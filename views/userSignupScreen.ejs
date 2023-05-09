@@ -1,0 +1,24 @@
+<%- include("templates/headerStart") %>
+
+<!-- place style reference to background image here -->
+
+<%- include("templates/headerEnd") %>
+
+
+<div class="login-container">
+  <h1>Signup</h1>
+  <form class="login-form" action="/submitUser" method="post">
+    <div>Create User:</div>
+    <input name="name" type="text" placeholder="Name">
+    <br>
+    <input name="email" type="email" placeholder="Email">
+    <br>
+    <input name="password" type="password" placeholder="Password">
+    <br>
+    <a href=""></a>
+    <button>Submit</button>
+  </form>
+</div>
+
+
+<%- include("templates/footer") %>
