@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Player Inventory</title>
+</head>
+<body>
+  <h1>Player Inventory</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Weight (lbs)</th>
+        <th>Price (golds)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (const item of items) { %>
+        <tr>
+          <td><%= item.Name %></td>
+          <td><%= item.Type1 %></td>
+          <td><%= item['Weight (lbs)'] %></td>
+          <td><%= item['Price (golds)'] %></td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</body>
+</html>
