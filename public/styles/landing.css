@@ -1,0 +1,21 @@
+@media (max-width: 600px){
+    body{
+        background-image: url(../images/landing\ page\ background\ 3);
+    }
+}
+
+.menu-button {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    text-align: center;
+    width: 250px;
+    margin: 0 auto;
+  }
+
+  .user-welcome {
+    text-align: center;
+  }
+

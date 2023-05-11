@@ -11,7 +11,9 @@ body {
   }
   
   .content {
-    padding-bottom: 60px; 
+    padding-bottom: 160px; /* Adjust this value to leave space for the footer */
+    overflow-y: auto;
+    height: calc(100% - 60px); /* Adjust this value to leave space for the footer */
   }
   
   footer {
@@ -23,3 +25,4 @@ body {
     color: white;
     bottom: -25px;
   }
+
