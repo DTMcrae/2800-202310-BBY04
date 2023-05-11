@@ -3,8 +3,8 @@ const router = express.Router();
 const OpenAI = require('../scripts/openai/openAI.js');
 
 const openAI = new OpenAI(process.env.OPENAI_KEY);
-const model = 'text-davinci-003';
-const topic = 'The Lost Villager';
+const model = 'gpt-3.5-turbo';
+const topic = 'The Lost Cat';
 
 router.get('/', (req, res) => {
     // Initialize summary and events in the session
@@ -32,8 +32,9 @@ const generateStoryPrompt = (topic) => {
 router.post('/generateStory', async (req, res) => {
     try {
         const text = await openAI.generateText(generateStoryPrompt(topic), model, 800);
+        
+        // Log the entire response to see what's in it
         console.log(text);
-
         const data = JSON.parse(text);
 
         // Store the generated story summary and events in the session
@@ -53,6 +54,8 @@ router.post('/generateStory', async (req, res) => {
         res.status(500).send({ error: error.toString() });
     }
 });
+
+
 
 const generateEventPrompt = (eventNumber, session) => {
     // Use the event description from the session
