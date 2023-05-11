@@ -54,6 +54,11 @@ var mongoStore = MongoStore.create({
     }
 })
 
+app.use("/styles", express.static("./public/styles"));
+app.use("/scripts", express.static("./public/scripts"));
+app.use("/views", express.static("./views"));
+app.use("/img", express.static(".public/images"));
+
 app.use(session({
     secret: node_session_secret,
     store: mongoStore,
@@ -241,6 +246,10 @@ app.post('/logout', (req, res) => {
         }
         res.redirect('/');
     });
+});
+
+app.get('/combat', (req, res) => {
+    res.render("combat");
 });
 
 app.use(express.static(__dirname + "/public"));
