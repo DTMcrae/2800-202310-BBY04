@@ -239,7 +239,8 @@ app.post('/logout', (req, res) => {
         if (err) {
             console.log(err);
         }
-        res.redirect('/');
+        console.log("check");
+        res.redirect('/userLoginScreen');
     });
 });
 
