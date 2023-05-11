@@ -1,20 +1,22 @@
 <%- include("templates/headerStart") %>
 
+<link rel="stylesheet" href="../styles/login.css">
+
 <%- include("templates/headerEnd") %>
 
 <div class="login-container">
-  <h1>Login</h1>
+  <h1 class="fw-bold text-white">Login</h1>
+  <br>
   <form class="login-form" action="/loggingin" method="post">
-    <label for="email">Email:</label>
     <input name="email" type="text" placeholder="email">
-    <br>
-    <label for="password">Password:</label>
+    <br><br>
     <input name="password" type="password" placeholder="password">
     <br>
     <button>Submit</button>
   </form>
-  <p>Don't have an account?</p>
-  <a href="/userSignupScreen">Signup</a>
+  <br>
+  <p class="fw-bold text-white">Don't have an account?</p>
+  <a class="fw-bold text-white" href="/userSignupScreen">Signup</a>
 </div>
 
 <script>
