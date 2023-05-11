@@ -1,39 +1,8 @@
 </head>
 
 <body>
-
+    <img src="../../images/myD&D_Banner.png" style="max-height: 125px; width: 100%; justify-self: left;">
     <div class="container">
         <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-            <a href="/"
-                class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
-                <svg class="bi me-2" width="40" height="32">
-                    <use xlink:href="#bootstrap"></use>
-                </svg>
-                <div>
-                    <img src="../../images/myD&D_Icon.png" style="height: 10vh; justify-self: left;">
-                    <span class="fs-4">myD&D</span>
-                </div>                
-            </a>
-
-            <ul class="nav nav-pills">
-                <li class="nav-item"><a href="#" onclick="logout()" class="nav-link">Logout</a></li>
-            </ul>
         </header>
     </div>
-
-    <script>
-        function logout() {
-            fetch('/logout', {
-                    method: 'POST'
-                })
-                .then(response => {
-                    if (response.ok) {
-                        window.location.href = '/userLoginScreen';
-                    }
-                })
-        }
-
-        function navigateTo(route) {
-            window.location.href = route;
-        }
-    </script>
