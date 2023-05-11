@@ -1,4 +1,14 @@
+# dependencies
+/node_modules/
+
+# misc
 .DS_Store
+
+# debug
 *.logs
-node_modules/
-.vscode/
+
+# IDE settings
+/.vscode/
+
+# env file
+.env

@@ -1,0 +1,23 @@
+<%- include("templates/header") %>
+
+<% if (typeof summary !== 'undefined') { %>
+    <p><%= summary %></p>
+<% } %>
+<form action="/story/generateStory" method="post">
+    <button type="submit">Generate Story</button>
+</form>
+
+<% if (typeof events !== 'undefined') { %>
+    <% for (let i = 0; i < events.length; i++) { %>
+        <p><%= events[i] %></p>
+    <% } %>
+<% } %>
+
+<% if (typeof currentEvent !== 'undefined' && currentEvent <= 4) { %>
+    <form action="/story/generateEvent/<%= currentEvent %>" method="post">
+        <button type="submit">Generate Event <%= currentEvent %></button>
+    </form>
+<% } %>
+
+
+<%- include("templates/footer") %> 
