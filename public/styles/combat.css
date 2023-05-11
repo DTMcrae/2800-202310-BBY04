@@ -2,3 +2,14 @@
 .material-symbols-outlined {
     font-size: 45px;
 }
+
+.combat-text {
+    max-height: 15rem;
+}
+
+/* Media query for small screens */
+@media (max-width: 1100px) {
+    .combat-text {
+        max-height: 8rem;
+    }
+}
