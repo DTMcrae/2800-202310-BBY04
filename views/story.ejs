@@ -1,16 +1,27 @@
 <%- include("templates/header") %>
 
-<% if (typeof summary !== 'undefined') { %>
-    <p><%= summary %></p>
-<% } %>
 <form action="/story/generateStory" method="post">
     <button type="submit">Generate Story</button>
 </form>
 
+<% if (typeof summary !== 'undefined') { %>
+    <h2>Event Summary:</h2>
+    <p><%- summary %></p>
+<% } %>
+
+<div id="spinner" style="display: none;">
+    <img src="loading.gif" alt="Loading...">
+</div>
+
 <% if (typeof events !== 'undefined') { %>
     <% for (let i = 0; i < events.length; i++) { %>
-        <p><%= events[i] %></p>
+        <p><%- events[i] %></p>
     <% } %>
+<% } %>
+
+<% if (typeof generatedEventText !== 'undefined') { %>
+    <h3>Story text:</h3>
+    <p><%- generatedEventText %></p>
 <% } %>
 
 <% if (typeof currentEvent !== 'undefined' && currentEvent <= 4) { %>
@@ -19,5 +30,13 @@
     </form>
 <% } %>
 
+<script>
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+            document.getElementById('spinner').style.display = 'block';
+        });
+    });
+</script>
 
-<%- include("templates/footer") %> 
+<%- include("templates/footer") %>  
