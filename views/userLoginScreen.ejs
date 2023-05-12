@@ -1,0 +1,31 @@
+<%- include("templates/headerStart") %>
+
+<link rel="stylesheet" href="../styles/login.css">
+
+<%- include("templates/headerEnd") %>
+
+<div class="login-container">
+  <h1 class="fw-bold text-white">Login</h1>
+  <br>
+  <form class="login-form" action="/loggingin" method="post">
+    <input name="email" type="text" placeholder="email">
+    <br><br>
+    <input name="password" type="password" placeholder="password">
+    <br>
+    <button>Submit</button>
+  </form>
+  <a class="fw-bold text-white" href="/passwordReset">Forgot Password</a>
+  <br><br>
+  <p class="fw-bold text-white">Don't have an account?</p>
+  <a class="fw-bold text-white" href="/userSignupScreen">Signup</a>
+</div>
+
+<script>
+  const loginButton = document.querySelector('#login-button');
+  const loginForm = document.querySelector('.login-form');
+  loginButton.addEventListener('click', () => {
+    loginForm.style.display = 'block';
+  });
+</script>
+
+<%- include("templates/footer") %>
