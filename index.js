@@ -32,6 +32,8 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'))
 
+app.use('/scripts', express.static("public/scripts"));
+
 const {
     connectToDatabase
 } = include('databaseConnection');
