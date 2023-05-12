@@ -1,0 +1,19 @@
+<%- include("templates/headerStart") %>
+
+<!-- <link rel="stylesheet" href="../styles/passwordReset.css"> -->
+
+<%- include("templates/headerEnd") %>
+
+
+    <h1>User Information</h1>
+
+    <ul>
+        <li><strong>User ID:</strong> <%= user._id %></li>
+        <li><strong>Name:</strong> <%= user.name %></li>
+        <li><strong>Email:</strong> <%= user.email %></li>
+        <li><strong>Password:</strong> <%= user.password %></li>
+        <li><strong>Type:</strong> <%= user.type %></li>
+      </ul>
+
+
+<%- include("templates/footer") %>

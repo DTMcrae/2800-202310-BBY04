@@ -136,19 +136,19 @@ app.get('/passwordReset', (req, res) => {
 });
 
 app.get('/userInfo', async (req, res) => {
-    const userId = req.params.id;
-
+    const userId = req.session.userId;
+  
     // Fetch user data from MongoDB based on the provided ID
     const user = await userCollection.findOne({ _id: userId });
-
+    
     if (!user) {
-        return res.status(404).send('User not found');
+      return res.status(404).send('User not found');
     }
-
+  
     // Render the userInfo.ejs view and pass the user object
     res.render('userInfo', { user });
-});
-
+  });
+  
 
 app.post('/submitUser', async (req, res) => {
     var name = req.body.name;
@@ -375,18 +375,15 @@ app.post('/reset/:token', async (req, res) => {
     const newPassword = req.body.password;
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-    await userCollection.updateOne(
-        {
-            _id: user._id,
+    await userCollection.updateOne({
+        _id: user._id,
+    }, {
+        $set: {
+            password: hashedPassword,
+            resetPasswordToken: undefined,
+            resetPasswordExpires: undefined,
         },
-        {
-            $set: {
-                password: hashedPassword,
-                resetPasswordToken: undefined,
-                resetPasswordExpires: undefined,
-            },
-        }
-    );
+    });
 
     const message = 'Password updated successfully';
     return res.send(`
