@@ -4,9 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const {
-    ObjectId
-} = require('mongodb');
+const ObjectId = require('mongodb').ObjectId;
 const bcrypt = require('bcrypt');
 const saltRounds = 12;
 const path = require('path');
@@ -77,11 +75,11 @@ app.get('/', (req, res) => {
 
 app.get('/LandingScreen', async (req, res) => {
     const usersName = req.session.name;
-    let userType;
+    const userID = req.session.userID;
 
     res.render("LandingScreen", {
         user: usersName,
-        userType: userType
+        userId: userID,
     });
 });
 
@@ -136,11 +134,11 @@ app.get('/passwordReset', (req, res) => {
 });
 
 app.get('/userInfo', async (req, res) => {
-    const userId = req.session.userId;
+    const userId = req.session.userID;
   
     // Fetch user data from MongoDB based on the provided ID
-    const user = await userCollection.findOne({ _id: userId });
-    
+    const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+
     if (!user) {
       return res.status(404).send('User not found');
     }
@@ -191,8 +189,10 @@ app.post('/submitUser', async (req, res) => {
 
     // Store the user's name and username in the session
     req.session.authenticated = true;
-    req.session.name = name;
+    req.session.name = result[0].name;
     req.session.cookie.maxAge = expireTime;
+    req.session.type = result[0].type;
+    req.session.userID = result[0]._id;
 
     // Redirect to the main landing screen
     res.redirect('/LandingScreen');
@@ -242,6 +242,7 @@ app.post('/loggingin', async (req, res) => {
         req.session.name = result[0].name;
         req.session.cookie.maxAge = expireTime;
         req.session.type = result[0].type;
+        req.session.userID = result[0]._id;
 
 
         res.redirect('/LandingScreen');
