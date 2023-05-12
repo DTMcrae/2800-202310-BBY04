@@ -34,6 +34,8 @@ const mongodb_database = process.env.MONGODB_DATABASE;
 const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
 
 const node_session_secret = process.env.NODE_SESSION_SECRET;
+
+const mailgun_api_secret = process.env.MAILGUN_API_SECRET;
 /* END secret section */
 
 app.set('view engine', 'ejs');
@@ -132,6 +134,21 @@ app.get('/loginSubmit', (req, res) => {
 app.get('/passwordReset', (req, res) => {
     res.render('passwordReset');
 });
+
+app.get('/userInfo', async (req, res) => {
+    const userId = req.params.id;
+
+    // Fetch user data from MongoDB based on the provided ID
+    const user = await userCollection.findOne({ _id: userId });
+
+    if (!user) {
+        return res.status(404).send('User not found');
+    }
+
+    // Render the userInfo.ejs view and pass the user object
+    res.render('userInfo', { user });
+});
+
 
 app.post('/submitUser', async (req, res) => {
     var name = req.body.name;
@@ -263,7 +280,7 @@ const Mailgun = require('mailgun.js');
 const mailgun = new Mailgun(formData);
 const mg = mailgun.client({
     username: 'api',
-    key: '6d37f3c61da590410a1d4f0bafab9aa2-6b161b0a-a8562a1f',
+    key: mailgun_api_secret,
 });
 
 // Generate a random token for the password reset link
