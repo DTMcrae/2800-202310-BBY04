@@ -11,6 +11,13 @@ const bcrypt = require('bcrypt');
 const saltRounds = 12;
 const path = require('path');
 
+// forget password modules
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+
+
 const port = process.env.PORT || 3000;
 
 const app = express();
@@ -46,6 +53,7 @@ init();
 app.use(express.urlencoded({
     extended: false
 }));
+app.use(bodyParser.json());
 
 var mongoStore = MongoStore.create({
     mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
@@ -119,6 +127,10 @@ app.get('/userLoginScreen', (req, res) => {
 
 app.get('/loginSubmit', (req, res) => {
     res.render('loginSubmit');
+});
+
+app.get('/passwordReset', (req, res) => {
+    res.render('passwordReset');
 });
 
 app.post('/submitUser', async (req, res) => {
@@ -243,6 +255,133 @@ app.post('/logout', (req, res) => {
         res.redirect('/userLoginScreen');
     });
 });
+
+// Forget password Begin
+
+const formData = require('form-data');
+const Mailgun = require('mailgun.js');
+const mailgun = new Mailgun(formData);
+const mg = mailgun.client({
+    username: 'api',
+    key: '6d37f3c61da590410a1d4f0bafab9aa2-6b161b0a-a8562a1f',
+});
+
+// Generate a random token for the password reset link
+function generateToken() {
+    return crypto.randomBytes(20).toString('hex');
+}
+
+// Render password reset form screen
+app.get('/reset/:token', (req, res) => {
+    const token = req.params.token;
+
+    // Renders the password reset form view and passes the token as a parameter
+    res.render('password-reset-form', {
+        token
+    });
+});
+
+// Send the password reset email
+function sendPasswordResetEmail(user, token) {
+
+    // ******************* WILL NEED TO UPDATE DOMAIN WITH OUR CYCLISH.SH DOMAIN
+    const resetLink = `http://localhost:3000/reset/${token}`;
+    // ******************* WILL NEED TO UPDATE DOMAIN WITH OUR CYCLISH.SH DOMAIN
+
+    mg.messages
+        .create('sandboxc8799ebc7fbb4ee9bba503eef8576f4d.mailgun.org', {
+            from: 'Mailgun Sandbox <postmaster@sandboxc8799ebc7fbb4ee9bba503eef8576f4d.mailgun.org>',
+            to: user.email,
+            subject: 'Password Reset Request',
+            text: `Hi ${user.name},\n\nYou are receiving this email because you (or someone else) has requested a password reset for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\nhttp://localhost:3000/reset/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n\nBest regards,\nThe D&D Dudes`,
+        })
+        .then((msg) => console.log(msg))
+        .catch((err) => console.log(err));
+}
+
+// Handle the password reset request
+app.post('/forgot', async (req, res) => {
+    const email = req.body.email;
+
+    const user = await userCollection.findOne({
+        email: email,
+    });
+
+    if (!user) {
+        return res.status(400).send({
+            message: 'Email address not found',
+        });
+    }
+
+    const token = generateToken();
+
+    // Save the token to the user's document in MongoDB
+    await userCollection.updateOne({
+        _id: user._id,
+    }, {
+        $set: {
+            resetPasswordToken: token,
+            resetPasswordExpires: Date.now() + 3600000, // 1 hour
+        },
+    });
+
+    // Send the password reset email to the user
+    sendPasswordResetEmail(user, token);
+
+    res.send({
+        message: 'If the email entered exists, a password reset email has been sent',
+    });
+});
+
+// Handle the password reset form submission
+app.post('/reset/:token', async (req, res) => {
+    const token = req.params.token;
+
+    const user = await userCollection.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpires: {
+            $gt: Date.now(),
+        },
+    });
+
+    if (!user) {
+        const message = 'Invalid or expired password reset token';
+        return res.send(`
+            <script>
+                alert("${message}");
+                window.location.href = "/userLoginScreen";
+            </script>
+        `);
+    }
+
+    // Update the user's password in MongoDB
+    const newPassword = req.body.password;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    await userCollection.updateOne(
+        {
+            _id: user._id,
+        },
+        {
+            $set: {
+                password: hashedPassword,
+                resetPasswordToken: undefined,
+                resetPasswordExpires: undefined,
+            },
+        }
+    );
+
+    const message = 'Password updated successfully';
+    return res.send(`
+        <script>
+            alert("${message}");
+            window.location.href = "/userLoginScreen";
+        </script>
+    `);
+});
+
+
+// Forget password End
 
 app.use(express.static(__dirname + "/public"));
 
