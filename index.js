@@ -249,6 +249,11 @@ app.post('/logout', (req, res) => {
 });
 
 app.get('/combat', (req, res) => {
+    if(!req.session.authenticated)
+    {
+        res.redirect("/userLoginScreen");
+        return;
+    }
     res.render("combat");
 });
 
