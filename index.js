@@ -303,7 +303,7 @@ app.get('/reset/:token', (req, res) => {
 function sendPasswordResetEmail(user, token) {
 
     // ******************* WILL NEED TO UPDATE DOMAIN WITH OUR CYCLISH.SH DOMAIN
-    const resetLink = `http://localhost:3000/reset/${token}`;
+    const resetLink = `https://mydnd.cyclic.app/reset/${token}`;
     // ******************* WILL NEED TO UPDATE DOMAIN WITH OUR CYCLISH.SH DOMAIN
 
     mg.messages
