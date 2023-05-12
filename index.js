@@ -306,8 +306,8 @@ function sendPasswordResetEmail(user, token) {
     // ******************* WILL NEED TO UPDATE DOMAIN WITH OUR CYCLISH.SH DOMAIN
 
     mg.messages
-        .create('sandboxc8799ebc7fbb4ee9bba503eef8576f4d.mailgun.org', {
-            from: 'Mailgun Sandbox <postmaster@sandboxc8799ebc7fbb4ee9bba503eef8576f4d.mailgun.org>',
+        .create('sandbox5227049b12c7448491caa1aa0c761516.mailgun.org', {
+            from: 'Mailgun Sandbox <postmaster@sandbox5227049b12c7448491caa1aa0c761516.mailgun.org>',
             to: user.email,
             subject: 'Password Reset Request',
             text: `Hi ${user.name},\n\nYou are receiving this email because you (or someone else) has requested a password reset for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\nhttp://localhost:3000/reset/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n\nBest regards,\nThe D&D Dudes`,
