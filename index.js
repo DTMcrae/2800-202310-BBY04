@@ -1,254 +1,66 @@
 require("./utils.js");
-
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const {
-    ObjectId
-} = require('mongodb');
-const bcrypt = require('bcrypt');
-const saltRounds = 12;
 const path = require('path');
-
-const port = process.env.PORT || 3000;
-
+const port =  3000;
 const app = express();
-
-const Joi = require("joi");
 
 const expireTime = 24 * 60 * 60 * 1000;
 
 /* secret information section */
-const mongodb_host = process.env.MONGODB_HOST;
-const mongodb_user = process.env.MONGODB_USER;
-const mongodb_password = process.env.MONGODB_PASSWORD;
-const mongodb_database = process.env.MONGODB_DATABASE;
-const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
-
-const node_session_secret = process.env.NODE_SESSION_SECRET;
+const mongodb_host = process.env.mongodb_host;
+const mongodb_user = process.env.mongodb_user;
+const mongodb_password = process.env.mongodb_password;
+const mongodb_database = process.env.mongodb_database;
+const mongodb_session_secret = process.env.mongodb_session_secret;
+const node_session_secert = process.env.node_session_secret;
 /* END secret section */
+
+var {database} = require('./databaseConnection');
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'))
 
-const {
-    connectToDatabase
-} = include('databaseConnection');
-let userCollection;
-
-async function init() {
-    const database = await connectToDatabase();
-    userCollection = database.db(mongodb_database).collection('USERAUTH');
-}
-
-init();
-app.use(express.urlencoded({
-    extended: false
-}));
-
-var mongoStore = MongoStore.create({
-    mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
-    crypto: {
-        secret: mongodb_session_secret
-    }
-})
-
 app.use(session({
-    secret: node_session_secret,
-    store: mongoStore,
+    secret: node_session_secert,
     saveUninitialized: false,
     resave: true
 }));
 
-app.get('/', (req, res) => {
-    res.render("userLoginScreen");
-});
+const { Configuration, OpenAIApi } = require("openai");
 
-app.get('/LandingScreen', async (req, res) => {
-    const usersName = req.session.name;
-    let userType;
+const configuration = new Configuration({
+    apiKey: process.env.openAI_API_KEY,
+  });
 
-    res.render("LandingScreen", {
-        user: usersName,
-        userType: userType
-    });
-});
+  const openai = new OpenAIApi(configuration);
 
-app.get('/nosql-injection', async (req, res) => {
-    var username = req.query.user;
-
-    if (!username) {
-        res.send(`<h3>No user provided - try /nosql-injection?user=name</h3> <h3>or /nosql-injection?user[$ne]=name</h3>`);
-        return;
-    }
-
-    const schema = Joi.string().max(20).required();
-    const validationResult = schema.validate(username);
-
-    if (validationResult.error != null) {
-        console.log(validationResult.error);
-        res.render('nosql-injection', {
-            errorMessage: 'A NoSQL injection attack was detected!'
+async function generateText() {
+    try {
+        // Send a request to the OpenAI API to generate text
+        const response = await openai.createChatCompletion({
+            model: "gpt-3.5-turbo",
+            messages: [{
+                role: "system",
+                content: 'Give me a bullet point of 5 dnd equipment as bullet points'
+            }]
         });
-        return;
-    }
-
-    const result = await userCollection.find({
-        username: username
-    }).project({
-        username: 1,
-        password: 1,
-        _id: 1
-    }).toArray();
-
-    console.log(result);
-
-    res.render('nosql-injection', {
-        result
-    });
-});
-
-app.get('/userSignupScreen', (req, res) => {
-    res.render('userSignupScreen');
-});
-
-app.get('/userLoginScreen', (req, res) => {
-    res.render('userLoginScreen');
-});
-
-app.get('/loginSubmit', (req, res) => {
-    res.render('loginSubmit');
-});
-
-app.post('/submitUser', async (req, res) => {
-    var name = req.body.name;
-    var email = req.body.email;
-    var password = req.body.password;
-
-    const schema = Joi.object({
-        name: Joi.string().max(50).required(),
-        email: Joi.string().email().required(),
-        password: Joi.string().max(20).required()
-    });
-
-    // Validate if any of the form fields are empty
-    const validationResult = schema.validate({
-        name,
-        email,
-        password
-    });
-
-    // Send message to submitUser.ejs if any field validation has failed
-    if (validationResult.error != null) {
-        console.log(validationResult.error);
-        const message = validationResult.error.details[0].message;
-        res.render("submitUser", {
-            message: message
-        });
-        return;
-    }
-
-    // User bcrypt to hash user's password
-    var hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    await userCollection.insertOne({
-        name: name,
-        email: email,
-        password: hashedPassword,
-        type: 'user'
-    });
-    console.log("Inserted user");
-
-    // Store the user's name and username in the session
-    req.session.authenticated = true;
-    req.session.name = name;
-    req.session.cookie.maxAge = expireTime;
-
-    // Redirect to the main landing screen
-    res.redirect('/LandingScreen');
-});
-
-
-app.post('/loggingin', async (req, res) => {
-    var email = req.body.email;
-    var password = req.body.password;
-
-    const schema = Joi.object({
-        email: Joi.string().email().required(),
-        password: Joi.string().max(20).required()
-    });
-
-    const validationResult = schema.validate({
-        email,
-        password
-    });
-
-    if (validationResult.error != null) {
-        console.log(validationResult.error);
-        res.redirect("/userLoginScreen");
-        return;
-    }
-
-    const result = await userCollection.find({
-        email: email
-    }).project({
-        type: 1,
-        password: 1,
-        _id: 1,
-        name: 1
-    }).toArray();
-
-    if (result.length != 1) {
-        const message = "user not found";
-        res.render("loginSubmit", {
-            message: message
-        });
-        return;
-    }
-
-    if (await bcrypt.compare(password, result[0].password)) {
-        console.log("correct password");
-        req.session.authenticated = true;
-        req.session.name = result[0].name;
-        req.session.cookie.maxAge = expireTime;
-        req.session.type = result[0].type;
-
-
-        res.redirect('/LandingScreen');
-        return;
-    } else {
-        const message = "incorrect password";
-        res.render("loginSubmit", {
-            message: message
-        });
-        return;
-    }
-});
-
-function requireLogin(req, res, next) {
-    if (req.session.authenticated) {
-        next();
-    } else {
-        res.redirect('/userLoginScreen');
+        console.log(`request cost: ${response.data.usage.total_tokens} tokens`);
+        console.log('Response: ' + response.data.choices[0].message);
+        // console.log(response['choices'][0]['message']['content']);
+            // Return the text of the response
+        return response.data.choices[0].message;
+    } catch (error) {
+        throw error;
     }
 }
 
-app.post('/logout', (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            console.log(err);
-        }
-        res.redirect('/');
-    });
+app.get('/', async (req, res) => {
+    const equipment = await generateText();
+    res.render('test', { equipment: equipment.content });
 });
-
-app.use(express.static(__dirname + "/public"));
-
-app.get("*", (req, res) => {
-    res.status(404);
-    res.send("Page not found - 404");
-})
 
 app.listen(port, () => {
     console.log("Node application listening on port " + port);
