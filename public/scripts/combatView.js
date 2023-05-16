@@ -10,7 +10,7 @@ const players = [{ name: "Draeven", class: "Ranger", ac: "12" }];
 const playerAction = 'Attacks with my greatbow. (10+4 to hit, 4+4 damage).'
 const enemies = [{ name: "Goblin 1", desc: "A goblin wielding a dagger." }];
 
-var initiative = new TurnOrder();//([{ name: "Draeven", id: "0", roll: 13 }, { name: "Goblin 1", id: "1", roll: 7 }]);
+var initiative = new TurnOrder();
 
 router.get('/', (req, res) => {
     // Initialize summary and events in the session
@@ -22,7 +22,7 @@ router.get('/', (req, res) => {
 
 // The general story prompt only asks for an adventure summary
 const generateEnemyTurnPrompt = (enemies, players) => {
-    let prompt = `You are the dungeon master for a D&D 5E combat encounter. I'm the ${players[0].name}, a ${players[0].class} with an AC of ${players[0].ac}`;
+    let prompt = `You are the dungeon master for a D&D 5E combat encounter. I'm ${players[0].name}, a ${players[0].class} with an AC of ${players[0].ac}`;
 
     if (players.length > 1) {
         prompt += `, and my party consists of `;
@@ -48,12 +48,12 @@ const generateEnemyTurnPrompt = (enemies, players) => {
         }
     }
 
-    prompt += `Do not include the following characters in your response; /();`;
+    prompt += `Do not include the following characters in your response: /();`;
 
     prompt += `. Please format your response as a JSON object like this:
 
     {
-        "Action": "A brief description of the action that was taken. Do not describe include any rolls, or damage numbers.",
+        "Action": "A brief description of the action that was taken. Do not describe any rolls, or damage numbers.",
         "Damage": "If the target of an attack would take damage, formated like this: 'TargetName_DamageAmount_Type'"
     }`;
 
@@ -69,7 +69,7 @@ const generatePlayerTurnPrompt = (actorName, action, target) => {
     Please format your response as a JSON object like this:
 
     {
-        "Action": "A brief description of the following: ${actorName} does ${action} to ${target.name}. Include whether or not the attack hits, but do not describe include any rolls, or damage numbers.",
+        "Action": "A brief description of the following: ${actorName} does ${action} to ${target.name}. Include whether or not the attack hits, but do not describe any rolls, or damage numbers.",
         "Damage": "TargetName_DamageAmount_Type"
     }`;
 
