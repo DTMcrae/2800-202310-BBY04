@@ -133,6 +133,10 @@ app.get('/passwordReset', (req, res) => {
     res.render('passwordReset');
 });
 
+app.get('/characterSelection', (req, res) => {
+    res.render('characterSelection');
+});
+
 app.get('/userInfo', async (req, res) => {
     const userId = req.session.userID;
   
