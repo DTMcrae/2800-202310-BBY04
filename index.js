@@ -398,6 +398,10 @@ app.post('/reset/:token', async (req, res) => {
 
 // Forget password End
 
+const combat = require('./public/scripts/combatView')
+
+app.use("/combat", combat);
+
 app.use(express.static(__dirname + "/public"));
 
 app.get("*", (req, res) => {
