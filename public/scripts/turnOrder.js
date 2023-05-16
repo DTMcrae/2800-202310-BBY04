@@ -4,7 +4,7 @@ class TurnOrder {
      * 
      * @param actors: An array of actors in the turn order.
      * The array should be formatted as such:
-     * [{name: name, id: id, roll:roll, callback, callback}] Where:
+     * [{name: name, id: id, roll:roll, start: callback}] Where:
      * 'name' is the actor's name.
      * 'id' is the actor's id.
      * 'roll' is the actor's initiative roll.
@@ -37,10 +37,11 @@ class TurnOrder {
      *  If the next turn's actor has a start function, that function is called.
      * 
      */
-    endTurn() {
+    async endTurn() {
         this.turn++;
         if(this.turn >= this.actors.length) this.turn = 0;
-        if(this.currentTurn().start !== undefined) this.currentTurn().start();
+        if(this.currentTurn().start !== undefined) await this.currentTurn().start();
+        return true;
     }
 
     /** Returns true if it is the specified actor's turn.
