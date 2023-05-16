@@ -1,0 +1,28 @@
+<%- include("templates/headerStart") %>
+<%- include("templates/headerEnd") %>
+
+            <% if (typeof history !=='undefined' ) { %>
+                <% if (history.length > 1 ) { %>
+                <h2>History:</h2>
+                    <% for(var i=0; i < history.length - 1; i++) {%>
+                        <p><%- history[i] %></p>
+                        <% } %>
+                    <% } %>
+                <% } %>
+
+                            <% if (typeof actions !=='undefined' ) { %>
+                                <h3>Previous Action text:</h3>
+                                <% for(var x = 0; x < actions.length; x++) {%>
+                                <p><%- actions[x].Action %></p>
+                                <% } %> 
+                            <%}%>
+
+                                        <form action="/combat/generateAction/Enemy" method="post">
+                                            <button type="submit">Enemy Action</button>
+                                        </form>
+                                        <form action="/combat/generateAction/Draeven" method="post">
+                                            <button type="submit">Player Action</button>
+                                        </form>
+                                        
+
+                                            <%- include("templates/footer") %>
