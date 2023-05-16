@@ -47,9 +47,14 @@ let userCollection;
 async function init() {
     const database = await connectToDatabase();
     userCollection = database.db(mongodb_database).collection('USERAUTH');
+    // console.log("database connection:", {
+    //     serverConfig: userCollection.s.serverConfig,
+    //     options: userCollection.s.options
+    // });
 }
 
 init();
+
 app.use(express.urlencoded({
     extended: false
 }));
@@ -137,20 +142,52 @@ app.get('/characterSelection', (req, res) => {
     res.render('characterSelection');
 });
 
+app.get('/characterSelected', async (req, res) => {
+    try {
+        const selectedCharacter = req.query.class;
+        const database = await connectToDatabase();
+        const dbo = database.db(mongodb_database).collection('CLASSES');
+
+        const characterData = await dbo.findOne({
+            Class: selectedCharacter,
+            Level: 1
+        });
+
+        if (characterData) {
+            res.render('characterSelected', {
+                characterData
+            }); // Pass characterData as a local variable
+        } else {
+            res.status(404).json({
+                error: 'Character not found'
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching character data:', error);
+        res.status(500).json({
+            error: 'Internal Server Error'
+        });
+    }
+});
+
 app.get('/userInfo', async (req, res) => {
     const userId = req.session.userID;
-  
+
     // Fetch user data from MongoDB based on the provided ID
-    const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+    const user = await userCollection.findOne({
+        _id: new ObjectId(userId)
+    });
 
     if (!user) {
-      return res.status(404).send('User not found');
+        return res.status(404).send('User not found');
     }
-  
+
     // Render the userInfo.ejs view and pass the user object
-    res.render('userInfo', { user });
-  });
-  
+    res.render('userInfo', {
+        user
+    });
+});
+
 
 app.post('/submitUser', async (req, res) => {
     var name = req.body.name;

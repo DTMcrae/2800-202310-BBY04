@@ -1,0 +1,50 @@
+<%- include("templates/headerStart") %>
+
+<link rel="stylesheet" href="../styles/characterSelected.css">
+
+<%- include("templates/headerEnd") %>
+
+<div class="characterCard" id="DruidCard">
+    <div>
+        <h2>Selected Character: </h2>
+
+        <img src="" alt="Selected Character" id="characterImage">
+    </div>
+    <% if (characterData) { %>
+        <h2>Class: <%= characterData.Class %></h2>
+        <h3>Level: <%= characterData.Level %></h3>
+        <h3>Ability Scores:</h3>
+        <ul>
+            <% Object.entries(characterData.AbilityScores).forEach(([ability, score]) => { %>
+                <li><%= ability %>: <%= score %></li>
+            <% }); %>
+        </ul>
+        <h3>Equipment:</h3>
+        <ul>
+            <% Object.entries(characterData.Equipment).forEach(([equipment, item]) => { %>
+                <li><%= equipment %>: <%= item %></li>
+            <% }); %>
+        </ul>
+        <h3>Skills:</h3>
+        <ul>
+            <% characterData.Skills.forEach(skill => { %>
+                <li><%= skill %></li>
+            <% }); %>
+        </ul>
+        <h3>Abilities:</h3>
+        <ul>
+            <% characterData.Abilities.forEach(ability => { %>
+                <li><%= ability %></li>
+            <% }); %>
+        </ul>
+    <% } else { %>
+        <p>Character not found.</p>
+    <% } %>
+</div>
+
+<br><br><br><br><br>
+
+<script src="/scripts/characterSelected.js"></script>
+
+
+<%- include("templates/footer") %>
