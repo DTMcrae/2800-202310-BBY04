@@ -3,10 +3,6 @@
     font-size: 45px;
 }
 
-.combat-text {
-    max-height: 15rem;
-}
-
 body {
     background-image: url("../images/combat_bg_lrg.jpeg");
 }
@@ -23,17 +19,30 @@ p {
     background-color: #2b2b2b;
 }
 
-/* Media query for small screens */
-@media (max-width: 1100px) {
-
-    .combat-text {
-        max-height: 8rem;
+@media only screen and (min-height: 1101px) {
+    #combat-text {
+        height: 70vh;
+        overflow: auto;
     }
 }
 
-@media (max-width: 850px)
+/* Media query for small screens */
+@media only screen and (min-height: 801px) and (max-height: 1100px) {
+
+    #combat-text {
+        height: 50vh;
+        overflow: auto;
+    }
+}
+
+@media only screen and (max-height: 800px)
 {
     body {
         background-image: url("../images/combat_bg.jpg");
+    }
+
+    #combat-text {
+        height: 48vh;
+        overflow: auto;
     }
 }
