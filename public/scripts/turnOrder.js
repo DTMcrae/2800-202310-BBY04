@@ -11,18 +11,16 @@ class TurnOrder {
      * 'start is the function to call once this actor's turn starts.
      */
     assignNew(actors) {
-        function sortOrder(a, b) {
-            if (a.roll < b.roll) return 1;
 
-            if (a.roll > b.roll) return -1;
-
-            return 0;
-        }
-
-        this.actors = actors.sort(sortOrder);
-        console.log("Initiative Order: ", this.actors);
+        this.actors = actors.sort(function (a, b) { return b.roll - a.roll;});
         this.turn = 0;
-        if (this.currentTurn().start !== undefined) this.currentTurn().start();
+        this.breakOut = 0;
+
+        let actor = this.currentTurn();
+
+        if(!actor.isActive) this.endTurn();
+
+        if (actor.start !== undefined) actor.start();
     }
 
     /** Gets the current turn's actor.
@@ -33,15 +31,59 @@ class TurnOrder {
         return this.actors[this.turn];
     }
 
+    /** Gets a list of all actors, starting at the current turn onwards.
+     * 
+     * @returns Array of Actor:{name,id,roll,start}
+     */
+    getCurrentOrder() {
+        let actorList = [];
+
+        for(var i = 0; i < this.actors.length; i++) {
+            actorList.push(this.actors[(this.turn + i) % this.actors.length]);
+        }
+
+        return actorList;
+    }
+
     /** Ends the current turn, and starts the next one.
      *  If the next turn's actor has a start function, that function is called.
-     * 
+     *  If the actor is not active, moves on to the next one.
      */
     async endTurn() {
         this.turn++;
+        this.breakOut++;
         if(this.turn >= this.actors.length) this.turn = 0;
+
+        if(this.breakOut > this.actors.length) {
+            console.log("All actors are inactive, unable to progress any further.");
+            return false;
+        }
+
+        if(!this.currentTurn().isActive)
+        {
+            return this.endTurn();
+        }
+
+        this.breakOut = 0;
         if(this.currentTurn().start !== undefined) await this.currentTurn().start();
         return true;
+    }
+
+    /** Gets the actor object for the specified actor.
+     * 
+     * @param name: the name of the actor.
+     * 
+     * @returns Actor:{name,id,roll,start}
+     */
+    getActorData(name)
+    {
+        var result;
+        this.actors.forEach(actor => {
+            if(actor.name === name) {
+                result = actor;
+            }
+        });
+        return result;
     }
 
     /** Returns true if it is the specified actor's turn.
