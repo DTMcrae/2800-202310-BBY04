@@ -1,0 +1,39 @@
+/*Sizing for material icons*/
+.material-symbols-outlined {
+    font-size: 45px;
+}
+
+.combat-text {
+    max-height: 15rem;
+}
+
+body {
+    background-image: url("../images/combat_bg_lrg.jpeg");
+}
+
+h5 {
+    color: white;
+}
+
+p {
+    color: white;
+}
+
+.transparent {
+    background-color: #2b2b2b;
+}
+
+/* Media query for small screens */
+@media (max-width: 1100px) {
+
+    .combat-text {
+        max-height: 8rem;
+    }
+}
+
+@media (max-width: 850px)
+{
+    body {
+        background-image: url("../images/combat_bg.jpg");
+    }
+}

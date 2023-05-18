@@ -1,0 +1,11 @@
+@media (max-width: 600px){
+    body{
+        background-image: url(../images/Create\ New\ User\ Background\ 1.png);
+    }
+}
+.login-container {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+  }
+  
