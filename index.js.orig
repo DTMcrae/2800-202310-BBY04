@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 require("./utils.js");
 
 require('dotenv').config();
@@ -68,11 +69,6 @@ var mongoStore = MongoStore.create({
         secret: mongodb_session_secret
     }
 })
-
-app.use("/styles", express.static("./public/styles"));
-app.use("/scripts", express.static("./public/scripts"));
-app.use("/views", express.static("./views"));
-app.use("/img", express.static(".public/images"));
 
 app.use(session({
     secret: node_session_secret,
@@ -215,14 +211,8 @@ app.get('/userInfo', async (req, res) => {
     });
 });
 
-// Story Generation
 app.get('/Quickstart', (req, res) => {
     res.render('Quickstart');
-});
-
-// Story Gen BCIT Easter Egg
-app.get('/BCIT', (req, res) => {
-    res.render('BCIT');
 });
 
 app.post('/submitUser', async (req, res) => {
@@ -349,15 +339,6 @@ app.post('/logout', (req, res) => {
         console.log("check");
         res.redirect('/userLoginScreen');
     });
-});
-
-app.get('/combat', (req, res) => {
-    if(!req.session.authenticated)
-    {
-        res.redirect("/userLoginScreen");
-        return;
-    }
-    res.render("combat");
 });
 
 // Forget password Begin
@@ -494,10 +475,25 @@ app.get("*", (req, res) => {
 app.listen(port, () => {
     console.log("Node application listening on port " + port);
 });
+=======
+const dotenv = require('dotenv');
+dotenv.config();
+
+const url = require('url');
+const express = require('express');
+const session = require('express-session');
 
 // For story generation
 const quickstart = require('./routes/quickstart');
-const BCIT = require('./routes/BCIT');
+const story = require('./routes/story');
+
+const app = express();
+
+app.use(session({
+    secret: process.env.NODE_SESSION_SECRET,
+    resave: true,
+    saveUninitialized: false
+}));
 
 // Story Initialization Middleware
 app.use((req, res, next) => {
@@ -515,6 +511,16 @@ app.use((req, res, next) => {
     next();
 });
 
+app.set('view engine', 'ejs');
+
+const port = process.env.PORT || 3000;
+
 // Generates Story Pages
 app.use('/quickstart', quickstart);
-app.use('/BCIT', BCIT);
+app.use('/story', story);
+
+
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+});
+>>>>>>> Justin_Saint_Quickstart

@@ -1,0 +1,40 @@
+<%- include("templates/headerStart") %>
+
+<link rel="stylesheet" href="../styles/quickstart.css">
+
+<%- include("templates/headerEnd") %>
+
+<div class="storygen">
+
+    <div class="center">
+        <% if (typeof summary !== 'undefined') { %>
+        <h2><%- title %></h2>
+        <p><%- summary %></p>
+        <% } %>
+
+        <form class="form-class" action="/BCIT/newGame" method="post">
+            <% if (typeof summary !== 'undefined') { %>
+            <button type="submit">Start New Game</button>
+            <% } %>
+        </form>
+
+
+        <form class="form-class" action="/BCIT/generateStory" method="post">
+            <% if (typeof summary == 'undefined') { %>
+            <button type="submit">Generate Story</button>
+            <% } else { %>
+                <br>
+            <button type="submit">Reroll Story</button>
+            <% } %>
+        </form>
+
+        <div id="spinner" style="display: none;">
+            <img src="../../loading.gif" alt="Loading...">
+        </div>
+
+    </div>
+</div>
+
+<script src="/scripts/quickstart.js"></script>
+
+<%- include("templates/footer") %>
