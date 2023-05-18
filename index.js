@@ -264,6 +264,15 @@ app.post('/submitUser', async (req, res) => {
     });
     console.log("Inserted user");
 
+    const result = await userCollection.find({
+        email: email
+    }).project({
+        type: 1,
+        password: 1,
+        _id: 1,
+        name: 1
+    }).toArray();
+
     // Store the user's name and username in the session
     req.session.authenticated = true;
     req.session.name = result[0].name;
