@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 require("./utils.js");
 
 require('dotenv').config();
@@ -474,10 +475,25 @@ app.get("*", (req, res) => {
 app.listen(port, () => {
     console.log("Node application listening on port " + port);
 });
+=======
+const dotenv = require('dotenv');
+dotenv.config();
+
+const url = require('url');
+const express = require('express');
+const session = require('express-session');
 
 // For story generation
 const quickstart = require('./routes/quickstart');
 const story = require('./routes/story');
+
+const app = express();
+
+app.use(session({
+    secret: process.env.NODE_SESSION_SECRET,
+    resave: true,
+    saveUninitialized: false
+}));
 
 // Story Initialization Middleware
 app.use((req, res, next) => {
@@ -495,7 +511,16 @@ app.use((req, res, next) => {
     next();
 });
 
+app.set('view engine', 'ejs');
+
+const port = process.env.PORT || 3000;
+
 // Generates Story Pages
 app.use('/quickstart', quickstart);
 app.use('/story', story);
 
+
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+});
+>>>>>>> Justin_Saint_Quickstart

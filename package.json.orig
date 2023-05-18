@@ -1,4 +1,6 @@
+<<<<<<< HEAD
 {"name":"bby04_comp2800_project","version":"1.0.0","description":"v1.0 - myD&D COMP2800 node Project\r ===================================","main":"index.js","scripts":{"test":"echo \"Error: no test specified\" && exit 1"},"author":"Alex Gabl, Daniel McRae, Justin Saint, Savio Dsouza","license":"ISC","dependencies":{"@sendgrid/mail":"^7.7.0","bcrypt":"^5.1.0","connect-mongo":"^4.6.0","connect-mongodb-session":"^3.1.1","dotenv":"^16.0.3","ejs":"^3.1.9","express":"^4.18.2","express-session":"^1.17.3","form-data":"^4.0.0","joi":"^17.9.2","mailgun":"^0.5.0","mailgun.js":"^8.2.1","mongodb":"^4.16.0","mongoose":"^7.1.1","nodemailer":"^6.9.2"}}
+=======
 {
   "dependencies": {
     "body-parser": "^1.20.2",
@@ -27,3 +29,4 @@
   },
   "homepage": "https://github.com/DTMcrae/2800-202310-BBY04#readme"
 }
+>>>>>>> Justin_Saint_Quickstart

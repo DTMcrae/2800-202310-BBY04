@@ -1,0 +1,19 @@
+<<<<<<< HEAD
+/node_modules
+package-lock.json
+=======
+# dependencies
+/node_modules/
+
+# misc
+.DS_Store
+
+# debug
+*.logs
+
+# IDE settings
+/.vscode/
+
+# env file
+>>>>>>> Justin_Saint_Quickstart
+.env
