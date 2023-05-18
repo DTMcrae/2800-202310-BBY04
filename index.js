@@ -5,7 +5,9 @@ const url = require('url');
 const express = require('express');
 const session = require('express-session');
 
-const storyRoutes = require('./routes/story');
+// For story generation
+const quickstart = require('./routes/quickstart');
+const story = require('./routes/story');
 
 const app = express();
 
@@ -35,8 +37,9 @@ app.set('view engine', 'ejs');
 
 const port = process.env.PORT || 3000;
 
-// Generates Story Page
-app.use('/story', storyRoutes);
+// Generates Story Pages
+app.use('/quickstart', quickstart);
+app.use('/story', story);
 
 
 app.listen(port, () => {

@@ -1,0 +1,37 @@
+<%- include("templates/header") %>
+
+<% if (typeof summary !== 'undefined') { %>
+    <h2><%- title %></h2>
+    <p><%- summary %></p>
+<% } %>
+
+<form action="/quickstart/generateStory" method="post">
+    <% if (typeof summary == 'undefined') { %>
+        <button type="submit">Generate Story</button>
+    <% } else { %>
+        <button type="submit">Reroll Story</button>
+    <% } %>
+</form>
+
+<form action="/quickstart/newGame" method="post">
+    <% if (typeof summary !== 'undefined') { %>
+        <button type="submit">Start New Game</button>
+    <% } %>
+</form>
+
+
+
+<div id="spinner" style="display: none;">
+    <img src="loading.gif" alt="Loading...">
+</div>
+
+<script>
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+            document.getElementById('spinner').style.display = 'block';
+        });
+    });
+</script>
+
+<%- include("templates/footer") %>  

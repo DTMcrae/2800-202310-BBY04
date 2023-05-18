@@ -24,7 +24,7 @@
     <p><%- generatedEventText %></p>
 <% } %>
 
-<% if (typeof currentEvent !== 'undefined' && currentEvent <= 4) { %>
+<% if (typeof currentEvent !== 'undefined' && currentEvent != 0 && currentEvent <= 8) { %>
     <form action="/story/generateEvent/<%= currentEvent %>" method="post">
         <button type="submit">Generate Event <%= currentEvent %></button>
     </form>
