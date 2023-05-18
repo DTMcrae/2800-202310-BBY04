@@ -1,0 +1,25 @@
+<%- include("templates/headerStart") %>
+<%- include("templates/headerEnd") %>
+
+<% if (typeof history !=='undefined' ) { %>
+    <% if (history.length > 1 ) { %>
+        <h2>History:</h2>
+        <% for(var i=0; i < history.length - 1; i++) {%>
+            <p><%- history[i] %></p>
+        <% } %>
+    <% } %>
+<% } %>
+
+<h3>Defeat...</h3>
+<% if (typeof summary !=='undefined' ) { %>
+    <p><%- summary %></p>
+<%}%>
+
+<div id="userOptions">
+    <form>
+        <button type="submit">Continue</button>
+    </form>
+</div>
+                                        
+
+<%- include("templates/footer") %>
