@@ -219,11 +219,7 @@ router.post('/generatePlayerAction/:roll', async(req,res) => {
         let systemPrompt = prompts.playerSystemPrompt();
         let playerPrompt = prompts.playerTurnPrompt(current, prompts.assignAction(current.actions[req.session.combatAction], result[0], result[1]), initiative.getActorData(req.session.combatTarget), 300, 0.75);
 
-        console.log("System Prompt: \n",systemPrompt);
-        console.log("Player Prompt: \n", playerPrompt);
-
         let text = await openAI.generateResponse(systemPrompt, playerPrompt);
-        console.log("Non-Formatted: ", text);
         text = formatResponse(text);
 
         //Info to be displayed on the page later.
@@ -235,22 +231,21 @@ router.post('/generatePlayerAction/:roll', async(req,res) => {
 
         // Store the received action, and update the history.
         req.session.action = data;
-        var history = req.session.history;
         for (var i = 0; i < data.length; i++) {
             req.session.history.push(data[i].Result.ActionDescription);
-            damage.push(parseDamage(data[i]));
+            req.session.history.push(parseDamage(data[i]));
         }
 
         //End the current turn, and run the callback function of the next actor's turn, if one exists.
         await initiative.endTurn();
 
+        console.log(req.session.history);
+
         //Render the page, using the received information from chatGPT.
         res.render('combatTesting', {
-            current: data,
-            history: history,
+            history: req.session.history,
             player: isActorFriendly(initiative.currentTurn()),
             actor: initiative.currentTurn(),
-            damage: damage,
             combat: combatStatus()
         });
 
@@ -266,18 +261,6 @@ router.post('/generateAction/:actor', async (req, res) => {
 
     let current = initiative.currentTurn();
     let friendly = isActorFriendly(current);
-
-    //If for whatever reason, this post is reached while it is not a player's turn, return to the combat screen.
-    if (actor != current.name) {
-        res.render('combatTesting', {
-            actions: [{ Action: `It is not ${actor}'s turn yet` }],
-            history: req.session.history,
-            player: friendly,
-             actor: current,
-            combat: combatStatus()
-        });
-        return;
-    }
 
     try {
         //Query the chatGPT API using the prompts generated from the enemy who is acting, and the targetable players.
@@ -297,23 +280,21 @@ router.post('/generateAction/:actor', async (req, res) => {
 
         // Store the received action, and update the history.
         req.session.action = data;
-        var history = req.session.history;
         for (var i = 0; i < data.length; i++) {
             req.session.history.push(data[i].Result.ActionDescription);
-            damage.push(parseEnemyDamage(data[i]));
+            req.session.history.push(parseEnemyDamage(data[i]));
         }
 
         //End the current turn, and run the callback function of the next actor's turn, if one exists.
         //This repeats for every consecutive enemy action.
         await initiative.endTurn();
 
+        console.log(req.session.history);
         //Render the page, using the received information from chatGPT.
         res.render('combatTesting', {
-            current: data,
-            history: history,
+            history: req.session.history,
             player: isActorFriendly(initiative.currentTurn()),
             actor: initiative.currentTurn(),
-            damage: damage,
             combat: combatStatus()
         });
 
@@ -332,8 +313,6 @@ function formatResponse(text) {
     {
         data = data.substring(0, data.length - 1);
     }
-
-    console.log("Formatted Result:", data);
 
     return data;
 }
