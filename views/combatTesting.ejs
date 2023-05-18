@@ -3,34 +3,25 @@
 
 <% if (typeof history !=='undefined' ) { %>
     <% if (history.length > 1 ) { %>
-        <h2>History:</h2>
-        <% for(var i=0; i < history.length - 1; i++) {%>
+        <div class="overflow-auto mh-75">
+        <% for(var i=0; i < history.length; i++) {%>
             <p><%- history[i] %></p>
         <% } %>
+        </div>
     <% } %>
 <% } %>
-
-<% if (typeof current !=='undefined' ) { %>
-    <h3>Current Action:</h3>
-    <% for(var x = 0; x < current.length; x++) {%>
-        <p><%- current[x].Result.ActionDescription %></p>
-        <% if (typeof damage !=='undefined') {%>
-                <p><%- damage[x] %></p>
-        <% } %>
-    <% } %> 
-<%}%>
 
 <% if(combat.status) { %>
     <div id="userOptions">
         <% if(combat.playerVictory) { %>
             <p>You stand victorious.</p>
             <form action='/combat/victory' method="post">
-                <button type="submit">Continue</button>
+                <button class="btn btn-secondary" type="submit">Continue</button>
             </form>
         <% } else { %>
             <p>Your vision begins to fade...</p>
             <form action='/combat/defeat' method="post">
-                <button type="submit">Continue</button>
+                <button class="btn btn-secondary" type="submit">Continue</button>
             </form>
         <% }%>
     </div>
@@ -40,12 +31,12 @@
 <div id="userOptions">
 <% for(var x = 0; x < actor.actions.length; x++) { %>
     <form action='/combat/selectAction/<%- actor.name %>=<%- x %>' method="post">
-        <button type="submit"><%- actor.actions[x].name %></button>
+        <button class="btn btn-secondary" type="submit"><%- actor.actions[x].name %></button>
     </form>
 <% } %>
 <% } else { %>
     <form action='/combat/generateAction/<%- actor.name %>' method="post">
-        <button type="submit">Continue</button>
+        <button class="btn btn-secondary" type="submit">Continue</button>
     </form>
     <% } %>
 </div>
