@@ -12,14 +12,14 @@
         <p><%- summary %></p>
         <% } %>
 
-        <form class="form-class" action="/quickstart/newGame" method="post">
+        <form class="form-class" action="/BCIT/newGame" method="post">
             <% if (typeof summary !== 'undefined') { %>
             <button type="submit">Start New Game</button>
             <% } %>
         </form>
 
 
-        <form class="form-class" action="/quickstart/generateStory" method="post">
+        <form class="form-class" action="/BCIT/generateStory" method="post">
             <% if (typeof summary == 'undefined') { %>
             <button type="submit">Generate Story</button>
             <% } else { %>
