@@ -1,19 +1,48 @@
+<div class="footer-container">
+  <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+    <p class="col-md-4 mb-0 text-white">© 2023 myD&D</p>
 
-<div class="container">
-    <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-      <p class="col-md-4 mb-0 text-muted">© 2023 myD&D</p>
-  
-      <a href="/" class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
-        <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
-      </a>
-  
-      <ul class="nav col-md-4 justify-content-end">
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Features</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">FAQs</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">About</a></li>
-      </ul>
-    </footer>
-  </div>
+    <a href="/" class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+      <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
+    </a>
+
+    <ul id="footer-links" class="nav justify-content-end">
+      <li class="nav-item"><a href="#" class="nav-link px-2 text-white">Features</a></li>
+      <li class="nav-item"><a href="#" class="nav-link px-2 text-white">FAQs</a></li>
+      <li class="nav-item"><a href="#" class="nav-link px-2 text-white">About</a></li>
+      <li>
+        <a href="#" onclick="logout(event)">
+            <span class="text-white">Logout</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M2.5 1A1.5 1.5 0 0 1 4 2.5V5h8v6h-8v2.5A1.5 1.5 0 0 1 2.5 15h-1a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 .5-.5h1zm3.854 4.646a.5.5 0 0 0-.708.708L7.293 7.5H1.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 1 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3z"/>
+            </svg>
+        </a>
+      </li>
+    </ul>
+  </footer>
+</div>
+
+<script>
+  function logout(event) {
+    event.preventDefault();
+
+    fetch('/logout', {
+        method: 'POST'
+      })
+      .then(response => {
+        if (response.ok) {
+          window.location.href = '/userLoginScreen';
+        }
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
+
+  function navigateTo(route) {
+    window.location.href = route;
+  }
+</script>
 
 </body>
 

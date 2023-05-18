@@ -4,12 +4,17 @@ require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const {
-    ObjectId
-} = require('mongodb');
+const ObjectId = require('mongodb').ObjectId;
 const bcrypt = require('bcrypt');
 const saltRounds = 12;
 const path = require('path');
+
+// forget password modules
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+
 
 const port = process.env.PORT || 3000;
 
@@ -27,6 +32,8 @@ const mongodb_database = process.env.MONGODB_DATABASE;
 const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
 
 const node_session_secret = process.env.NODE_SESSION_SECRET;
+
+const mailgun_api_secret = process.env.MAILGUN_API_SECRET;
 /* END secret section */
 
 app.set('view engine', 'ejs');
@@ -42,12 +49,18 @@ let userCollection;
 async function init() {
     const database = await connectToDatabase();
     userCollection = database.db(mongodb_database).collection('USERAUTH');
+    // console.log("database connection:", {
+    //     serverConfig: userCollection.s.serverConfig,
+    //     options: userCollection.s.options
+    // });
 }
 
 init();
+
 app.use(express.urlencoded({
     extended: false
 }));
+app.use(bodyParser.json());
 
 var mongoStore = MongoStore.create({
     mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
@@ -69,11 +82,11 @@ app.get('/', (req, res) => {
 
 app.get('/LandingScreen', async (req, res) => {
     const usersName = req.session.name;
-    let userType;
+    const userID = req.session.userID;
 
     res.render("LandingScreen", {
         user: usersName,
-        userType: userType
+        userId: userID,
     });
 });
 
@@ -123,6 +136,84 @@ app.get('/loginSubmit', (req, res) => {
     res.render('loginSubmit');
 });
 
+app.get('/passwordReset', (req, res) => {
+    res.render('passwordReset');
+});
+
+app.get('/characterSelection', (req, res) => {
+    res.render('characterSelection');
+});
+
+app.get('/characterSelected', async (req, res) => {
+    try {
+        const selectedCharacter = req.query.class;
+        const database = await connectToDatabase();
+        const dbo = database.db(mongodb_database).collection('CLASSES');
+
+        const characterData = await dbo.findOne({
+            Class: selectedCharacter,
+            Level: 1
+        });
+
+        if (characterData) {
+            res.render('characterSelected', {
+                characterData
+            }); // Pass characterData as a local variable
+        } else {
+            res.status(404).json({
+                error: 'Character not found'
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching character data:', error);
+        res.status(500).json({
+            error: 'Internal Server Error'
+        });
+    }
+});
+
+app.post('/saveCharacter', async (req, res) => {
+
+    const database = await connectToDatabase();
+    const dbo = database.db(mongodb_database).collection('USERCHAR');
+
+    const characterStats = req.body;
+
+    console.log('Saving character:', characterStats);
+
+    dbo.insertOne(characterStats, (err, result) => {
+        if (err) {
+            console.error('Error saving character:', err);
+            res.sendStatus(500);
+        } else {
+            console.log('Character saved successfully');
+            res.sendStatus(200);
+        }
+    });
+});
+
+app.get('/userInfo', async (req, res) => {
+    const userId = req.session.userID;
+
+    // Fetch user data from MongoDB based on the provided ID
+    const user = await userCollection.findOne({
+        _id: new ObjectId(userId)
+    });
+
+    if (!user) {
+        return res.status(404).send('User not found');
+    }
+
+    // Render the userInfo.ejs view and pass the user object
+    res.render('userInfo', {
+        user
+    });
+});
+
+app.get('/Quickstart', (req, res) => {
+    res.render('Quickstart');
+});
+
 app.post('/submitUser', async (req, res) => {
     var name = req.body.name;
     var email = req.body.email;
@@ -164,8 +255,10 @@ app.post('/submitUser', async (req, res) => {
 
     // Store the user's name and username in the session
     req.session.authenticated = true;
-    req.session.name = name;
+    req.session.name = result[0].name;
     req.session.cookie.maxAge = expireTime;
+    req.session.type = result[0].type;
+    req.session.userID = result[0]._id;
 
     // Redirect to the main landing screen
     res.redirect('/LandingScreen');
@@ -215,6 +308,7 @@ app.post('/loggingin', async (req, res) => {
         req.session.name = result[0].name;
         req.session.cookie.maxAge = expireTime;
         req.session.type = result[0].type;
+        req.session.userID = result[0]._id;
 
 
         res.redirect('/LandingScreen');
@@ -241,9 +335,134 @@ app.post('/logout', (req, res) => {
         if (err) {
             console.log(err);
         }
-        res.redirect('/');
+        console.log("check");
+        res.redirect('/userLoginScreen');
     });
 });
+
+// Forget password Begin
+
+const formData = require('form-data');
+const Mailgun = require('mailgun.js');
+const mailgun = new Mailgun(formData);
+const mg = mailgun.client({
+    username: 'api',
+    key: mailgun_api_secret,
+});
+
+// Generate a random token for the password reset link
+function generateToken() {
+    return crypto.randomBytes(20).toString('hex');
+}
+
+// Render password reset form screen
+app.get('/reset/:token', (req, res) => {
+    const token = req.params.token;
+
+    // Renders the password reset form view and passes the token as a parameter
+    res.render('password-reset-form', {
+        token
+    });
+});
+
+// Send the password reset email
+function sendPasswordResetEmail(user, token) {
+
+    // ******************* WILL NEED TO UPDATE DOMAIN WITH OUR CYCLISH.SH DOMAIN
+    const resetLink = `https://mydnd.cyclic.app/reset/${token}`;
+    // ******************* WILL NEED TO UPDATE DOMAIN WITH OUR CYCLISH.SH DOMAIN
+
+    mg.messages
+        .create('sandbox5227049b12c7448491caa1aa0c761516.mailgun.org', {
+            from: 'Mailgun Sandbox <postmaster@sandbox5227049b12c7448491caa1aa0c761516.mailgun.org>',
+            to: user.email,
+            subject: 'Password Reset Request',
+            text: `Hi ${user.name},\n\nYou are receiving this email because you (or someone else) has requested a password reset for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\nhttp://localhost:3000/reset/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n\nBest regards,\nThe D&D Dudes`,
+        })
+        .then((msg) => console.log(msg))
+        .catch((err) => console.log(err));
+}
+
+// Handle the password reset request
+app.post('/forgot', async (req, res) => {
+    const email = req.body.email;
+
+    const user = await userCollection.findOne({
+        email: email,
+    });
+
+    if (!user) {
+        return res.status(400).send({
+            message: 'Email address not found',
+        });
+    }
+
+    const token = generateToken();
+
+    // Save the token to the user's document in MongoDB
+    await userCollection.updateOne({
+        _id: user._id,
+    }, {
+        $set: {
+            resetPasswordToken: token,
+            resetPasswordExpires: Date.now() + 3600000, // 1 hour
+        },
+    });
+
+    // Send the password reset email to the user
+    sendPasswordResetEmail(user, token);
+
+    res.send({
+        message: 'If the email entered exists, a password reset email has been sent',
+    });
+});
+
+// Handle the password reset form submission
+app.post('/reset/:token', async (req, res) => {
+    const token = req.params.token;
+
+    const user = await userCollection.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpires: {
+            $gt: Date.now(),
+        },
+    });
+
+    if (!user) {
+        const message = 'Invalid or expired password reset token';
+        return res.send(`
+            <script>
+                alert("${message}");
+                window.location.href = "/userLoginScreen";
+            </script>
+        `);
+    }
+
+    // Update the user's password in MongoDB
+    const newPassword = req.body.password;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    await userCollection.updateOne({
+        _id: user._id,
+    }, {
+        $set: {
+            password: hashedPassword,
+            resetPasswordToken: undefined,
+            resetPasswordExpires: undefined,
+        },
+    });
+
+    const message = 'Password updated successfully';
+    return res.send(`
+        <script>
+            alert("${message}");
+            window.location.href = "/userLoginScreen";
+        </script>
+    `);
+});
+
+
+// Forget password End
 
 app.use(express.static(__dirname + "/public"));
 

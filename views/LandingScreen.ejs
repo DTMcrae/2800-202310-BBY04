@@ -1,26 +1,38 @@
 <%- include("templates/headerStart") %>
 
-<!-- place style reference to background image here -->
+<link rel="stylesheet" href="../styles/landing.css">
 
 <%- include("templates/headerEnd") %>
 
-<div style="padding-left: 10%;">
-    <h1>Main Menu</h1>
+<div class="content">
+    <div class="user-welcome text-white">
+        <h1>Welcome <%= user %></h1>
+    </div>
     <br>
-    <h1>Welcome <%= user %></h1>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h2 class="menu-button">Return to Game</h2>
+                <br><br>
+                <h2 class="menu-button">Quick Start</h2>
+                <br><br>
+                <div>
+                    <h2 class="menu-button"><a href="/characterSelection">New Game</a></h2>
+                </div>
+                <br><br>
+                <h2 class="menu-button">Load Game</h2>
+                <br><br>
+                <h2 class="menu-button">Quit</h2>
+                <br><br>
+                <div>
+                    <h2 class="menu-button"><a href="/userInfo">User Info</a></h2>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div>
-    <h2>Return to Game</h2>
-    <br><br>
-    <h2>Quick Start</h2>
-    <br><br>
-    <h2>New Game</h2>
-    <br><br>
-    <h2>Load Game</h2>
-    <br><br>
-    <h2>Quit</h2>
-</div>
 
 
 <%- include("templates/footer") %>
