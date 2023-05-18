@@ -39,6 +39,8 @@ const mailgun_api_secret = process.env.MAILGUN_API_SECRET;
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'))
 
+app.use('/scripts', express.static("public/scripts"));
+
 const {
     connectToDatabase
 } = include('databaseConnection');
@@ -47,9 +49,14 @@ let userCollection;
 async function init() {
     const database = await connectToDatabase();
     userCollection = database.db(mongodb_database).collection('USERAUTH');
+    // console.log("database connection:", {
+    //     serverConfig: userCollection.s.serverConfig,
+    //     options: userCollection.s.options
+    // });
 }
 
 init();
+
 app.use(express.urlencoded({
     extended: false
 }));
@@ -133,20 +140,79 @@ app.get('/passwordReset', (req, res) => {
     res.render('passwordReset');
 });
 
+app.get('/characterSelection', (req, res) => {
+    res.render('characterSelection');
+});
+
+app.get('/characterSelected', async (req, res) => {
+    try {
+        const selectedCharacter = req.query.class;
+        const database = await connectToDatabase();
+        const dbo = database.db(mongodb_database).collection('CLASSES');
+
+        const characterData = await dbo.findOne({
+            Class: selectedCharacter,
+            Level: 1
+        });
+
+        if (characterData) {
+            res.render('characterSelected', {
+                characterData
+            }); // Pass characterData as a local variable
+        } else {
+            res.status(404).json({
+                error: 'Character not found'
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching character data:', error);
+        res.status(500).json({
+            error: 'Internal Server Error'
+        });
+    }
+});
+
+app.post('/saveCharacter', async (req, res) => {
+
+    const database = await connectToDatabase();
+    const dbo = database.db(mongodb_database).collection('USERCHAR');
+
+    const characterStats = req.body;
+
+    console.log('Saving character:', characterStats);
+
+    dbo.insertOne(characterStats, (err, result) => {
+        if (err) {
+            console.error('Error saving character:', err);
+            res.sendStatus(500);
+        } else {
+            console.log('Character saved successfully');
+            res.sendStatus(200);
+        }
+    });
+});
+
 app.get('/userInfo', async (req, res) => {
     const userId = req.session.userID;
-  
+
     // Fetch user data from MongoDB based on the provided ID
-    const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+    const user = await userCollection.findOne({
+        _id: new ObjectId(userId)
+    });
 
     if (!user) {
-      return res.status(404).send('User not found');
+        return res.status(404).send('User not found');
     }
-  
+
     // Render the userInfo.ejs view and pass the user object
-    res.render('userInfo', { user });
-  });
-  
+    res.render('userInfo', {
+        user
+    });
+});
+
+app.get('/Quickstart', (req, res) => {
+    res.render('Quickstart');
+});
 
 app.post('/submitUser', async (req, res) => {
     var name = req.body.name;
