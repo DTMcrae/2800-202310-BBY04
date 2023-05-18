@@ -144,6 +144,10 @@ app.get('/characterSelection', (req, res) => {
     res.render('characterSelection');
 });
 
+app.get('/characterSelectionEasterEgg', (req, res) => {
+    res.render('characterSelectionEasterEgg');
+});
+
 app.get('/characterSelected', async (req, res) => {
     try {
         const selectedCharacter = req.query.class;

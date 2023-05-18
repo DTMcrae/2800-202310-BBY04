@@ -20,6 +20,13 @@ h1 {
     margin: 0 auto;
 }
 
+#imgBCIT {
+    display: block;
+    margin: 0 auto;
+    width: 80%;
+    height: 100%;
+}
+
 #imgDruid {
     display: block;
     margin: 0 auto;
@@ -65,4 +72,30 @@ button {
     width: 60%;
     height: 60%;
     margin: 0 auto;
+}
+
+.buttonContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+    "backButton confirmButton";
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    height: 100%;
+    gap: 30px;
+}
+
+.backButton, .charButton {
+    overflow: hidden;
+    white-space: wrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    height: 100%;
+    font-weight: bold;
+    color: black;
+  }
+  
+  .buttonLink {
+    text-decoration: none;
 }

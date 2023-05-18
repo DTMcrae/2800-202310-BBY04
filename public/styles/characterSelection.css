@@ -58,11 +58,16 @@ h2 {
     "stats characteristics";
 }
 
-button {
+.charButton {
     display: flex;
     justify-content: center;
     align-content: center;
     width: 60%;
     height: 60%;
     margin: 0 auto;
+    color: black;
+  }
+  
+  .buttonLink {
+    text-decoration: none;
 }
