@@ -8,6 +8,8 @@ const Dice = require('./Dice.js');
 const openAI = new OpenAI(process.env.OPENAI_KEY);
 const model = 'gpt-3.5-turbo';
 
+const mainPage = 'combat';
+
 //Preset enemy and player information for testing.
 const presetPlayers = [{ name: "Draeven", class: "Ranger", hp: 11, ac: 12, actions: [{ name: "Greatbow" }, { name: "Dagger" }] }, { name: "Asha", class: "Rogue", hp: 9, ac: 11, actions: [{ name: "Dual Daggers" }, { name: "Shortbow" }] }];
 const presetEnemies = [{ name: "Goblin 1", hp: 6, ac: 8, desc: "A goblin wielding a dagger." }, { name: "Goblin 2", hp: 6, ac: 8, desc: "A goblin wielding a bow." }];
@@ -18,6 +20,12 @@ const prompts = new CombatPrompts();
 var initiative = new TurnOrder();
 
 router.get('/', (req, res) => {
+    if(!req.session.authenticated)
+    {
+        res.redirect("/userLoginScreen");
+        return;
+    }
+    
     // Initialize combat history
     req.session.history = [];
     var actors = [];
@@ -44,7 +52,7 @@ router.get('/', (req, res) => {
     initiative.assignNew(actors);
     var currentActor = initiative.currentTurn();
     this.combatEnded = false;
-    res.render('combatTesting', { player: players.includes(currentActor), actor: currentActor, combat: combatStatus() });
+    res.render('combat', { player: players.includes(currentActor), actor: currentActor, combat: combatStatus() });
 });
 
 //Process and save the damage the player deals to an enemy.
@@ -202,7 +210,7 @@ router.post('/generatePlayerAction/:roll', async(req,res) => {
     
     //If for whatever reason, this post is reached while it is not a player's turn, return to the combat screen.
     if (actor != current.name) {
-        res.render('combatTesting', {
+        res.render('combat', {
             actions: [{ Action: `It is not ${actor}'s turn yet` }],
             history: req.session.history,
             player: friendly,
@@ -242,7 +250,7 @@ router.post('/generatePlayerAction/:roll', async(req,res) => {
         console.log(req.session.history);
 
         //Render the page, using the received information from chatGPT.
-        res.render('combatTesting', {
+        res.render('combat', {
             history: req.session.history,
             player: isActorFriendly(initiative.currentTurn()),
             actor: initiative.currentTurn(),
@@ -291,7 +299,7 @@ router.post('/generateAction/:actor', async (req, res) => {
 
         console.log(req.session.history);
         //Render the page, using the received information from chatGPT.
-        res.render('combatTesting', {
+        res.render('combat', {
             history: req.session.history,
             player: isActorFriendly(initiative.currentTurn()),
             actor: initiative.currentTurn(),
