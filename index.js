@@ -477,7 +477,6 @@ app.listen(port, () => {
 
 // For story generation
 const quickstart = require('./routes/quickstart');
-const story = require('./routes/story');
 
 // Story Initialization Middleware
 app.use((req, res, next) => {
@@ -497,5 +496,4 @@ app.use((req, res, next) => {
 
 // Generates Story Pages
 app.use('/quickstart', quickstart);
-app.use('/story', story);
 
