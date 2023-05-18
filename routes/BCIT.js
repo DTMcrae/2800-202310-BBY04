@@ -5,7 +5,7 @@ const OpenAI = require('../scripts/openai/openAI.js');
 const openAI = new OpenAI(process.env.OPENAI_KEY);
 const model = 'gpt-3.5-turbo';
 
-const types = ['', '', '', '', '', '', '', '', 'about a lost villager', 'about fighting bandit raiders', 'about fighting a gang of thugs', 'about a bounty hunt', 'about fighting goblins', 'about a magic portal', 'about defending a village', 'about stealing back an artifact', 'about a haunted mansion', 'about a separated couple', 'about a missing royal', 'about a rescue', 'about a heist', 'about a rivalry', 'about a journey', 'about an intruder', 'about a rebellion', 'about an artifact', 'about a prophecy', 'about a tournament', 'about an escape', 'about a hunt', 'about a treasure hunt', 'about strange magic', 'about a tower defense', 'about a lost cat', 'about BCIT'];
+const types = ['', '', '', '', '', '', '', '', 'about a lost student', 'about fighting a rival school', 'about fighting school bullies', 'about missing textbooks', 'about a cursed exam', 'about a magic portal', 'about defending the campus', 'about stealing back stolen documents', 'about a haunted building', 'about a separated couple', 'about a student imposter', 'about a rescue', 'about restoring power to campus', 'about a lost cat'];
 
 router.get('/', (req, res) => {
     // Initialize summary and events in the session
@@ -14,13 +14,13 @@ router.get('/', (req, res) => {
       req.session[`event${i}`] = '';
     }
     req.session.currentEvent = 0;
-    res.render('quickstart', { currentEvent: req.session.currentEvent });
+    res.render('BCIT', { currentEvent: req.session.currentEvent });
 });
 
 // The general story prompt asks for an adventure summary and event types
 const generateStoryPrompt = (randomType) => {
 
-    return `Imagine you are creating a detailed DnD adventure ${randomType}. Please provide the following details:
+    return `Imagine you are creating a detailed DnD adventure ${randomType} at BCIT. Please provide the following details:
 
 - "Title": The title of the adventure.
 - "Summary": An overall summary of the adventure that describes the central conflict or goal. Please write the summary in three sentences. Leave the outcome a mystery to maintain the suspense.
@@ -87,7 +87,7 @@ router.post('/generateStory', async (req, res) => {
         console.log('Start location:', req.session.s_start);
         console.log('Boss location:', req.session.s_boss);
         
-        res.render('quickstart', {
+        res.render('BCIT', {
             title: req.session.title,
             summary: req.session.summary,
             goal: req.session.goal,

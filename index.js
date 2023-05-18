@@ -210,8 +210,14 @@ app.get('/userInfo', async (req, res) => {
     });
 });
 
+// Story Generation
 app.get('/Quickstart', (req, res) => {
     res.render('Quickstart');
+});
+
+// Story Gen BCIT Easter Egg
+app.get('/BCIT', (req, res) => {
+    res.render('BCIT');
 });
 
 app.post('/submitUser', async (req, res) => {
@@ -477,6 +483,7 @@ app.listen(port, () => {
 
 // For story generation
 const quickstart = require('./routes/quickstart');
+const BCIT = require('./routes/BCIT');
 
 // Story Initialization Middleware
 app.use((req, res, next) => {
@@ -496,4 +503,4 @@ app.use((req, res, next) => {
 
 // Generates Story Pages
 app.use('/quickstart', quickstart);
-
+app.use('/BCIT', BCIT);
