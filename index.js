@@ -170,6 +170,26 @@ app.get('/characterSelected', async (req, res) => {
     }
 });
 
+app.post('/saveCharacter', async (req, res) => {
+
+    const database = await connectToDatabase();
+    const dbo = database.db(mongodb_database).collection('USERCHAR');
+
+    const characterStats = req.body;
+
+    console.log('Saving character:', characterStats);
+
+    dbo.insertOne(characterStats, (err, result) => {
+        if (err) {
+            console.error('Error saving character:', err);
+            res.sendStatus(500);
+        } else {
+            console.log('Character saved successfully');
+            res.sendStatus(200);
+        }
+    });
+});
+
 app.get('/userInfo', async (req, res) => {
     const userId = req.session.userID;
 
@@ -188,6 +208,9 @@ app.get('/userInfo', async (req, res) => {
     });
 });
 
+app.get('/Quickstart', (req, res) => {
+    res.render('Quickstart');
+});
 
 app.post('/submitUser', async (req, res) => {
     var name = req.body.name;
