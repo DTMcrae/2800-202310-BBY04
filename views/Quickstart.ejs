@@ -1,37 +1,40 @@
-<%- include("templates/header") %>
+<%- include("templates/headerStart") %>
 
-<% if (typeof summary !== 'undefined') { %>
-    <h2><%- title %></h2>
-    <p><%- summary %></p>
-<% } %>
+<link rel="stylesheet" href="../styles/quickstart.css">
 
-<form action="/quickstart/generateStory" method="post">
-    <% if (typeof summary == 'undefined') { %>
-        <button type="submit">Generate Story</button>
-    <% } else { %>
-        <button type="submit">Reroll Story</button>
-    <% } %>
-</form>
+<%- include("templates/headerEnd") %>
 
-<form action="/quickstart/newGame" method="post">
-    <% if (typeof summary !== 'undefined') { %>
-        <button type="submit">Start New Game</button>
-    <% } %>
-</form>
+<div class="storygen">
 
+    <div class="center">
+        <% if (typeof summary !== 'undefined') { %>
+        <h2><%- title %></h2>
+        <p><%- summary %></p>
+        <% } %>
+
+        <form class="form-class" action="/quickstart/newGame" method="post">
+            <% if (typeof summary !== 'undefined') { %>
+            <button type="submit">Start New Game</button>
+            <% } %>
+        </form>
 
 
-<div id="spinner" style="display: none;">
-    <img src="loading.gif" alt="Loading...">
+        <form class="form-class" action="/quickstart/generateStory" method="post">
+            <% if (typeof summary == 'undefined') { %>
+            <button type="submit">Generate Story</button>
+            <% } else { %>
+                <br>
+            <button type="submit">Reroll Story</button>
+            <% } %>
+        </form>
+
+        <div id="spinner" style="display: none;">
+            <img src="../../loading.gif" alt="Loading...">
+        </div>
+
+    </div>
 </div>
 
-<script>
-    const buttons = document.querySelectorAll('button');
-    buttons.forEach((button) => {
-        button.addEventListener('click', () => {
-            document.getElementById('spinner').style.display = 'block';
-        });
-    });
-</script>
+<script src="/scripts/quickstart.js"></script>
 
-<%- include("templates/footer") %>  
+<%- include("templates/footer") %>
