@@ -31,18 +31,57 @@ app.use('/scripts', express.static("public/scripts"));
 const {
     connectToDatabase
 } = include('databaseConnection');
-let userCollection;
+
+// Define collections
+let classesCollection;
+let equipmentCollection;
+let levelCollection;
+let monstersCollection;
+let npcCollection;
+let partymemCollection;
+let scenarioCollection;
+let sessionCollection;
+let spellsCollection;
+let usercharCollection;
+let usersavedCollection;
+let userauthCollection;
 
 async function init() {
     const database = await connectToDatabase();
-    userCollection = database.db(mongodb_database).collection('USERAUTH');
-    // console.log("database connection:", {
-    //     serverConfig: userCollection.s.serverConfig,
-    //     options: userCollection.s.options
-    // });
+
+    // Initialize collections
+    classesCollection = database.db(mongodb_database).collection('CLASSES');
+    equipmentCollection = database.db(mongodb_database).collection('EQUIPMENT');
+    levelCollection = database.db(mongodb_database).collection('LEVEL');
+    monstersCollection = database.db(mongodb_database).collection('MONSTERS');
+    npcCollection = database.db(mongodb_database).collection('NPC');
+    partymemCollection = database.db(mongodb_database).collection('PARTYMEM');
+    scenarioCollection = database.db(mongodb_database).collection('SCENARIO');
+    sessionCollection = database.db(mongodb_database).collection('SESSION');
+    spellsCollection = database.db(mongodb_database).collection('SPELLS');
+    usercharCollection = database.db(mongodb_database).collection('USERCHAR');
+    usersavedCollection = database.db(mongodb_database).collection('USERSAVED');
+    userauthCollection = database.db(mongodb_database).collection('USERAUTH');
+
 }
 
 init();
+
+//Copy paste this to get access to the collections in mydnd
+// module.exports = {
+//     classesCollection,
+//     equipmentCollection,
+//     levelCollection,
+//     monstersCollection,
+//     npcCollection,
+//     partymemCollection,
+//     scenarioCollection,
+//     sessionCollection,
+//     spellsCollection,
+//     usercharCollection,
+//     usersavedCollection,
+//     userauthCollection
+// }
 
 app.use(express.urlencoded({
     extended: false
@@ -76,34 +115,6 @@ app.get('/LandingScreen', async (req, res) => {
     res.render("LandingScreen", {
         user: usersName,
         userId: userID,
-    });
-});
-
-async function generateText() {
-    try {
-        // Send a request to the OpenAI API to generate text
-        const response = await openai.createChatCompletion({
-            model: "gpt-3.5-turbo",
-            messages: [{
-                role: "system",
-                content: 'Give me a bullet point of 5 dnd equipment as bullet points'
-            }]
-        });
-        return;
-    }
-
-    const result = await userCollection.find({
-        username: username
-    }).project({
-        username: 1,
-        password: 1,
-        _id: 1
-    }).toArray();
-
-    console.log(result);
-
-    res.render('nosql-injection', {
-        result
     });
 });
 
