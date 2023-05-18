@@ -1,28 +1,74 @@
 <%- include("templates/headerStart") %>
 <%- include("templates/headerEnd") %>
 
-            <% if (typeof history !=='undefined' ) { %>
-                <% if (history.length > 1 ) { %>
-                <h2>History:</h2>
-                    <% for(var i=0; i < history.length - 1; i++) {%>
-                        <p><%- history[i] %></p>
-                        <% } %>
-                    <% } %>
-                <% } %>
+<% if (typeof history !=='undefined' ) { %>
+    <% if (history.length > 1 ) { %>
+        <h2>History:</h2>
+        <% for(var i=0; i < history.length - 1; i++) {%>
+            <p><%- history[i] %></p>
+        <% } %>
+    <% } %>
+<% } %>
 
-                            <% if (typeof actions !=='undefined' ) { %>
-                                <h3>Previous Action text:</h3>
-                                <% for(var x = 0; x < actions.length; x++) {%>
-                                <p><%- actions[x].Action %></p>
-                                <% } %> 
-                            <%}%>
+<% if (typeof current !=='undefined' ) { %>
+    <h3>Current Action:</h3>
+    <% for(var x = 0; x < current.length; x++) {%>
+        <p><%- current[x].Result.ActionDescription %></p>
+        <% if (typeof damage !=='undefined') {%>
+                <p><%- damage[x] %></p>
+        <% } %>
+    <% } %> 
+<%}%>
 
-                                        <form action="/combat/generateAction/Enemy" method="post">
-                                            <button type="submit">Enemy Action</button>
-                                        </form>
-                                        <form action="/combat/generateAction/Draeven" method="post">
-                                            <button type="submit">Player Action</button>
-                                        </form>
+<% if(combat.status) { %>
+    <div id="userOptions">
+        <% if(combat.playerVictory) { %>
+            <p>You stand victorious.</p>
+            <form action='/combat/victory' method="post">
+                <button type="submit">Continue</button>
+            </form>
+        <% } else { %>
+            <p>Your vision begins to fade...</p>
+            <form action='/combat/defeat' method="post">
+                <button type="submit">Continue</button>
+            </form>
+        <% }%>
+    </div>
+<% } else if(typeof player !=='undefined' && typeof actor !=='undefined') {%>%>
+    <p>It is now <%- actor.name %>'s turn.</p>
+<% if(player) { %>
+<div id="userOptions">
+<% for(var x = 0; x < actor.actions.length; x++) { %>
+    <form action='/combat/selectAction/<%- actor.name %>=<%- x %>' method="post">
+        <button type="submit"><%- actor.actions[x].name %></button>
+    </form>
+<% } %>
+<% } else { %>
+    <form action='/combat/generateAction/<%- actor.name %>' method="post">
+        <button type="submit">Continue</button>
+    </form>
+    <% } %>
+</div>
+<% } %>
+
+<div class="modal fade" id="diceModal" tabindex="-1" role="dialog" aria-labelledby="diceModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="diceModalLongTitle">Dice Roller</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+            <canvas id="diceRolls"></canvas>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
                                         
 
-                                            <%- include("templates/footer") %>
+<%- include("templates/footer") %>
