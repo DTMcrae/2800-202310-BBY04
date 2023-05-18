@@ -121,8 +121,7 @@ class CombatPrompts {
     enemyTurnPrompt(actor, targets) {
         let prompt = `{
             "Enemy": {
-                "Name": "${actor.name}",
-                "Description": "${actor.desc}"
+                "Name": "${actor.name}"
             },
             "ValidTargets": [`;
             targets.forEach(target => {
