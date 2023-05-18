@@ -1,0 +1,70 @@
+<%- include("templates/headerStart") %>
+<%- include("templates/headerEnd") %>
+
+<% if (typeof current !=='undefined' ) { %>
+    <h3>Current Action:</h3>
+    <% for(var x = 0; x < current.length; x++) {%>
+        <p><%- current[x].Action %></p>
+        <% if (typeof damage !=='undefined') {%>
+            <% if(damage[x].amount !== 'undefined' && damage[x].amount > 0) {%>
+                <p><%- damage[x].text%></p>
+            <% } %>
+        <% } %>
+    <% } %> 
+<%}%>
+
+<% if(typeof Dice !=='undefined') {%>
+<div id="userOptions"></div>
+<h2>Roll!</h2>
+<form id="roller" action='/combat/generatePlayerAction/' method="post">
+    <button id="atkRoll" type="button">Roll 1d20</button>
+    <button id="dmgRoll" class="<%-Amount%>d<%-Dice%>" type="button">Roll <%- Amount %>d<%- Dice %></button>
+    <button id="continue" type="button">Next</button>
+</form>
+<% } %>
+
+<div class="modal fade" id="diceModal" tabindex="-1" role="dialog" aria-labelledby="diceModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="diceModalLongTitle">Dice Roller</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <canvas id="diceRolls"></canvas>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/scripts/DiceClient.js"></script>
+<script>
+    const atkRoll = document.getElementById('atkRoll').addEventListener('click', () => {
+        this.atkRoll = VisualizeRoll(20,1);
+        console.log("Attack Roll: " + this.atkRoll);
+        if (this.atkRoll < 0) return;
+        updateForm();
+    });
+
+    const dmgRoll = document.getElementById('dmgRoll').addEventListener('click', () => {
+        let roll = document.getElementById('dmgRoll').className.split('d');
+        this.dmgRoll = VisualizeRoll(roll[1], roll[0]);
+        console.log("Damage Roll: " + this.dmgRoll);
+        if(this.dmgRoll < 0) return;
+        updateForm();
+    });
+
+    function updateForm() {
+        if (typeof this.dmgRoll === undefined || typeof this.atkRoll === undefined) return;
+        document.getElementById('roller').setAttribute("action","/combat/generatePlayerAction/" + this.atkRoll + "_" + this.dmgRoll);
+        document.getElementById("continue").setAttribute("type","submit");
+    }
+</script>
+
+<%- include("templates/footer") %>
