@@ -69,10 +69,7 @@ var mongoStore = MongoStore.create({
     }
 })
 
-app.use("/styles", express.static("./public/styles"));
-app.use("/scripts", express.static("./public/scripts"));
-app.use("/views", express.static("./views"));
-app.use("/img", express.static(".public/images"));
+app.use(express.static(__dirname + '/public'));
 
 app.use(session({
     secret: node_session_secret,
@@ -358,15 +355,6 @@ app.post('/logout', (req, res) => {
         console.log("check");
         res.redirect('/userLoginScreen');
     });
-});
-
-app.get('/combat', (req, res) => {
-    if(!req.session.authenticated)
-    {
-        res.redirect("/userLoginScreen");
-        return;
-    }
-    res.render("combat");
 });
 
 // Forget password Begin
