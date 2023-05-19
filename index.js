@@ -4,7 +4,7 @@ const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const path = require('path');
-const port =  3000;
+const port = 3000;
 const app = express();
 
 const expireTime = 24 * 60 * 60 * 1000;
@@ -21,7 +21,9 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 const mailgun_api_secret = process.env.MAILGUN_API_SECRET;
 /* END secret section */
 
-var {database} = require('./databaseConnection');
+var {
+    database
+} = require('./databaseConnection');
 
 
 app.set('view engine', 'ejs');
@@ -31,7 +33,7 @@ app.use('/scripts', express.static("public/scripts"));
 
 const {
     connectToDatabase
-} = include('databaseConnection');
+} = require('./databaseConnection');
 
 // Define collections
 let classesCollection;
@@ -47,35 +49,69 @@ let usercharCollection;
 let usersavedCollection;
 let userauthCollection;
 
+const {
+    MongoClient
+} = require('mongodb');
+
+const uri = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`
+
 async function init() {
-    const database = await connectToDatabase();
+
+    //create a new MongoClient instance
+    const client = new MongoClient(uri);
+
+    //connect to database
+    await client.connect();
+
+    //database object
+    const database = client.db(mongodb_database);
 
     // Initialize collections
-    classesCollection = database.db(mongodb_database).collection('CLASSES');
-    equipmentCollection = database.db(mongodb_database).collection('EQUIPMENT');
-    levelCollection = database.db(mongodb_database).collection('LEVEL');
-    userCollection = database.db(mongodb_database).collection('USERAUTH');
-    savedCollection = database.db(mongodb_database).collection('USERSAVED');
-    monstersCollection = database.db(mongodb_database).collection('MONSTERS');
-    scenarioCollection = database.db(mongodb_database).collection('SCENARIO');
-    npcCollection = database.db(mongodb_database).collection('NPC');
-    partymemCollection = database.db(mongodb_database).collection('PARTYMEM');
-    scenarioCollection = database.db(mongodb_database).collection('SCENARIO');
-    sessionCollection = database.db(mongodb_database).collection('SESSION');
-    spellsCollection = database.db(mongodb_database).collection('SPELLS');
-    usercharCollection = database.db(mongodb_database).collection('USERCHAR');
-    usersavedCollection = database.db(mongodb_database).collection('USERSAVED');
-    userauthCollection = database.db(mongodb_database).collection('USERAUTH');
-
+    classesCollection = database.collection('CLASSES');
+    equipmentCollection = database.collection('EQUIPMENT');
+    levelCollection = database.collection('LEVEL');
+    monstersCollection = database.collection('MONSTERS');
+    scenarioCollection = database.collection('SCENARIO');
+    npcCollection = database.collection('NPC');
+    partymemCollection = database.collection('PARTYMEM');
+    sessionCollection = database.collection('SESSION');
+    spellsCollection = database.collection('SPELLS');
+    usercharCollection = database.collection('USERCHAR');
+    usersavedCollection = database.collection('USERSAVED');
+    userauthCollection = database.collection('USERAUTH');
 }
-
 init();
 
+//********************************************************************************************* */
+//original function to initialize collections. Was getting a TypeError: database.db is not a function:
+
+// async function init() {
+//     const database = await connectToDatabase();
+
+//     // Initialize collections
+//     classesCollection = database.db(mongodb_database).collection('CLASSES');
+//     equipmentCollection = database.db(mongodb_database).collection('EQUIPMENT');
+//     levelCollection = database.db(mongodb_database).collection('LEVEL');
+//     userCollection = database.db(mongodb_database).collection('USERAUTH');
+//     savedCollection = database.db(mongodb_database).collection('USERSAVED');
+//     monstersCollection = database.db(mongodb_database).collection('MONSTERS');
+//     scenarioCollection = database.db(mongodb_database).collection('SCENARIO');
+//     npcCollection = database.db(mongodb_database).collection('NPC');
+//     partymemCollection = database.db(mongodb_database).collection('PARTYMEM');
+//     scenarioCollection = database.db(mongodb_database).collection('SCENARIO');
+//     sessionCollection = database.db(mongodb_database).collection('SESSION');
+//     spellsCollection = database.db(mongodb_database).collection('SPELLS');
+//     usercharCollection = database.db(mongodb_database).collection('USERCHAR');
+//     usersavedCollection = database.db(mongodb_database).collection('USERSAVED');
+//     userauthCollection = database.db(mongodb_database).collection('USERAUTH');
+// }
+// init();
+//********************************************************************************************* */
 
 app.use(express.urlencoded({
     extended: false
 }));
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 
 var mongoStore = MongoStore.create({
     mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
@@ -90,12 +126,15 @@ app.use("/views", express.static("./views"));
 app.use("/img", express.static(".public/images"));
 
 app.use(session({
-    secret: node_session_secert,
+    secret: node_session_secret,
     saveUninitialized: false,
     resave: true
 }));
 
-const { Configuration, OpenAIApi } = require("openai");
+const {
+    Configuration,
+    OpenAIApi
+} = require("openai");
 
 app.get('/LandingScreen', async (req, res) => {
     const usersName = req.session.name;
@@ -212,15 +251,15 @@ const BCIT = require('./routes/BCIT');
 // Story Initialization Middleware
 app.use((req, res, next) => {
     if (typeof req.session.summary === 'undefined') {
-      req.session.summary = '';
+        req.session.summary = '';
     }
     for (let i = 1; i <= 12; i++) {
-      if (typeof req.session[`event${i}`] === 'undefined') {
-        req.session[`event${i}`] = '';
-      }
+        if (typeof req.session[`event${i}`] === 'undefined') {
+            req.session[`event${i}`] = '';
+        }
     }
     if (typeof req.session.currentEvent === 'undefined') {
-      req.session.currentEvent = 0;
+        req.session.currentEvent = 0;
     }
     next();
 });
@@ -365,8 +404,7 @@ app.post('/logout', (req, res) => {
 });
 
 app.get('/combat', (req, res) => {
-    if(!req.session.authenticated)
-    {
+    if (!req.session.authenticated) {
         res.redirect("/userLoginScreen");
         return;
     }

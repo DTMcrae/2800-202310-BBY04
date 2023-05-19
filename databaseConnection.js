@@ -9,9 +9,9 @@ const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_ho
 var database = new MongoClient(atlasURI, {useNewUrlParser: true, useUnifiedTopology: true});
 let db;
 
-client.connect(err => {
+database.connect(err => {
     if (err) throw err;
-    db = client.db('MYDND');
+    db = database.db('MYDND');
 });
 
 const getClassesCollection = () => db.collection('CLASSES');
