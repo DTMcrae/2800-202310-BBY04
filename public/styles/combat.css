@@ -7,6 +7,14 @@ body {
     background-image: url("../images/combat_bg_lrg.jpeg");
 }
 
+.partyDisplay {
+    background-color: rgba(43, 43, 43, .75);
+}
+
+.modal-content {
+    background-color: rgba(43, 43, 43, .5);
+}
+
 h5 {
     color: white;
 }
@@ -15,8 +23,16 @@ p {
     color: white;
 }
 
+#combatHistory {
+    position: relative;
+}
+
 .transparent {
-    background-color: #2b2b2b;
+    background-color: rgba(43, 43, 43, .5);
+}
+
+#playerCard {
+    width: 250px;
 }
 
 @media only screen and (min-height: 1101px) {
@@ -32,6 +48,11 @@ p {
     #combat-text {
         height: 50vh;
         overflow: auto;
+    }
+
+    #playerData {
+        padding-left: 5px;
+        padding-right: 5px;
     }
 }
 
