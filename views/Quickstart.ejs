@@ -8,22 +8,25 @@
 
     <div class="center">
 
+        <div class = "storycreation">
+        <!-- Generates the loading animation -->
         <div id="spinner" style="display: none;">
             <img src="/images/loading.gif" class="loading" alt="Loading...">
         </div>
-        
+
+        <!-- Story Gen: Title and Summary -->
         <% if (typeof summary !== 'undefined') { %>
         <h2 class="form-class"><%- title %></h2>
         <p class="form-class"><%- summary %></p>
         <% } %>
 
-        <form class="form-class" action="/quickstart/newGame" method="post">
+        <!-- Story Gen: Buttons -->
+        <form class="form-class" action="/quickstart/generateEvent/1" method="post">
             <% if (typeof summary !== 'undefined') { %>
             <button type="submit">Start New Game</button>
             <% } %>
         </form>
-
-
+        
         <form class="form-class" action="/quickstart/generateStory" method="post">
             <% if (typeof summary == 'undefined') { %>
             <button type="submit">Generate Story</button>
@@ -32,6 +35,7 @@
             <button type="submit">Reroll Story</button>
             <% } %>
         </form>
+        </div>
 
     </div>
 </div>

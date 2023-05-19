@@ -145,6 +145,8 @@ app.get('/characterSelected', async (req, res) => {
             Level: 1
         });
 
+        req.session.selectedClass = selectedCharacter;
+
         if (characterData) {
             res.render('characterSelected', {
                 characterData

@@ -1,6 +1,8 @@
     const buttons = document.querySelectorAll('button');
     const forms = document.querySelectorAll('.form-class');
     const spinner = document.getElementById('spinner');
+    const storycreation = document.querySelector('.storycreation');
+
     buttons.forEach((button) => {
         button.addEventListener('click', () => {
             spinner.style.display = 'block';
