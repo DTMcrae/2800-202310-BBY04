@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const OpenAI = require('./openai/combatAI.js');
+const CombatAI = require('./openai/combatAI.js');
 const TurnOrder = require('./turnOrder.js');
 const CombatPrompts = require('./combatPrompts.js');
 const Dice = require('./Dice.js');
 
-const openAI = new OpenAI(process.env.OPENAI_KEY);
+const openAI = new CombatAI(process.env.OPENAI_KEY);
 const model = 'gpt-3.5-turbo';
 
 const mainPage = 'combat';
