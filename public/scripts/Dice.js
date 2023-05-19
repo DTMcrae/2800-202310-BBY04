@@ -90,6 +90,7 @@ class Dice {
     const context = document.getElementById("diceRolls").getContext("2d");
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.font = "48px serif";
+    context.fillStyle = "white";
 
     var rolls = [];
 
