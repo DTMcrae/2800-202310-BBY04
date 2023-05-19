@@ -84,6 +84,11 @@ const {
 } = require("openai");
 
 app.get('/LandingScreen', async (req, res) => {
+    if (!req.session.authenticated) {
+        res.redirect('/userLoginScreen');
+        return;
+    }
+
     const usersName = req.session.name;
     const userID = req.session.userID;
 
@@ -98,6 +103,10 @@ app.get('/userSignupScreen', (req, res) => {
 });
 
 app.get('/userLoginScreen', (req, res) => {
+    if (req.session.authenticated) {
+        res.redirect('/LandingScreen');
+        return;
+    }
     res.render('userLoginScreen');
 });
 
@@ -118,6 +127,10 @@ app.get('/characterSelectionEasterEgg', (req, res) => {
 });
 
 app.get('/', (req, res) => {
+    if(req.session.authenticated) {
+        res.redirect('/LandingScreen');
+        return;
+    }
     res.render("userLoginScreen");
 });
 
