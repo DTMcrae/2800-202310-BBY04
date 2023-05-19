@@ -1,11 +1,26 @@
 require("./utils.js");
+
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const ObjectId = require('mongodb').ObjectId;
+const bcrypt = require('bcrypt');
+const saltRounds = 12;
 const path = require('path');
-const port = 3000;
+
+// forget password modules
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+
+
+const port = process.env.PORT || 3000;
+
 const app = express();
+
+const Joi = require("joi");
 
 const expireTime = 24 * 60 * 60 * 1000;
 
@@ -21,11 +36,6 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 const mailgun_api_secret = process.env.MAILGUN_API_SECRET;
 /* END secret section */
 
-var {
-    database
-} = require('./databaseConnection');
-
-
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'))
 
@@ -33,80 +43,20 @@ app.use('/scripts', express.static("public/scripts"));
 
 const {
     connectToDatabase
-} = require('./databaseConnection');
-
-// Define collections
-let classesCollection;
-let equipmentCollection;
-let levelCollection;
-let monstersCollection;
-let npcCollection;
-let partymemCollection;
-let scenarioCollection;
-let sessionCollection;
-let spellsCollection;
-let usercharCollection;
-let usersavedCollection;
-let userauthCollection;
-
-const {
-    MongoClient
-} = require('mongodb');
-
-const uri = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`
+} = include('databaseConnection');
+let userCollection;
 
 async function init() {
-
-    //create a new MongoClient instance
-    const client = new MongoClient(uri);
-
-    //connect to database
-    await client.connect();
-
-    //database object
-    const database = client.db(mongodb_database);
-
-    // Initialize collections
-    classesCollection = database.collection('CLASSES');
-    equipmentCollection = database.collection('EQUIPMENT');
-    levelCollection = database.collection('LEVEL');
-    monstersCollection = database.collection('MONSTERS');
-    scenarioCollection = database.collection('SCENARIO');
-    npcCollection = database.collection('NPC');
-    partymemCollection = database.collection('PARTYMEM');
-    sessionCollection = database.collection('SESSION');
-    spellsCollection = database.collection('SPELLS');
-    usercharCollection = database.collection('USERCHAR');
-    usersavedCollection = database.collection('USERSAVED');
-    userauthCollection = database.collection('USERAUTH');
+    const database = await connectToDatabase();
+    userCollection = database.db(mongodb_database).collection('USERAUTH');
+    // console.log("database connection:", {
+    //     serverConfig: userCollection.s.serverConfig,
+    //     options: userCollection.s.options
+    // });
 }
+
 init();
 
-//********************************************************************************************* */
-//original function to initialize collections. Was getting a TypeError: database.db is not a function:
-
-// async function init() {
-//     const database = await connectToDatabase();
-
-//     // Initialize collections
-//     classesCollection = database.db(mongodb_database).collection('CLASSES');
-//     equipmentCollection = database.db(mongodb_database).collection('EQUIPMENT');
-//     levelCollection = database.db(mongodb_database).collection('LEVEL');
-//     userCollection = database.db(mongodb_database).collection('USERAUTH');
-//     savedCollection = database.db(mongodb_database).collection('USERSAVED');
-//     monstersCollection = database.db(mongodb_database).collection('MONSTERS');
-//     scenarioCollection = database.db(mongodb_database).collection('SCENARIO');
-//     npcCollection = database.db(mongodb_database).collection('NPC');
-//     partymemCollection = database.db(mongodb_database).collection('PARTYMEM');
-//     scenarioCollection = database.db(mongodb_database).collection('SCENARIO');
-//     sessionCollection = database.db(mongodb_database).collection('SESSION');
-//     spellsCollection = database.db(mongodb_database).collection('SPELLS');
-//     usercharCollection = database.db(mongodb_database).collection('USERCHAR');
-//     usersavedCollection = database.db(mongodb_database).collection('USERSAVED');
-//     userauthCollection = database.db(mongodb_database).collection('USERAUTH');
-// }
-// init();
-//********************************************************************************************* */
 
 app.use(express.urlencoded({
     extended: false
