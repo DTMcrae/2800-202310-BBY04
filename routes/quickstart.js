@@ -5,12 +5,15 @@ const OpenAI = require('../scripts/openai/openAI.js');
 const openAI = new OpenAI(process.env.OPENAI_KEY);
 const model = 'gpt-3.5-turbo';
 
-const types = ['', '', '', '', '', '', '', '', 'about a lost villager', 'about fighting bandit raiders', 'about fighting a gang of thugs', 'about a bounty hunt', 'about fighting goblins', 'about a magic portal', 'about defending a village', 'about stealing back an artifact', 'about a haunted mansion', 'about a separated couple', 'about a missing royal', 'about a rescue', 'about a heist', 'about a rivalry', 'about a journey', 'about an intruder', 'about a rebellion', 'about an artifact', 'about a prophecy', 'about a tournament', 'about an escape', 'about a hunt', 'about a treasure hunt', 'about strange magic', 'about a tower defense', 'about a lost cat', 'about BCIT'];
+const typesN = ['', '', '', '', '', '', '', '', 'about a lost villager', 'about fighting bandit raiders', 'about fighting a gang of thugs', 'about a bounty hunt', 'about fighting goblins', 'about a magic portal', 'about defending a village', 'about stealing back an artifact', 'about a haunted mansion', 'about a separated couple', 'about a missing royal', 'about a rescue', 'about a heist', 'about a rivalry', 'about a journey', 'about an intruder', 'about a rebellion', 'about an artifact', 'about a prophecy', 'about a tournament', 'about an escape', 'about a hunt', 'about a treasure hunt', 'about strange magic', 'about a tower defense', 'about a lost cat', 'about BCIT'];
+const typesB = ['', 'about time travel back to BCIT opening in 1969', 'about squeaky classroom chairs', 'about a campus coffee shortage', 'about an extremely long line at Tim Horton\'s', 'about loud noises at the BCIT library', 'about an overcrowded BCIT gym', 'about find a parking spot', 'about a lost student', 'about fighting a rival school', 'about fighting school bullies', 'about missing textbooks', 'about a cursed exam', 'about a magic portal', 'about defending the campus', 'about stealing back stolen documents', 'about a haunted building', 'about separated friends', 'about a team of students working on an AI project', 'about an Easter Egg mission', 'about AI', 'about a student imposter', 'about a rescue', 'about restoring power to campus', 'about cursed code', 'about rogue AI', 'about escaping a virtual reality program', 'about a cybersecurity breach', 'about a vanishing classroom', 'about a lost cat'];
+const bcitN = '';
+const bcitB = 'at BCIT';
 
 // The general story prompt asks for an adventure summary and event types
-const generateStoryPrompt = (randomType) => {
+const generateStoryPrompt = (randomType, bcit) => {
 
-    return `Imagine you are creating a detailed DnD adventure ${randomType}. Please provide the following details:
+    return `Imagine you are creating a detailed DnD adventure ${randomType} ${bcit}. Please provide the following details:
 
 - "Title": The title of the adventure.
 - "Summary": An overall summary of the adventure that describes the central conflict or goal. Please write the summary in three sentences. Leave the outcome a mystery to maintain the suspense.
@@ -41,11 +44,20 @@ router.use(express.static('images'));
 
 router.post('/generateStory', async (req, res) => {
     try {
+
+        if ('BCIT' == 'BCIT') {
+            types = typesB;
+            bcit = bcitB;
+        } else {
+            types = typesN;
+            bcit = bcitN;
+        }
+
         const randomIndex = Math.floor(Math.random() * types.length);
         const randomType = types[randomIndex];
         console.log('Story type: ', randomType);
 
-        const responseText = await openAI.generateText(generateStoryPrompt(randomType), model, 1600);
+        const responseText = await openAI.generateText(generateStoryPrompt(randomType, bcit), model, 1600);
 
         // Parse the text into a JSON object
         const responseObject = JSON.parse(responseText);
