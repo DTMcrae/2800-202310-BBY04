@@ -1,0 +1,19 @@
+<footer class="d-flex fixed-bottom">
+    <button class="btn btn-secondary w-100 p-3">Party</button>
+    <button class="btn btn-secondary w-100 p-3">Inventory</button>
+</footer>
+
+<script>
+    function setScroll() {
+        var element = document.getElementById("combat-text");
+
+        if(typeof element !== undefined && element != null) {
+            element.scrollTop += element.scrollHeight;
+        }
+    }
+    setTimeout(setScroll(), 10);
+</script>
+
+</body>
+
+</html>
