@@ -7,16 +7,6 @@ const model = 'gpt-3.5-turbo';
 
 const types = ['', '', '', '', '', '', '', '', 'about a lost villager', 'about fighting bandit raiders', 'about fighting a gang of thugs', 'about a bounty hunt', 'about fighting goblins', 'about a magic portal', 'about defending a village', 'about stealing back an artifact', 'about a haunted mansion', 'about a separated couple', 'about a missing royal', 'about a rescue', 'about a heist', 'about a rivalry', 'about a journey', 'about an intruder', 'about a rebellion', 'about an artifact', 'about a prophecy', 'about a tournament', 'about an escape', 'about a hunt', 'about a treasure hunt', 'about strange magic', 'about a tower defense', 'about a lost cat', 'about BCIT'];
 
-router.get('/', (req, res) => {
-    // Initialize summary and events in the session
-    req.session.summary = '';
-    for (let i = 1; i <= 8; i++) {
-      req.session[`event${i}`] = '';
-    }
-    req.session.currentEvent = 0;
-    res.render('quickstart', { currentEvent: req.session.currentEvent });
-});
-
 // The general story prompt asks for an adventure summary and event types
 const generateStoryPrompt = (randomType) => {
 
@@ -41,6 +31,11 @@ Please structure your response in the following format:
 }`;
 };
 
+const generateIntro = (summary, s_start) => {
+
+    return `Write me an introductory paragraph to our story in three sentences. The summary of the story is that ${summary}. Start the story in ${s_start} and do not talk about the conflict.`;
+};
+
 // This line serves static files from the 'images' directory
 router.use(express.static('images'));
 
@@ -50,7 +45,7 @@ router.post('/generateStory', async (req, res) => {
         const randomType = types[randomIndex];
         console.log('Story type: ', randomType);
 
-        const responseText = await openAI.generateText(generateStoryPrompt(randomType), model, 1200);
+        const responseText = await openAI.generateText(generateStoryPrompt(randomType), model, 1600);
 
         // Parse the text into a JSON object
         const responseObject = JSON.parse(responseText);
@@ -63,20 +58,62 @@ router.post('/generateStory', async (req, res) => {
         req.session.s_boss = responseObject.s_boss;
 
         req.session.events = {
-            "1": { "type": "Story_Intro", "json": false },
-            "2": { "type": "NPC_Quest", "json": false },
-            "3": { "type": "NPC_Q1", "json": false },
-            "4": { "type": "NPC_Q2", "json": false },
-            "5": { "type": "SkillCheck_prompt", "json": true },
-            "6": { "type": "SkillCheck_fail", "json": false },
-            "7": { "type": "SkillCheck_partial", "json": false },
-            "8": { "type": "SkillCheck_success", "json": false },
-            "9": { "type": "SkillCheck_full", "json": false },
-            "10": { "type": "Battle", "json": false },
-            "11": { "type": "Story_Event", "json": false },
-            "12": { "type": "Boss", "json": false },
+            "1": {
+                "type": "Story_Event",
+                "json": false
+            },
+            "2": {
+                "type": "NPC_Quest",
+                "json": false
+            },
+            "3": {
+                "type": "NPC_Q1",
+                "json": false
+            },
+            "4": {
+                "type": "NPC_Q2",
+                "json": false
+            },
+            "5": {
+                "type": "SkillCheck_prompt",
+                "json": true
+            },
+            "6": {
+                "type": "SkillCheck_fail",
+                "json": false
+            },
+            "7": {
+                "type": "SkillCheck_partial",
+                "json": false
+            },
+            "8": {
+                "type": "SkillCheck_success",
+                "json": false
+            },
+            "9": {
+                "type": "SkillCheck_full",
+                "json": false
+            },
+            "10": {
+                "type": "Battle",
+                "json": false
+            },
+            "11": {
+                "type": "Story_Event",
+                "json": false
+            },
+            "12": {
+                "type": "Boss",
+                "json": false
+            },
         };
-        
+
+        // sessionCollection.insertOne(req.session.summary);
+        // sessionCollection.insertOne(req.session.title);
+        // sessionCollection.insertOne(req.session.goal);
+        // sessionCollection.insertOne(req.session.s_start);
+        // sessionCollection.insertOne(req.session.s_boss);
+
 
         req.session.currentEvent = 1;
 
@@ -86,26 +123,38 @@ router.post('/generateStory', async (req, res) => {
         console.log('Current Event:', req.session.currentEvent);
         console.log('Start location:', req.session.s_start);
         console.log('Boss location:', req.session.s_boss);
-        
+
         res.render('quickstart', {
             title: req.session.title,
             summary: req.session.summary,
-            goal: req.session.goal,
-            currentEvent: req.session.currentEvent,
-            events: req.session.events,
-            s_start: req.session.s_start,
-            s_boss: req.session.s_boss,
+            intro: req.session.intro,
         });
-        
+
 
     } catch (error) {
         console.error(error);
-        res.status(500).send({ error: error.toString() });
+        res.status(500).send({
+            error: error.toString()
+        });
     }
 });
 
 router.post('/newGame', async (req, res) => {
-    res.redirect('/story');
+    try {
+        const introText = await openAI.generateText(generateIntro(req.session.summary, req.session.s_start), model, 800);
+        console.log(introText);
+        req.session.intro = introText;
+
+        // res.render('quickstart', {
+        //     intro: req.session.intro,
+        // });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({
+            error: error.toString()
+        });
+    }
 });
 
 

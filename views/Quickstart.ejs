@@ -7,9 +7,14 @@
 <div class="storygen">
 
     <div class="center">
+
+        <div id="spinner" style="display: none;">
+            <img src="/images/loading.gif" class="loading" alt="Loading...">
+        </div>
+        
         <% if (typeof summary !== 'undefined') { %>
-        <h2><%- title %></h2>
-        <p><%- summary %></p>
+        <h2 class="form-class"><%- title %></h2>
+        <p class="form-class"><%- summary %></p>
         <% } %>
 
         <form class="form-class" action="/quickstart/newGame" method="post">
@@ -27,10 +32,6 @@
             <button type="submit">Reroll Story</button>
             <% } %>
         </form>
-
-        <div id="spinner" style="display: none;">
-            <img src="../../loading.gif" alt="Loading...">
-        </div>
 
     </div>
 </div>
