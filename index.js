@@ -120,6 +120,10 @@ app.get('/characterSelectionEasterEgg', (req, res) => {
     res.render('characterSelectionEasterEgg');
 });
 
+app.get('/', (req, res) => {
+    res.render("userLoginScreen");
+});
+
 app.get('/characterSelected', async (req, res) => {
     try {
         const selectedCharacter = req.query.class;
@@ -491,6 +495,8 @@ app.get("*", (req, res) => {
     res.status(404);
     res.send("Page not found - 404");
 })
+
+
 
 app.listen(port, () => {
     console.log("Node application listening on port " + port);
