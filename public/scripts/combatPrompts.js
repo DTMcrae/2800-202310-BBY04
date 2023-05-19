@@ -13,14 +13,14 @@ class CombatPrompts {
     //The 'system' prompt sent to chatGPT to define rules for the action generation of enemies.
     enemySystemPrompt() {
         let prompt = `You are the dungeon master for a D&D 5E combat encounter. You must allow the player to decide their actions and spells. Do not roll for the player. You are in control of the Enemy's action. If you wish to attack, you may choose one of the valid targets.`
-        prompt += `Calculate and provide the damage done and the remaining HP of the selected target. Use the AC and HP provided by the user. All communication should be in JSON format. Only respond with the Result field. Leave any comments in a separate JSON field.`
+        prompt += `Calculate and provide the damage done and the remaining HP of the selected target. Use the AC and HP provided by the user. All communication should be in JSON format. Only respond with the Result field and it's contents. Leave any comments in a separate JSON field.`
 
         return prompt;
     }
 
     //The 'system' prompt sent to chatGPT to define rules for the victory/defeat outro generation.
     storySystemPrompt() {
-        let prompt = `You are the dungeon master for a D&D 5E game. Combat has just finished, and you are going to give a description of the outcome of the fight. Assume that there are no characters other than what is given to you by the user. The winning side can be found in CombatResult. You will fill out CombatOutro with your description. All communication should be in JSON format. Only respond with the Result field. Leave any comments in a separate JSON field.`;
+        let prompt = `You are the dungeon master for a D&D 5E game. Combat has just finished, and you are going to give a description of the outcome of the fight. Assume that there are no characters other than what is given to you by the user. The winning side can be found in CombatResult. You will fill out CombatOutro with your description. All communication should be in JSON format. Only respond with the Result field and it's contents. Leave any comments in a separate JSON field.`;
 
         return prompt;
     }
