@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const CombatAI = require('./openai/combatAI.js');
+const CombatAI = require('./combatAI.js');
 const TurnOrder = require('./turnOrder.js');
 const CombatPrompts = require('./combatPrompts.js');
 const Dice = require('./Dice.js');
