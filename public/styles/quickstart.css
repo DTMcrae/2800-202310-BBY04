@@ -10,7 +10,6 @@ h1 {
     justify-content: center;
     align-content: center;
     width: 100%;
-    height: 100%;
     color: white;
 }
 
@@ -24,6 +23,7 @@ h2 {
 
 p {
     color: #FFF;
+    font-size: 0.8em;
 }
 
 .storygen {
@@ -39,6 +39,13 @@ p {
 	right: 10vw;
 	height: 50vh;
 	margin-top: -25vh;
+}
+
+.loading {
+    width: 100%;
+    height: 100%;
+    margin: auto;
+    display: block;
 }
 
 button {
