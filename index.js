@@ -39,6 +39,8 @@ const mailgun_api_secret = process.env.MAILGUN_API_SECRET;
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'))
 
+app.use('/scripts', express.static("public/scripts"));
+
 const {
     connectToDatabase
 } = include('databaseConnection');
@@ -47,13 +49,19 @@ let userCollection;
 async function init() {
     const database = await connectToDatabase();
     userCollection = database.db(mongodb_database).collection('USERAUTH');
+    // console.log("database connection:", {
+    //     serverConfig: userCollection.s.serverConfig,
+    //     options: userCollection.s.options
+    // });
 }
 
 init();
+
+
 app.use(express.urlencoded({
     extended: false
 }));
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 
 var mongoStore = MongoStore.create({
     mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
@@ -62,18 +70,25 @@ var mongoStore = MongoStore.create({
     }
 })
 
+app.use(express.static(__dirname + '/public'));
+
 app.use(session({
     secret: node_session_secret,
-    store: mongoStore,
     saveUninitialized: false,
     resave: true
 }));
 
-app.get('/', (req, res) => {
-    res.render("userLoginScreen");
-});
+const {
+    Configuration,
+    OpenAIApi
+} = require("openai");
 
 app.get('/LandingScreen', async (req, res) => {
+    if (!req.session.authenticated) {
+        res.redirect('/userLoginScreen');
+        return;
+    }
+
     const usersName = req.session.name;
     const userID = req.session.userID;
 
@@ -83,45 +98,15 @@ app.get('/LandingScreen', async (req, res) => {
     });
 });
 
-app.get('/nosql-injection', async (req, res) => {
-    var username = req.query.user;
-
-    if (!username) {
-        res.send(`<h3>No user provided - try /nosql-injection?user=name</h3> <h3>or /nosql-injection?user[$ne]=name</h3>`);
-        return;
-    }
-
-    const schema = Joi.string().max(20).required();
-    const validationResult = schema.validate(username);
-
-    if (validationResult.error != null) {
-        console.log(validationResult.error);
-        res.render('nosql-injection', {
-            errorMessage: 'A NoSQL injection attack was detected!'
-        });
-        return;
-    }
-
-    const result = await userCollection.find({
-        username: username
-    }).project({
-        username: 1,
-        password: 1,
-        _id: 1
-    }).toArray();
-
-    console.log(result);
-
-    res.render('nosql-injection', {
-        result
-    });
-});
-
 app.get('/userSignupScreen', (req, res) => {
     res.render('userSignupScreen');
 });
 
 app.get('/userLoginScreen', (req, res) => {
+    if (req.session.authenticated) {
+        res.redirect('/LandingScreen');
+        return;
+    }
     res.render('userLoginScreen');
 });
 
@@ -133,20 +118,115 @@ app.get('/passwordReset', (req, res) => {
     res.render('passwordReset');
 });
 
+app.get('/characterSelection', (req, res) => {
+    res.render('characterSelection');
+});
+
+app.get('/characterSelectionEasterEgg', (req, res) => {
+    res.render('characterSelectionEasterEgg');
+});
+
+app.get('/', (req, res) => {
+    if(req.session.authenticated) {
+        res.redirect('/LandingScreen');
+        return;
+    }
+    res.render("userLoginScreen");
+});
+
+app.get('/characterSelected', async (req, res) => {
+    try {
+        const selectedCharacter = req.query.class;
+        const database = await connectToDatabase();
+        const dbo = database.db(mongodb_database).collection('CLASSES');
+
+        const characterData = await dbo.findOne({
+            Class: selectedCharacter,
+            Level: 1
+        });
+
+        req.session.selectedClass = selectedCharacter;
+
+        if (characterData) {
+            res.render('characterSelected', {
+                characterData
+            }); // Pass characterData as a local variable
+        } else {
+            res.status(404).json({
+                error: 'Character not found'
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching character data:', error);
+        res.status(500).json({
+            error: 'Internal Server Error'
+        });
+    }
+});
+
+app.post('/saveCharacter', async (req, res) => {
+
+    const database = await connectToDatabase();
+    const dbo = database.db(mongodb_database).collection('USERCHAR');
+
+    const characterStats = req.body;
+
+    console.log('Saving character:', characterStats);
+
+    dbo.insertOne(characterStats, (err, result) => {
+        if (err) {
+            console.error('Error saving character:', err);
+            res.sendStatus(500);
+        } else {
+            console.log('Character saved successfully');
+            res.sendStatus(200);
+        }
+    });
+});
+
 app.get('/userInfo', async (req, res) => {
     const userId = req.session.userID;
-  
+
     // Fetch user data from MongoDB based on the provided ID
-    const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+    const user = await userCollection.findOne({
+        _id: new ObjectId(userId)
+    });
 
     if (!user) {
-      return res.status(404).send('User not found');
+        return res.status(404).send('User not found');
     }
-  
+
     // Render the userInfo.ejs view and pass the user object
-    res.render('userInfo', { user });
-  });
-  
+    res.render('userInfo', {
+        user
+    });
+});
+
+// Story Generation
+app.get('/Quickstart', (req, res) => {
+    res.render('Quickstart');
+});
+
+const quickstart = require('./routes/quickstart');
+
+// Story Initialization Middleware
+app.use((req, res, next) => {
+    if (typeof req.session.summary === 'undefined') {
+        req.session.summary = '';
+    }
+    for (let i = 1; i <= 12; i++) {
+        if (typeof req.session[`event${i}`] === 'undefined') {
+            req.session[`event${i}`] = '';
+        }
+    }
+    if (typeof req.session.currentEvent === 'undefined') {
+        req.session.currentEvent = 0;
+    }
+    next();
+});
+
+// Generates Story Pages
+app.use('/quickstart', quickstart);
 
 app.post('/submitUser', async (req, res) => {
     var name = req.body.name;
@@ -186,6 +266,15 @@ app.post('/submitUser', async (req, res) => {
         type: 'user'
     });
     console.log("Inserted user");
+
+    const result = await userCollection.find({
+        email: email
+    }).project({
+        type: 1,
+        password: 1,
+        _id: 1,
+        name: 1
+    }).toArray();
 
     // Store the user's name and username in the session
     req.session.authenticated = true;
@@ -273,6 +362,10 @@ app.post('/logout', (req, res) => {
         res.redirect('/userLoginScreen');
     });
 });
+
+const combat = require('./public/scripts/combatManager')
+
+app.use("/combat", combat);
 
 // Forget password Begin
 
@@ -404,6 +497,8 @@ app.get("*", (req, res) => {
     res.status(404);
     res.send("Page not found - 404");
 })
+
+
 
 app.listen(port, () => {
     console.log("Node application listening on port " + port);

@@ -1,0 +1,15 @@
+<%- include("templates/combatHeader") %>
+<%- include("templates/combatBodyStart") %>
+
+<% if(typeof targets !=='undefined') {%>
+<div class="options d-flex fixed-bottom flex-column pb-5 mb-4 ml-auto mr-auto" style="max-width: 25rem;">
+<p class="text-center">Select a Target</p>
+<% for(var x = 0; x < targets.length; x++) { %>
+    <form action='/combat/selectTarget/<%- targets[x].name %>' method="post">
+        <button class="btn btn-secondary p-2 mb-2" style="width:25rem" type="submit"><%- targets[x].name %></button>
+    </form>
+<% } %>
+</div>
+<% } %>                             
+
+<%- include("templates/combatBodyEnd") %>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DnD Level Up</title>
+    </head>
+    <body>
+        <h1>Character: <%= characterData.name %></h1>
+        <p>Current Level: <%= characterData.currentLevel %></p>
+        <p>Next Level: <%= characterData.currentLevel + 1 %></p>
+        
+        <h2>Skill Options:</h2>
+        <ul>
+            <% for(let skill of skillOptions) { %>
+                <li><%= skill %></li>
+            <% } %>
+        </ul>
+
+        <% if(characterData.currentLevel === 1) { %>
+            <h2>Subclass Options:</h2>
+            <ul>
+                <% for(let subclass of subclassOptions) { %>
+                    <li><%= subclass %></li>
+                <% } %>
+            </ul>
+        <% } else { %>
+            <h2>Subclass Details:</h2>
+            <p><%= characterData.subclass %></p>
+        <% } %>
+    </body>
+</html>

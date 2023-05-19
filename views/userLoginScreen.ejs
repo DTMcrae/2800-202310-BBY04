@@ -23,9 +23,11 @@
 <script>
   const loginButton = document.querySelector('#login-button');
   const loginForm = document.querySelector('.login-form');
+  if(loginButton != null) {
   loginButton.addEventListener('click', () => {
     loginForm.style.display = 'block';
   });
+}
 </script>
 
 <%- include("templates/footer") %>

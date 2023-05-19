@@ -1,0 +1,85 @@
+<%- include("templates/combatHeader") %>
+<%- include("templates/combatBodyStart") %>
+
+    <div class="options d-flex fixed-bottom flex-column pb-5 mb-4 align-items-center">
+        <% if(combat.status) { %>
+                <% if(combat.playerVictory) { %>
+                    <p>You stand victorious.</p>
+                    <form action='/combat/victory' method="post">
+                        <button class="btn btn-secondary p-2 mb-2" style="width:25rem" type="submit">Continue</button>
+                    </form>
+                <% } else { %>
+                    <p>Your vision begins to fade...</p>
+                    <form action='/combat/defeat' method="post">
+                        <button class="btn btn-secondary p-2 mb-2" style="width:25rem" type="submit">Continue</button>
+                    </form>
+                <% }%>
+        <% } else if(typeof isPlayer !=='undefined' && typeof actor !=='undefined') {%>%>
+            <p>It is now <%- actor.name %>'s turn.</p>
+        <% if(isPlayer) { %>
+            <% if(actor.actions.length <= 3) { %>
+        <% for(var x = 0; x < actor.actions.length; x++) { %>
+            <form action='/combat/selectAction/<%- actor.name %>=<%- x %>' method="post">
+                <button class="btn btn-secondary p-2 mb-2" style="width:25rem" type="submit"><%- actor.actions[x].name %></button>
+            </form>
+        <% } %>
+
+        <% } else { %>
+            <% for(var x=0; x < 2; x++) { %>
+                <form action='/combat/selectAction/<%- actor.name %>=<%- x %>' method="post">
+                    <button class="btn btn-secondary p-2 mb-2" style="width:25rem" type="submit"><%- actor.actions[x].name%></button>
+                </form>
+                <% } %>
+                <button class="btn btn-secondary p-2 mb-2" style="width:25rem" id="displayActions" type="button">More</button>
+            <% } %>
+        <% } else { %>
+            <form action='/combat/generateAction/<%- actor.name %>' method="post">
+                <button class="btn btn-secondary p-2 mb-2" style="width:25rem" type="submit">Continue</button>
+            </form>
+            <% } %>
+        <% } %>
+    </div>
+
+    <% if(typeof isPlayer !=='undefined' && typeof actor !=='undefined') { %>
+        <% if(isPlayer) { %>
+    <!-- If too many actions are available, display them in a modal -->
+    <div class="modal fade" id="actionModal" tabindex="-1" role="dialog" aria-labelledby="diceModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="diceModalLongTitle">Available Actions</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true" style="color:white">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body overflow-auto" style="max-height: 20rem;">
+                    <% for(var x=0; x < actor.actions.length; x++) { %>
+                        <form action='/combat/selectAction/<%- actor.name %>=<%- x %>' method="post">
+                            <button class="btn btn-secondary p-2 mb-2" style="width:100%;" type="submit"><%-
+                                    actor.actions[x].name %></button>
+                        </form>
+                        <% } %>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <% } %>
+    <% } %>
+
+    <script>
+        function init() {
+            const displayModal = document.getElementById('displayActions');
+            if(typeof displayModal !== undefined && displayModal != null) {
+                displayModal.addEventListener('click', () => {
+                    $('#actionModal').modal("show");
+                });
+            }
+        }
+        init();
+    </script>
+
+<%- include("templates/combatBodyEnd") %>

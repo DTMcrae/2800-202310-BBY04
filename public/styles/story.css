@@ -1,0 +1,77 @@
+@media (max-width: 600px) {
+    body {
+        background-image: url(../images/passwordResetConfirmationScreen.png);
+        overflow-y: auto;
+    }
+}
+
+h1 {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    color: white;
+}
+
+h2 {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    color: #CCC;
+}
+
+p {
+    color: #FFF;
+    font-size: 0.9em;
+}
+
+.storygen {
+    background-color: rgba(0, 0, 0, 0.75);
+    height: 350px;
+    position: relative;
+}
+
+.center {
+	position: absolute;
+	top: 50%;
+	left: 10vw;
+	right: 10vw;
+	height: 50vh;
+	margin-top: -25vh;
+}
+
+button {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    width: 60%;
+    height: 60%;
+    margin: 0 auto;
+}
+
+.buttonContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+    "backButton confirmButton";
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    height: 100%;
+    gap: 30px;
+}
+
+.backButton, .confirmButton {
+    overflow: hidden;
+    white-space: wrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    height: 100%;
+    font-weight: bold;
+    color: black;
+  }
+  
+  .buttonLink {
+    text-decoration: none;
+}
