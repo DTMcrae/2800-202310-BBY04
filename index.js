@@ -67,21 +67,6 @@ async function init() {
 
 init();
 
-//Copy paste this to get access to the collections in mydnd
-// module.exports = {
-//     classesCollection,
-//     equipmentCollection,
-//     levelCollection,
-//     monstersCollection,
-//     npcCollection,
-//     partymemCollection,
-//     scenarioCollection,
-//     sessionCollection,
-//     spellsCollection,
-//     usercharCollection,
-//     usersavedCollection,
-//     userauthCollection
-// }
 
 app.use(express.urlencoded({
     extended: false

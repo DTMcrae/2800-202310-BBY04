@@ -7,19 +7,39 @@ const mongodb_password = process.env.mongodb_password;
 const MongoClient = require("mongodb").MongoClient;
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true`;
 var database = new MongoClient(atlasURI, {useNewUrlParser: true, useUnifiedTopology: true});
+let db;
 
-const classesCollection = db.collection('CLASSES');
-const equipmentCollection = db.collection('EQUIPMENT');
-const levelCollection = db.collection('LEVEL');
-const monstersCollection = db.collection('MONSTERS');
-const npcCollection = db.collection('NPC');
-const partymemCollection = db.collection('PARTYMEM');
-const scenarioCollection = db.collection('SCENARIO');
-const sessionCollection = db.collection('SESSION');
-const spellsCollection = db.collection('SPELLS');
-const usercharCollection = db.collection('USERCHAR');
-const usersavedCollection = db.collection('USERSAVED');
-const userauthCollection = db.collection('USERAUTH');
+client.connect(err => {
+    if (err) throw err;
+    db = client.db('MYDND');
+});
+
+const getClassesCollection = () => db.collection('CLASSES');
+const getEquipmentCollection = () => db.collection('EQUIPMENT');
+const getLevelCollection = () => db.collection('LEVEL');
+const getMonstersCollection = () => db.collection('MONSTERS');
+const getNpcCollection = () => db.collection('NPC');
+const getPartymemCollection = () => db.collection('PARTYMEM');
+const getScenarioCollection = () => db.collection('SCENARIO');
+const getSessionCollection = () => db.collection('SESSION');
+const getSpellsCollection = () => db.collection('SPELLS');
+const getUsercharCollection = () => db.collection('USERCHAR');
+const getUsersavedCollection = () => db.collection('USERSAVED');
+const getUserauthCollection = () => db.collection('USERAUTH');
 
 
-module.exports = {database};
+module.exports = {
+    database,
+    getClassesCollection,
+    getEquipmentCollection,
+    getLevelCollection,
+    getMonstersCollection,
+    getNpcCollection,
+    getPartymemCollection,
+    getScenarioCollection,
+    getSessionCollection,
+    getSpellsCollection,
+    getUsercharCollection,
+    getUsersavedCollection,
+    getUserauthCollection
+};
