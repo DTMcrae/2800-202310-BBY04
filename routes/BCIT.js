@@ -5,17 +5,7 @@ const OpenAI = require('../scripts/openai/openAI.js');
 const openAI = new OpenAI(process.env.OPENAI_KEY);
 const model = 'gpt-3.5-turbo';
 
-const types = ['', '', '', '', '', '', '', '', 'about a lost student', 'about fighting a rival school', 'about fighting school bullies', 'about missing textbooks', 'about a cursed exam', 'about a magic portal', 'about defending the campus', 'about stealing back stolen documents', 'about a haunted building', 'about a separated couple', 'about a student imposter', 'about a rescue', 'about restoring power to campus', 'about a lost cat'];
-
-router.get('/', (req, res) => {
-    // Initialize summary and events in the session
-    req.session.summary = '';
-    for (let i = 1; i <= 8; i++) {
-      req.session[`event${i}`] = '';
-    }
-    req.session.currentEvent = 0;
-    res.render('BCIT', { currentEvent: req.session.currentEvent });
-});
+const types = ['', 'about time travel back to BCIT opening in 1969', 'about squeaky classroom chairs', 'about a campus coffee shortage', 'about an extremely long line at Tim Horton\'s', 'about loud noises at the BCIT library', 'about an overcrowded BCIT gym', 'about find a parking spot', 'about a lost student', 'about fighting a rival school', 'about fighting school bullies', 'about missing textbooks', 'about a cursed exam', 'about a magic portal', 'about defending the campus', 'about stealing back stolen documents', 'about a haunted building', 'about separated friends', 'about a team of students working on an AI project', 'about an Easter Egg mission', 'about AI', 'about a student imposter', 'about a rescue', 'about restoring power to campus', 'about cursed code', 'about rogue AI', 'about escaping a virtual reality program', 'about a cybersecurity breach', 'about a vanishing classroom', 'about a lost cat'];
 
 // The general story prompt asks for an adventure summary and event types
 const generateStoryPrompt = (randomType) => {
@@ -50,7 +40,7 @@ router.post('/generateStory', async (req, res) => {
         const randomType = types[randomIndex];
         console.log('Story type: ', randomType);
 
-        const responseText = await openAI.generateText(generateStoryPrompt(randomType), model, 1200);
+        const responseText = await openAI.generateText(generateStoryPrompt(randomType), model, 1000);
 
         // Parse the text into a JSON object
         const responseObject = JSON.parse(responseText);
@@ -105,7 +95,17 @@ router.post('/generateStory', async (req, res) => {
 });
 
 router.post('/newGame', async (req, res) => {
-    res.redirect('/story');
+    try {
+        const introText = await openAI.generateText(generateIntro(req.session.summary, req.session.s_start), model, 800);
+        console.log(introText);
+        req.session.intro = introText;
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({
+            error: error.toString()
+        });
+    }
 });
 
 

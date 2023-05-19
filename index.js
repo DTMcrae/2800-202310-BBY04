@@ -1,26 +1,11 @@
 require("./utils.js");
-
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const ObjectId = require('mongodb').ObjectId;
-const bcrypt = require('bcrypt');
-const saltRounds = 12;
 const path = require('path');
-
-// forget password modules
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const nodemailer = require('nodemailer');
-const crypto = require('crypto');
-
-
-const port = process.env.PORT || 3000;
-
+const port =  3000;
 const app = express();
-
-const Joi = require("joi");
 
 const expireTime = 24 * 60 * 60 * 1000;
 
@@ -36,6 +21,9 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 const mailgun_api_secret = process.env.MAILGUN_API_SECRET;
 /* END secret section */
 
+var {database} = require('./databaseConnection');
+
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'))
 
@@ -44,18 +32,45 @@ app.use('/scripts', express.static("public/scripts"));
 const {
     connectToDatabase
 } = include('databaseConnection');
-let userCollection;
+
+// Define collections
+let classesCollection;
+let equipmentCollection;
+let levelCollection;
+let monstersCollection;
+let npcCollection;
+let partymemCollection;
+let scenarioCollection;
+let sessionCollection;
+let spellsCollection;
+let usercharCollection;
+let usersavedCollection;
+let userauthCollection;
 
 async function init() {
     const database = await connectToDatabase();
+
+    // Initialize collections
+    classesCollection = database.db(mongodb_database).collection('CLASSES');
+    equipmentCollection = database.db(mongodb_database).collection('EQUIPMENT');
+    levelCollection = database.db(mongodb_database).collection('LEVEL');
     userCollection = database.db(mongodb_database).collection('USERAUTH');
-    // console.log("database connection:", {
-    //     serverConfig: userCollection.s.serverConfig,
-    //     options: userCollection.s.options
-    // });
+    savedCollection = database.db(mongodb_database).collection('USERSAVED');
+    monstersCollection = database.db(mongodb_database).collection('MONSTERS');
+    scenarioCollection = database.db(mongodb_database).collection('SCENARIO');
+    npcCollection = database.db(mongodb_database).collection('NPC');
+    partymemCollection = database.db(mongodb_database).collection('PARTYMEM');
+    scenarioCollection = database.db(mongodb_database).collection('SCENARIO');
+    sessionCollection = database.db(mongodb_database).collection('SESSION');
+    spellsCollection = database.db(mongodb_database).collection('SPELLS');
+    usercharCollection = database.db(mongodb_database).collection('USERCHAR');
+    usersavedCollection = database.db(mongodb_database).collection('USERSAVED');
+    userauthCollection = database.db(mongodb_database).collection('USERAUTH');
+
 }
 
 init();
+
 
 app.use(express.urlencoded({
     extended: false
@@ -72,15 +87,12 @@ var mongoStore = MongoStore.create({
 app.use(express.static(__dirname + '/public'));
 
 app.use(session({
-    secret: node_session_secret,
-    store: mongoStore,
+    secret: node_session_secert,
     saveUninitialized: false,
     resave: true
 }));
 
-app.get('/', (req, res) => {
-    res.render("userLoginScreen");
-});
+const { Configuration, OpenAIApi } = require("openai");
 
 app.get('/LandingScreen', async (req, res) => {
     const usersName = req.session.name;
@@ -89,40 +101,6 @@ app.get('/LandingScreen', async (req, res) => {
     res.render("LandingScreen", {
         user: usersName,
         userId: userID,
-    });
-});
-
-app.get('/nosql-injection', async (req, res) => {
-    var username = req.query.user;
-
-    if (!username) {
-        res.send(`<h3>No user provided - try /nosql-injection?user=name</h3> <h3>or /nosql-injection?user[$ne]=name</h3>`);
-        return;
-    }
-
-    const schema = Joi.string().max(20).required();
-    const validationResult = schema.validate(username);
-
-    if (validationResult.error != null) {
-        console.log(validationResult.error);
-        res.render('nosql-injection', {
-            errorMessage: 'A NoSQL injection attack was detected!'
-        });
-        return;
-    }
-
-    const result = await userCollection.find({
-        username: username
-    }).project({
-        username: 1,
-        password: 1,
-        _id: 1
-    }).toArray();
-
-    console.log(result);
-
-    res.render('nosql-injection', {
-        result
     });
 });
 
@@ -144,6 +122,10 @@ app.get('/passwordReset', (req, res) => {
 
 app.get('/characterSelection', (req, res) => {
     res.render('characterSelection');
+});
+
+app.get('/characterSelectionEasterEgg', (req, res) => {
+    res.render('characterSelectionEasterEgg');
 });
 
 app.get('/characterSelected', async (req, res) => {
@@ -217,10 +199,32 @@ app.get('/Quickstart', (req, res) => {
     res.render('Quickstart');
 });
 
-// Story Gen BCIT Easter Egg
 app.get('/BCIT', (req, res) => {
     res.render('BCIT');
 });
+
+const quickstart = require('./routes/quickstart');
+const BCIT = require('./routes/BCIT');
+
+// Story Initialization Middleware
+app.use((req, res, next) => {
+    if (typeof req.session.summary === 'undefined') {
+      req.session.summary = '';
+    }
+    for (let i = 1; i <= 12; i++) {
+      if (typeof req.session[`event${i}`] === 'undefined') {
+        req.session[`event${i}`] = '';
+      }
+    }
+    if (typeof req.session.currentEvent === 'undefined') {
+      req.session.currentEvent = 0;
+    }
+    next();
+});
+
+// Generates Story Pages
+app.use('/quickstart', quickstart);
+app.use('/BCIT', BCIT);
 
 app.post('/submitUser', async (req, res) => {
     var name = req.body.name;
@@ -495,27 +499,3 @@ app.get("*", (req, res) => {
 app.listen(port, () => {
     console.log("Node application listening on port " + port);
 });
-
-// For story generation
-const quickstart = require('./routes/quickstart');
-const BCIT = require('./routes/BCIT');
-
-// Story Initialization Middleware
-app.use((req, res, next) => {
-    if (typeof req.session.summary === 'undefined') {
-      req.session.summary = '';
-    }
-    for (let i = 1; i <= 4; i++) {
-      if (typeof req.session[`event${i}`] === 'undefined') {
-        req.session[`event${i}`] = '';
-      }
-    }
-    if (typeof req.session.currentEvent === 'undefined') {
-      req.session.currentEvent = 0;
-    }
-    next();
-});
-
-// Generates Story Pages
-app.use('/quickstart', quickstart);
-app.use('/BCIT', BCIT);
