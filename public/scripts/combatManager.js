@@ -11,8 +11,8 @@ const model = 'gpt-3.5-turbo';
 const mainPage = 'combat';
 
 //Preset enemy and player information for testing.
-const presetPlayers = [{ name: "Draeven", class: "Ranger", hp: 11, ac: 12, actions: [{ name: "Greatbow" }, { name: "Dagger" }] }, { name: "Asha", class: "Rogue", hp: 9, ac: 11, actions: [{ name: "Dual Daggers" }, { name: "Shortbow" }] }];
-const presetEnemies = [{ name: "Goblin 1", hp: 6, ac: 8, desc: "A goblin wielding a dagger." }, { name: "Goblin 2", hp: 6, ac: 8, desc: "A goblin wielding a bow." }];
+function presetPlayers() { return [{ name: "Draeven", class: "Ranger", maxHP: 10, hp: 10, ac: 12, gold: 0, actions: [{ name: "Greatbow" }, { name: "Dagger" }, { name: "Axe" }, { name: "Quarterstaff" }] }, { name: "Asha", class: "Rogue", maxHP: 12, hp: 12, ac: 11, actions: [{ name: "Dual Daggers" }, { name: "Crossbow" }, { name: "Sneak Attack" }]}] }
+function presetEnemies() { return [{ name: "Goblin 1", hp: 7, ac: 9, desc: "A goblin wielding a dagger." }, { name: "Goblin 2", hp: 7, ac: 9, desc: "A goblin wielding a bow." }] }
 var players = [];
 var enemies = [];
 
@@ -31,8 +31,8 @@ router.get('/', (req, res) => {
     var actors = [];
     
     //Assign the preset players/enemies
-    players = presetPlayers;
-    enemies = presetEnemies;
+    players = presetPlayers();
+    enemies = presetEnemies();
     
     //Roll initiative for each player
     players.forEach(player => {
@@ -52,7 +52,7 @@ router.get('/', (req, res) => {
     initiative.assignNew(actors);
     var currentActor = initiative.currentTurn();
     this.combatEnded = false;
-    res.render('combat', { player: players.includes(currentActor), actor: currentActor, combat: combatStatus() });
+    res.render('combat', { players: players, isPlayer: players.includes(currentActor), actor: currentActor, combat: combatStatus() });
 });
 
 //Process and save the damage the player deals to an enemy.
@@ -150,8 +150,15 @@ router.post("/victory", async (req,res) => {
     let response = await openAI.generateResponse(prompts.storySystemPrompt(), prompts.combatVictoryPrompt(players, enemies, req.session.history), 600, 0.95);
     let data = JSON.parse(response);
 
+    var outro;
+
+    if (data.Result !== undefined) outro = data.Result.CombatOutro;
+    else outro = data.CombatOutro;
+
     res.render("combatVictory", {
-        summary: data.Result.CombatOutro
+        summary: outro,
+        players: players,
+        isPlayer: true
     })
 });
 
@@ -160,8 +167,15 @@ router.post("/defeat", async (req, res) => {
     let response = await openAI.generateResponse(prompts.storySystemPrompt(), prompts.combatDefeatPrompt(players, enemies, req.session.history), 600, 0.95);
     let data = JSON.parse(response);
 
+    var outro;
+
+    if(data.Result !== undefined) outro = data.Result.CombatOutro;
+    else outro = data.CombatOutro;
+
     res.render("combatDefeat", {
-        summary: data.Result.CombatOutro
+        summary: outro,
+        players: players, 
+        isPlayer: true
     })
 });
 
@@ -175,6 +189,9 @@ router.post("/selectAction/:action", async (req, res) => {
 
     res.render('target', {
         targets: getActiveEnemies(),
+        history: req.session.history,
+        players: players,
+        isPlayer: true
     });
 });
 
@@ -194,7 +211,10 @@ router.post("/selectTarget/:target", async (req, res) => {
 
     res.render('diceRoll', {
         Dice: roll[1],
-        Amount: roll[0]
+        Amount: roll[0],
+        history: req.session.history,
+        players: players,
+        isPlayer: true
     });
 });
 
@@ -213,7 +233,8 @@ router.post('/generatePlayerAction/:roll', async(req,res) => {
         res.render('combat', {
             actions: [{ Action: `It is not ${actor}'s turn yet` }],
             history: req.session.history,
-            player: friendly,
+            players: players, 
+            isPlayer: friendly,
             actor: current,
             combat: combatStatus()
         });
@@ -252,7 +273,8 @@ router.post('/generatePlayerAction/:roll', async(req,res) => {
         //Render the page, using the received information from chatGPT.
         res.render('combat', {
             history: req.session.history,
-            player: isActorFriendly(initiative.currentTurn()),
+            players: players,
+            isPlayer: isActorFriendly(initiative.currentTurn()),
             actor: initiative.currentTurn(),
             combat: combatStatus()
         });
@@ -301,7 +323,8 @@ router.post('/generateAction/:actor', async (req, res) => {
         //Render the page, using the received information from chatGPT.
         res.render('combat', {
             history: req.session.history,
-            player: isActorFriendly(initiative.currentTurn()),
+            players: players,
+            isPlayer: isActorFriendly(initiative.currentTurn()),
             actor: initiative.currentTurn(),
             combat: combatStatus()
         });
