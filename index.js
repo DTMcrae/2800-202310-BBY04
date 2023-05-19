@@ -354,13 +354,9 @@ app.post('/logout', (req, res) => {
     });
 });
 
-app.get('/combat', (req, res) => {
-    if (!req.session.authenticated) {
-        res.redirect("/userLoginScreen");
-        return;
-    }
-    res.render("combat");
-});
+const combat = require('./public/scripts/combatManager')
+
+app.use("/combat", combat);
 
 // Forget password Begin
 
@@ -485,10 +481,6 @@ app.post('/reset/:token', async (req, res) => {
 
 
 // Forget password End
-
-const combat = require('./public/scripts/combatManager')
-
-app.use("/combat", combat);
 
 app.use(express.static(__dirname + "/public"));
 
