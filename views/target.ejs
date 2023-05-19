@@ -1,26 +1,15 @@
-<%- include("templates/headerStart") %>
-<%- include("templates/headerEnd") %>
-
-<% if (typeof current !=='undefined' ) { %>
-    <h3>Current Action:</h3>
-    <% for(var x = 0; x < current.length; x++) {%>
-        <p><%- current[x].Action %></p>
-        <% if (typeof damage !=='undefined') {%>
-            <% if(damage[x].amount !== 'undefined' && damage[x].amount > 0) {%>
-                <p><%- damage[x].text%></p>
-            <% } %>
-        <% } %>
-    <% } %> 
-<%}%>
+<%- include("templates/combatHeader") %>
+<%- include("templates/combatBodyStart") %>
 
 <% if(typeof targets !=='undefined') {%>
-<div id="userOptions"></div>
-<h2>Select a Target</h2>
+<div class="options d-flex fixed-bottom flex-column pb-5 mb-4 ml-auto mr-auto" style="max-width: 25rem;">
+<p class="text-center">Select a Target</p>
 <% for(var x = 0; x < targets.length; x++) { %>
     <form action='/combat/selectTarget/<%- targets[x].name %>' method="post">
-        <button type="submit"><%- targets[x].name %></button>
+        <button class="btn btn-secondary p-2 mb-2" style="width:25rem" type="submit"><%- targets[x].name %></button>
     </form>
 <% } %>
+</div>
 <% } %>                             
 
-<%- include("templates/footer") %>
+<%- include("templates/combatBodyEnd") %>
