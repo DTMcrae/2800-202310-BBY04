@@ -3,7 +3,7 @@ const {
     OpenAIApi
 } = require('openai');
 
-class OpenAI {
+class CombatAI {
     constructor(apiKey) {
         // Create the Configuration and OpenAIApi instances
         this.openai = new OpenAIApi(new Configuration({
@@ -67,4 +67,4 @@ class OpenAI {
     }
 }
 
-module.exports = OpenAI;
+module.exports = CombatAI;
