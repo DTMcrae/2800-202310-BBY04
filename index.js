@@ -36,6 +36,9 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 const mailgun_api_secret = process.env.MAILGUN_API_SECRET;
 /* END secret section */
 
+//creating the required databases
+
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'))
 
@@ -49,6 +52,9 @@ let userCollection;
 async function init() {
     const database = await connectToDatabase();
     userCollection = database.db(mongodb_database).collection('USERAUTH');
+    savedCollection = database.db(mongodb_database).collection('USERSAVED');
+    monstersCollection = database.db(mongodb_database).collection('MONSTERS');
+    scenarioCollection = database.db(mongodb_database).collection('SCENARIO');
     // console.log("database connection:", {
     //     serverConfig: userCollection.s.serverConfig,
     //     options: userCollection.s.options
@@ -220,10 +226,32 @@ app.get('/Quickstart', (req, res) => {
     res.render('Quickstart');
 });
 
-// Story Gen BCIT Easter Egg
 app.get('/BCIT', (req, res) => {
     res.render('BCIT');
 });
+
+const quickstart = require('./routes/quickstart');
+const BCIT = require('./routes/BCIT');
+
+// Story Initialization Middleware
+app.use((req, res, next) => {
+    if (typeof req.session.summary === 'undefined') {
+      req.session.summary = '';
+    }
+    for (let i = 1; i <= 12; i++) {
+      if (typeof req.session[`event${i}`] === 'undefined') {
+        req.session[`event${i}`] = '';
+      }
+    }
+    if (typeof req.session.currentEvent === 'undefined') {
+      req.session.currentEvent = 0;
+    }
+    next();
+});
+
+// Generates Story Pages
+app.use('/quickstart', quickstart);
+app.use('/BCIT', BCIT);
 
 app.post('/submitUser', async (req, res) => {
     var name = req.body.name;
@@ -494,27 +522,3 @@ app.get("*", (req, res) => {
 app.listen(port, () => {
     console.log("Node application listening on port " + port);
 });
-
-// For story generation
-const quickstart = require('./routes/quickstart');
-const BCIT = require('./routes/BCIT');
-
-// Story Initialization Middleware
-app.use((req, res, next) => {
-    if (typeof req.session.summary === 'undefined') {
-      req.session.summary = '';
-    }
-    for (let i = 1; i <= 4; i++) {
-      if (typeof req.session[`event${i}`] === 'undefined') {
-        req.session[`event${i}`] = '';
-      }
-    }
-    if (typeof req.session.currentEvent === 'undefined') {
-      req.session.currentEvent = 0;
-    }
-    next();
-});
-
-// Generates Story Pages
-app.use('/quickstart', quickstart);
-app.use('/BCIT', BCIT);
