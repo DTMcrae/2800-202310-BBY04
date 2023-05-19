@@ -195,12 +195,7 @@ app.get('/Quickstart', (req, res) => {
     res.render('Quickstart');
 });
 
-app.get('/BCIT', (req, res) => {
-    res.render('BCIT');
-});
-
 const quickstart = require('./routes/quickstart');
-const BCIT = require('./routes/BCIT');
 
 // Story Initialization Middleware
 app.use((req, res, next) => {
@@ -220,7 +215,6 @@ app.use((req, res, next) => {
 
 // Generates Story Pages
 app.use('/quickstart', quickstart);
-app.use('/BCIT', BCIT);
 
 app.post('/submitUser', async (req, res) => {
     var name = req.body.name;
