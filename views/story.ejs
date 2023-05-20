@@ -21,13 +21,13 @@
         <% } %>
 
         <!-- Story Gen: Buttons -->
-        <form class="form-class" action="/quickstart/generateEvent/1" method="post">
+        <form class="form-class" action="/story/story-event" method="get">
             <% if (typeof summary !== 'undefined') { %>
             <button type="submit">Start New Game</button>
             <% } %>
         </form>
         
-        <form class="form-class" action="/quickstart/generateStory" method="post">
+        <form class="form-class" action="/story/generateStory" method="post">
             <% if (typeof summary == 'undefined') { %>
             <button type="submit">Generate Story</button>
             <% } else { %>
@@ -40,6 +40,6 @@
     </div>
 </div>
 
-<script src="/scripts/quickstart.js"></script>
+<script src="/scripts/story.js"></script>
 
 <%- include("templates/footer") %>

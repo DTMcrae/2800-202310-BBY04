@@ -203,11 +203,11 @@ app.get('/userInfo', async (req, res) => {
 });
 
 // Story Generation
-app.get('/Quickstart', (req, res) => {
-    res.render('Quickstart');
+app.get('/story', (req, res) => {
+    res.render('story');
 });
 
-const quickstart = require('./routes/quickstart');
+const story = require('./routes/story.js');
 
 // Story Initialization Middleware
 app.use((req, res, next) => {
@@ -226,7 +226,7 @@ app.use((req, res, next) => {
 });
 
 // Generates Story Pages
-app.use('/quickstart', quickstart);
+app.use('/story', story);
 
 app.post('/submitUser', async (req, res) => {
     var name = req.body.name;
