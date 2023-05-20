@@ -292,7 +292,7 @@ router.get('/npc-dialogue', async (req, res) => {
     // Changes the prompts based on the button pressed
     switch (questionKey) {
         case 'mission':
-            qtopic = 'why ' + NPC + needs a ' + req.session.selectedClass + ' to ' + req.session.goal;
+            qtopic = 'why ' + NPC + ' needs a ' + req.session.selectedClass + ' to ' + req.session.goal;
             break;
 
         case 'npc':
