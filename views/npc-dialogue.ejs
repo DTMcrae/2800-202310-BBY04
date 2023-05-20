@@ -1,0 +1,47 @@
+<%- include("templates/headerStart") %>
+
+<link rel="stylesheet" href="/styles/story.css">
+
+<%- include("templates/headerEnd") %>
+
+<div class="storygen">
+
+    <div class="center">
+
+        <div class = "storycreation">
+        <!-- Generates the loading animation -->
+        <div id="spinner" style="display: none;">
+            <img src="/images/loading.gif" class="loading" alt="Loading...">
+        </div>
+
+        <!-- Story text -->
+        <p class="form-class"><%- Q1 %></p>
+        <p class="form-class"><%- A1 %></p>
+        <p class="form-class"><%- Q2 %></p>
+        <p class="form-class"><%- A2 %></p>
+
+        <!-- Interactive button(s) for the player -->         
+        <% for (let i = 0; i < questions.length; i++) { %>
+            <form class="form-class" action="/story/npc-dialogue/?question=<%= questions[i] %>" method="get">
+              <input type="hidden" name="question" value="<%= questions[i] %>">
+              <% if (questions[i] === 'mission') { %>
+                <button type="submit">Ask About the Mission</button>
+              <% } else if (questions[i] === 'npc') { %>
+                <button type="submit">Ask about <%- NPC %></button>
+              <% } else if (questions[i] === 'setting') { %>
+                <button type="submit">Ask about <%- s_start %></button>
+              <% } %>
+            </form>
+          <% } %>          
+
+        <form class="form-class" action="/story/story-event" method="get">
+            <button type="submit">Skip Asking Questions</button>
+        </form>
+        </div>
+
+    </div>
+</div>
+
+<script src="/scripts/story.js"></script>
+
+<%- include("templates/footer") %>

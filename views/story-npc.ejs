@@ -14,12 +14,30 @@
             <img src="/images/loading.gif" class="loading" alt="Loading...">
         </div>
 
-        <!-- Story Gen: Title and Summary -->
-        <p class="form-class">Hello World!</p>
+        <!-- Story text -->
+        <p class="form-class"><%- text %></p>
+        <br>
+        <p class="form-class"><%- NPC %> gives you a <%- emotion %> look. What will you do next?</p>
 
-        <!-- Story Gen: Buttons -->        
-        <form class="form-class" action="" method="post">
-            <button type="submit">Next</button>
+        <!-- Interactive button(s) for the player -->         
+        <form class="form-class" action="/story/npc-dialogue/" method="get">
+            <input type="hidden" name="question" value="mission">
+            <button type="submit">Ask About the Mission</button>
+        </form>
+        
+        <form class="form-class" action="/story/npc-dialogue/" method="get">
+            <input type="hidden" name="question" value="npc">
+            <button type="submit">Ask about <%- NPC %></button>
+        </form>
+        
+        <form class="form-class" action="/story/npc-dialogue/" method="get">
+            <input type="hidden" name="question" value="setting">
+            <button type="submit">Ask about <%- s_start %></button>
+        </form>
+                 
+
+        <form class="form-class" action="/story/story-event" method="get">
+            <button type="submit">Skip Asking Questions</button>
         </form>
         </div>
 
