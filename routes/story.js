@@ -16,10 +16,56 @@ const typesB = ['', 'about time travel back to BCIT opening in 1969', 'about squ
 const bcitN = '';
 const bcitB = 'at BCIT';
 
-// Array around the main character's relationship with the starting location
+// Arrays for event generation to randomize either the event or the emotion in the scene
 const random_class = ['barbarian', 'bard', 'cleric', 'druid', 'fighter', 'monk', 'paladin', 'ranger', 'rogue', 'sorcerer', 'warlock', 'wizard', 'BCIT student'];
 const emotion_NPC = ['desperate', 'hopeless', 'fearful', 'anxious', 'weary', 'skeptical', 'grateful', 'resigned', 'suspicious', 'regretful', 'grieiving', 'nervous', 'awestruck', 'excited', 'curious', 'hopeful', 'relieved', 'happy'];
 const verb_location = ['living in', 'arriving at', 'visiting', 'exploring', 'investigating', 'found themselves in', 'randomly found', 'lived all their life in'];
+
+const skillcheck_npc = [
+    { skillcheck: 'Athletics', ability: 'str' },
+    { skillcheck: 'Intimidation', ability: 'str' },
+    { skillcheck: 'Stealth', ability: 'dex' },
+    { skillcheck: 'Sleight of Hand', ability: 'dex' },
+    { skillcheck: 'Endurance', ability: 'con' },
+    { skillcheck: 'Resilience', ability: 'con' },
+    { skillcheck: 'Investigation', ability: 'int' },
+    { skillcheck: 'History', ability: 'int' },
+    { skillcheck: 'Insight', ability: 'wis' },
+    { skillcheck: 'Medicine', ability: 'wis' },
+    { skillcheck: 'Persuasion', ability: 'cha' },
+    { skillcheck: 'Deception', ability: 'cha' },
+];
+
+const skillcheck_sc = [
+    { skillcheck: 'Athletics', ability: 'str' },
+    { skillcheck: 'Intimidation', ability: 'str' },
+    { skillcheck: 'Stealth', ability: 'dex' },
+    { skillcheck: 'Sleight of Hand', ability: 'dex' },
+    { skillcheck: 'Endurance', ability: 'con' },
+    { skillcheck: 'Poison Resistance', ability: 'con' },
+    { skillcheck: 'Investigation', ability: 'int' },
+    { skillcheck: 'Arcana', ability: 'int' },
+    { skillcheck: 'Perception', ability: 'wis' },
+    { skillcheck: 'Insight', ability: 'wis' },
+    { skillcheck: 'Persuasion', ability: 'cha' },
+    { skillcheck: 'Deception', ability: 'cha' },
+];
+
+const skillcheck_jny = [
+    { skillcheck: 'Athletics', ability: 'str' },
+    { skillcheck: 'Survival', ability: 'str' },
+    { skillcheck: 'Acrobatics', ability: 'dex' },
+    { skillcheck: 'Sleight of Hand', ability: 'dex' },
+    { skillcheck: 'Endurance', ability: 'con' },
+    { skillcheck: 'Fortitude', ability: 'con' },
+    { skillcheck: 'Investigation', ability: 'int' },
+    { skillcheck: 'History', ability: 'int' },
+    { skillcheck: 'Perception', ability: 'wis' },
+    { skillcheck: 'Survival', ability: 'wis' },
+    { skillcheck: 'Persuasion', ability: 'cha' },
+    { skillcheck: 'Intimidation', ability: 'cha' },
+];
+
 
 // Test values for story generation
 const NPC = 'Alistair';
