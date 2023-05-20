@@ -16,6 +16,9 @@ const typesB = ['', 'about time travel back to BCIT opening in 1969', 'about squ
 const bcitN = '';
 const bcitB = 'at BCIT';
 
+// Array around the main character's relationship with the starting location
+const location = [];
+
 // Test values for story generation
 const NPC = 'Alistair';
 
@@ -50,6 +53,12 @@ Please structure your response in the following format:
   "s_boss": "<setting>"
 
 }`;
+};
+
+const generateIntro = () => {
+    
+    return `Yay! The code worked.`
+
 };
 
 const generateEventPrompt = (eventNumber, events, NPC, goal, s_start, s_boss, characters, enemies, boss) => {
@@ -110,8 +119,6 @@ router.use(express.static('images'));
 router.post('/generateStory', async (req, res) => {
     try {
 
-        console.log(req.session.selectedClass);
-
         // If user picks "Easter Egg" class, switch that turns all stories into BCIT-related stories
         if (req.session.selectedClass == 'BCIT Nerd') {
             types = typesB;
@@ -133,82 +140,49 @@ router.post('/generateStory', async (req, res) => {
         const responseObject = JSON.parse(responseText);
 
         // Store the generated story summary and events in the session
-        req.session.currentEvent = 0;
+
         req.session.summary = responseObject.summary;
         req.session.title = responseObject.title;
         req.session.goal = responseObject.goal;
         req.session.s_start = responseObject.s_start;
         req.session.s_boss = responseObject.s_boss;
 
+        if (!req.session.selectedClass) {
+            req.session.selectedClass = 'Druid';
+        }
+
         req.session.events = {
-            "1": {
-                "type": "Story_Event",
-                "json": false
-            },
-            "2": {
-                "type": "NPC_Quest",
-                "json": false
-            },
-            "3": {
-                "type": "NPC_Q1",
-                "json": false
-            },
-            "4": {
-                "type": "NPC_Q2",
-                "json": false
-            },
-            "5": {
-                "type": "SkillCheck_prompt",
-                "json": true
-            },
-            "6": {
-                "type": "SkillCheck_fail",
-                "json": false
-            },
-            "7": {
-                "type": "SkillCheck_partial",
-                "json": false
-            },
-            "8": {
-                "type": "SkillCheck_success",
-                "json": false
-            },
-            "9": {
-                "type": "SkillCheck_full",
-                "json": false
-            },
-            "10": {
-                "type": "Battle",
-                "json": false
-            },
-            "11": {
-                "type": "Story_Event",
-                "json": false
-            },
-            "12": {
-                "type": "Boss",
-                "json": false
-            },
+            "1": { "type": "story_intro", "json": false },
+            "2": { "type": "NPC_Quest", "json": false },
+            "3": { "type": "NPC_Q1", "json": false },
+            "4": { "type": "NPC_Q2", "json": false },
+            "5": { "type": "SkillCheck_prompt", "json": true },
+            "6": { "type": "SkillCheck_fail", "json": false },
+            "7": { "type": "SkillCheck_partial", "json": false },
+            "8": { "type": "SkillCheck_success", "json": false },
+            "9": { "type": "SkillCheck_full", "json": false },
+            "10": { "type": "Battle", "json": false },
+            "11": { "type": "Story_Event", "json": false },
+            "12": { "type": "Boss", "json": false },
         };
 
-        // sessionCollection.insertOne(req.session.summary);
-        // sessionCollection.insertOne(req.session.title);
-        // sessionCollection.insertOne(req.session.goal);
-        // sessionCollection.insertOne(req.session.s_start);
-        // sessionCollection.insertOne(req.session.s_boss);
-
+        console.log('Character Class:', req.session.selectedClass);
         console.log('Summary:', req.session.summary);
         console.log('Title:', req.session.title);
         console.log('Goal:', req.session.goal);
-        console.log('Current Event:', req.session.currentEvent);
         console.log('Start location:', req.session.s_start);
         console.log('Boss location:', req.session.s_boss);
 
         // Sends title and summary to the story generation screen
-        res.render('quickstart', {
+        res.render('story', {
+            selectedClass: req.session.selectedClass,
             title: req.session.title,
             summary: req.session.summary,
             currentEvent: req.session.currentEvent,
+            goal: req.session.goal,
+            s_start: req.session.s_start,
+            s_boss: req.session.s_boss,
+            events: req.session.events
         });
 
     } catch (error) {
@@ -217,6 +191,21 @@ router.post('/generateStory', async (req, res) => {
             error: error.toString()
         });
     }
+});
+
+// Starts a new game
+router.get('/story-intro', (req,res) => {
+    console.log('New game started!');
+
+    res.render('story-intro', {
+        selectedClass: req.session.selectedClass,
+        title: req.session.title,
+        summary: req.session.summary,
+        currentEvent: req.session.currentEvent,
+        goal: req.session.goal,
+        s_start: req.session.s_start,
+        s_boss: req.session.s_boss,
+        events: req.session.events })
 });
 
 // For generating events
@@ -263,7 +252,7 @@ router.post('/generateEvent/:eventNumber', async (req, res) => {
             eventsUpToCurrent[i] = req.session.events[i];
         }
 
-        res.render('quickstart', {
+        res.render('story', {
             title: req.session.title,
             summary: req.session.summary,
             currentEvent: req.session.currentEvent,

@@ -1,0 +1,31 @@
+<%- include("templates/headerStart") %>
+
+<link rel="stylesheet" href="../styles/story.css">
+
+<%- include("templates/headerEnd") %>
+
+<div class="storygen">
+
+    <div class="center">
+
+        <div class = "storycreation">
+        <!-- Generates the loading animation -->
+        <div id="spinner" style="display: none;">
+            <img src="/images/loading.gif" class="loading" alt="Loading...">
+        </div>
+
+        <!-- Story Gen: Title and Summary -->
+        <p class="form-class">Hello World!</p>
+
+        <!-- Story Gen: Buttons -->        
+        <form class="form-class" action="" method="post">
+            <button type="submit">Next</button>
+        </form>
+        </div>
+
+    </div>
+</div>
+
+<script src="/scripts/story.js"></script>
+
+<%- include("templates/footer") %>
