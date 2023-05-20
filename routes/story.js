@@ -17,7 +17,8 @@ const bcitN = '';
 const bcitB = 'at BCIT';
 
 // Array around the main character's relationship with the starting location
-const location = [];
+const random_class = ['barbarian', 'bard', 'cleric', 'druid', 'fighter', 'monk', 'paladin', 'ranger', 'rogue', 'sorcerer', 'warlock', 'wizard', 'BCIT student'];
+const verb_location = ['living in', 'arriving at', 'visiting', 'exploring', 'investigating', 'found themselves in', 'randomly found', 'lived all their life in'];
 
 // Test values for story generation
 const NPC = 'Alistair';
@@ -55,9 +56,9 @@ Please structure your response in the following format:
 }`;
 };
 
-const generateIntro = () => {
+const generateIntro = (selectedClass, verb, s_start) => {
     
-    return `Yay! The code worked.`
+    return `Start a DnD adventure about a player character of the "${selectedClass}" class who is "${verb}" "${s_start}" in four sentences. Describe the character and the setting. Don't introduce any conflict. `;
 
 };
 
@@ -114,6 +115,26 @@ const generateEventPrompt = (eventNumber, events, NPC, goal, s_start, s_boss, ch
 // This line serves static files from the 'images' directory
 router.use(express.static('images'));
 
+// Function that pulls random values in arrays to randomize story generation prompts
+function getRandomElement(array) {
+    const randomIndex = Math.floor(Math.random() * array.length);
+    return array[randomIndex];
+}
+
+// Sets up the next event in the story sequence
+function getNextEvent(req) {
+    // If starting a new game, sets currentEvent to 1
+    if (!req.session.currentEvent) {
+        req.session.currentEvent = 1;
+    }
+
+    // Readies the number for the next event
+    const event = req.session.events[req.session.currentEvent];
+    req.session.currentEvent += 1;
+    return event;
+}
+
+
 // Generates main story details
 // JSON output: story summary, title, event sequence, character's main objective, starting and final locations
 router.post('/generateStory', async (req, res) => {
@@ -129,8 +150,7 @@ router.post('/generateStory', async (req, res) => {
         }
 
         // Adds a random story type to the generated story
-        const randomIndex = Math.floor(Math.random() * types.length);
-        const randomType = types[randomIndex];
+        const randomType = getRandomElement(types);
         console.log('Story type: ', randomType);
 
         // Creates the story
@@ -147,14 +167,10 @@ router.post('/generateStory', async (req, res) => {
         req.session.s_start = responseObject.s_start;
         req.session.s_boss = responseObject.s_boss;
 
-        if (!req.session.selectedClass) {
-            req.session.selectedClass = 'Druid';
-        }
-
         req.session.events = {
             "1": { "type": "story_intro", "json": false },
-            "2": { "type": "NPC_Quest", "json": false },
-            "3": { "type": "NPC_Q1", "json": false },
+            "2": { "type": "story_NPC", "json": true },
+            "3": { "type": "story_scene", "json": false },
             "4": { "type": "NPC_Q2", "json": false },
             "5": { "type": "SkillCheck_prompt", "json": true },
             "6": { "type": "SkillCheck_fail", "json": false },
@@ -175,14 +191,8 @@ router.post('/generateStory', async (req, res) => {
 
         // Sends title and summary to the story generation screen
         res.render('story', {
-            selectedClass: req.session.selectedClass,
             title: req.session.title,
             summary: req.session.summary,
-            currentEvent: req.session.currentEvent,
-            goal: req.session.goal,
-            s_start: req.session.s_start,
-            s_boss: req.session.s_boss,
-            events: req.session.events
         });
 
     } catch (error) {
@@ -193,76 +203,44 @@ router.post('/generateStory', async (req, res) => {
     }
 });
 
-// Starts a new game
-router.get('/story-intro', (req,res) => {
-    console.log('New game started!');
 
-    res.render('story-intro', {
-        selectedClass: req.session.selectedClass,
-        title: req.session.title,
-        summary: req.session.summary,
-        currentEvent: req.session.currentEvent,
-        goal: req.session.goal,
-        s_start: req.session.s_start,
-        s_boss: req.session.s_boss,
-        events: req.session.events })
-});
 
-// For generating events
-router.post('/generateEvent/:eventNumber', async (req, res) => {
-    try {
+// Handles GET requests and moves player to the next event
+router.get('/story-event', async (req, res) => {
 
-        if (req.session.currentEvent == 0) {
-            req.session.currentEvent++;
-        }
+    const event = getNextEvent(req);
+    
 
-        // Sets the current event number
-        const eventNumber = parseInt(req.params.eventNumber);
-        const event = req.session.events[eventNumber];
-        console.log('Event Number: ', eventNumber);
-        
-        // Generates the event text from existing data
-        const prompt = generateEventPrompt(
-            eventNumber, 
-            req.session.events, 
-            NPC, 
-            req.session.goal, 
-            req.session.s_start, 
-            req.session.s_boss, 
-            characters, 
-            enemies, 
-            boss
-        );        
-        
-        const text = await openAI.generateText(prompt, model, 800);
-        
-        if(event.json) {
-            const responseObject = JSON.parse(text);
-            req.session[`event${eventNumber}`] = responseObject;
-        } else {
-            req.session[`event${eventNumber}`] = text;
-        }
-        console.log('Event text: ', text);
-        
-        req.session.currentEvent = eventNumber + 1;
+    // Generates a different event page depending on the next event type
+    switch (event.type) {
 
-        // Create a new object to store all events up to the current one
-        let eventsUpToCurrent = {};
-        for(let i = 1; i <= req.session.currentEvent; i++) {
-            eventsUpToCurrent[i] = req.session.events[i];
-        }
+        case 'story_intro':
 
-        res.render('story', {
-            title: req.session.title,
-            summary: req.session.summary,
-            currentEvent: req.session.currentEvent,
-            events: eventsUpToCurrent,
-            eventText: text
-        });
-        
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({ error: error.toString() });
+            const randomVerb = getRandomElement(verb_location);
+
+            if (!req.session.selectedClass) {
+                const randomClass = getRandomElement(random_class);
+                req.session.selectedClass = randomClass;
+                console.log('Random class: ', randomClass);
+            }
+
+            const responseText = await openAI.generateText(generateIntro(req.session.selectedClass, randomVerb, req.session.s_start), model, 800);
+
+            res.render('story-intro', { text: responseText });
+            break;
+
+        case 'story_NPC':
+            // Handle story_NPC event here...
+            break;
+        case 'story_scene':
+            // Handle story_scene event here...
+            break;
+        // ...Add more cases as needed
+        default:
+            // Handle an unknown event type
+            console.error(`Unknown event type: ${event.type}`);
+            res.status(500).send('An error occurred');
+            break;
     }
 });
 
