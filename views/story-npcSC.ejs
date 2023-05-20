@@ -16,30 +16,23 @@
 
         <!-- Story text -->
         <p class="form-class"><%- text %></p>
-        <br>
-        <p class="form-class"><%- NPC %> gives you a <%- emotion %> look. What will you do next?</p>
+        <p class="form-class">In response, you can:</p>
+
+        <p class="form-class"><%- SCA1 %> (<%- SC1 %>)</p>
+        <p class="form-class"><%- SCA2 %> (<%- SC2 %>)</p>
+
+        <p class="form-class">What will you do?</p>
 
         <!-- Interactive button(s) for the player -->         
         <form class="form-class" action="/story/npc-dialogue/" method="get">
-            <input type="hidden" name="question" value="mission">
-            <button type="submit">Ask About the Mission</button>
+            <input type="hidden" name="skillcheck" value="<%- SC1 %>">
+            <button type="submit"><%- SC1 %></button>
         </form>
         
         <form class="form-class" action="/story/npc-dialogue/" method="get">
-            <input type="hidden" name="question" value="npc">
-            <button type="submit">Ask about <%- NPC %></button>
+            <input type="hidden" name="skillcheck" value="<%- SC2 %>">
+            <button type="submit"><%- SC2 %></button>
         </form>
-        
-        <form class="form-class" action="/story/npc-dialogue/" method="get">
-            <input type="hidden" name="question" value="setting">
-            <button type="submit">Ask about <%- s_start %></button>
-        </form>
-                 
-
-        <form class="form-class" action="/story/story-event" method="get">
-            <button type="submit">Skip Asking Questions</button>
-        </form>
-        </div>
 
     </div>
 </div>

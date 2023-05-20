@@ -20,17 +20,17 @@
         <p class="form-class"><%- NPC %> gives you a <%- emotion %> look. What will you do next?</p>
 
         <!-- Interactive button(s) for the player -->         
-        <form class="form-class" action="/story/npc-dialogue/" method="get">
+        <form class="form-class" action="/story/story-npcCHAT/" method="get">
             <input type="hidden" name="question" value="mission">
             <button type="submit">Ask About the Mission</button>
         </form>
         
-        <form class="form-class" action="/story/npc-dialogue/" method="get">
+        <form class="form-class" action="/story/story-npcCHAT/" method="get">
             <input type="hidden" name="question" value="npc">
             <button type="submit">Ask about <%- NPC %></button>
         </form>
         
-        <form class="form-class" action="/story/npc-dialogue/" method="get">
+        <form class="form-class" action="/story/story-npcCHAT/" method="get">
             <input type="hidden" name="question" value="setting">
             <button type="submit">Ask about <%- s_start %></button>
         </form>

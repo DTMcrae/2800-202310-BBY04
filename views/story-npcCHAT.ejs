@@ -22,7 +22,7 @@
 
         <!-- Interactive button(s) for the player -->         
         <% for (let i = 0; i < questions.length; i++) { %>
-            <form class="form-class" action="/story/npc-dialogue/?question=<%= questions[i] %>" method="get">
+            <form class="form-class" action="/story/story-npcCHAT/?question=<%= questions[i] %>" method="get">
               <input type="hidden" name="question" value="<%= questions[i] %>">
               <% if (questions[i] === 'mission') { %>
                 <button type="submit">Ask About the Mission</button>

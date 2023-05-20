@@ -21,52 +21,6 @@ const random_class = ['barbarian', 'bard', 'cleric', 'druid', 'fighter', 'monk',
 const emotion_NPC = ['desperate', 'hopeless', 'fearful', 'anxious', 'weary', 'skeptical', 'grateful', 'resigned', 'suspicious', 'regretful', 'grieiving', 'nervous', 'awestruck', 'excited', 'curious', 'hopeful', 'relieved', 'happy'];
 const verb_location = ['living in', 'arriving at', 'visiting', 'exploring', 'investigating', 'found themselves in', 'randomly found', 'lived all their life in'];
 
-const skillcheck_npc = [
-    { skillcheck: 'Athletics', ability: 'str' },
-    { skillcheck: 'Intimidation', ability: 'str' },
-    { skillcheck: 'Stealth', ability: 'dex' },
-    { skillcheck: 'Sleight of Hand', ability: 'dex' },
-    { skillcheck: 'Endurance', ability: 'con' },
-    { skillcheck: 'Resilience', ability: 'con' },
-    { skillcheck: 'Investigation', ability: 'int' },
-    { skillcheck: 'History', ability: 'int' },
-    { skillcheck: 'Insight', ability: 'wis' },
-    { skillcheck: 'Medicine', ability: 'wis' },
-    { skillcheck: 'Persuasion', ability: 'cha' },
-    { skillcheck: 'Deception', ability: 'cha' },
-];
-
-const skillcheck_sc = [
-    { skillcheck: 'Athletics', ability: 'str' },
-    { skillcheck: 'Intimidation', ability: 'str' },
-    { skillcheck: 'Stealth', ability: 'dex' },
-    { skillcheck: 'Sleight of Hand', ability: 'dex' },
-    { skillcheck: 'Endurance', ability: 'con' },
-    { skillcheck: 'Poison Resistance', ability: 'con' },
-    { skillcheck: 'Investigation', ability: 'int' },
-    { skillcheck: 'Arcana', ability: 'int' },
-    { skillcheck: 'Perception', ability: 'wis' },
-    { skillcheck: 'Insight', ability: 'wis' },
-    { skillcheck: 'Persuasion', ability: 'cha' },
-    { skillcheck: 'Deception', ability: 'cha' },
-];
-
-const skillcheck_jny = [
-    { skillcheck: 'Athletics', ability: 'str' },
-    { skillcheck: 'Survival', ability: 'str' },
-    { skillcheck: 'Acrobatics', ability: 'dex' },
-    { skillcheck: 'Sleight of Hand', ability: 'dex' },
-    { skillcheck: 'Endurance', ability: 'con' },
-    { skillcheck: 'Fortitude', ability: 'con' },
-    { skillcheck: 'Investigation', ability: 'int' },
-    { skillcheck: 'History', ability: 'int' },
-    { skillcheck: 'Perception', ability: 'wis' },
-    { skillcheck: 'Survival', ability: 'wis' },
-    { skillcheck: 'Persuasion', ability: 'cha' },
-    { skillcheck: 'Intimidation', ability: 'cha' },
-];
-
-
 // Test values for story generation
 const NPC = 'Alistair';
 
@@ -75,7 +29,7 @@ const characters = [
   { name: 'Thorin', class: 'Fighter' }
 ];
 
-const enemies = ['bandit1', 'bandit2'];
+const enemies = ['bandit', 'goblin'];
 const boss = 'Beholder';
 
 
@@ -132,6 +86,25 @@ const generateDialogue = (qtopic, NPC, characters) => {
     }`;
 };
 
+const generateNPCSC = (characters, NPC, enemies) => {
+    return `As they finish talking, ${characters[0].name} and ${NPC} are ambushed by a ${enemies[0]} and a ${enemies[1]}. ${characters[0].name} employs various skills in response to the surprise attack.
+
+    1. In two sentences, depict the unfolding attack. Do not refer to the enemies with "the". Remember that the action is just starting.
+    2. Choose two different skill checks. For each, provide a brief action phrase starting with "Try to" indicating how the skill check is used. Remember that the player is ${characters[0].name}.
+
+    Format your response as follows:
+    
+    {
+      "npc_atk": "Description of the attack",
+      "SC1": "First Skill",
+      "SCA1": "How the first skill check is used",
+      "SC2": "Second Skill",
+      "SCA2": "How the second skill check is used",
+
+    }`
+
+};
+
 const generateEventPrompt = (eventNumber, events, NPC, goal, s_start, s_boss, characters, enemies, boss) => {
     const eventType = events[eventNumber].type;
     let prompt = "";
@@ -185,11 +158,39 @@ const generateEventPrompt = (eventNumber, events, NPC, goal, s_start, s_boss, ch
 // This line serves static files from the 'images' directory
 router.use(express.static('images'));
 
-// Function that pulls random values in arrays to randomize story generation prompts
+// Functions that pull random values in arrays to randomize story generation prompts
 function getRandomElement(array) {
     const randomIndex = Math.floor(Math.random() * array.length);
     return array[randomIndex];
 }
+
+function getTwoRandomElements(array) {
+    let firstIndex = Math.floor(Math.random() * array.length);
+    let secondIndex = firstIndex;
+    
+    // Ensure the second index is not the same as the first
+    while (secondIndex === firstIndex) {
+        secondIndex = Math.floor(Math.random() * array.length);
+    }
+
+    return [array[firstIndex], array[secondIndex]];
+}
+
+function getThreeRandomElements(array) {
+    let indices = new Set();
+
+    if(array.length < 3) {
+        throw new Error("Input array should have at least 3 unique elements");
+    }
+    
+    while(indices.size < 3) {
+        let randomIndex = Math.floor(Math.random() * array.length);
+        indices.add(randomIndex);
+    }
+
+    return Array.from(indices).map(index => array[index]);
+}
+
 
 // Sets up the next event in the story sequence
 function getNextEvent(req) {
@@ -203,7 +204,6 @@ function getNextEvent(req) {
     req.session.currentEvent += 1;
     return event;
 }
-
 
 // Generates main story details
 // JSON output: story summary, title, event sequence, character's main objective, starting and final locations
@@ -240,8 +240,8 @@ router.post('/generateStory', async (req, res) => {
         req.session.events = {
             "1": { "type": "story-intro" },
             "2": { "type": "story-npc" },
-            "3": { "type": "story-scene" },
-            "4": { "type": "NPC_Q2" },
+            "3": { "type": "story-npcSC" },
+            "4": { "type": "story-npcsc" },
             "5": { "type": "SkillCheck_prompt" },
             "6": { "type": "SkillCheck_fail" },
             "7": { "type": "SkillCheck_partial" },
@@ -303,6 +303,7 @@ router.get('/story-event', async (req, res) => {
             const randomEmotion = getRandomElement(emotion_NPC);
 
             const npcText = await openAI.generateText(generateNPC(NPC, randomEmotion, characters, req.session.goal), model, 800);
+            console.log(npcText);
 
             // Generates an array of questions to ask the NPC
             req.session.questions = ['mission', 'npc', 'setting'];
@@ -311,10 +312,22 @@ router.get('/story-event', async (req, res) => {
 
             break;
 
-        case 'story_scene':
-            // Handle story_scene event here...
+        case 'story-npcSC':
+
+            const npcscText = await openAI.generateText(generateNPCSC(characters, NPC, enemies), model, 1600);
+            const npcscObject = JSON.parse(npcscText);
+            
+            req.session.npc_atk = npcscObject.npc_atk;
+            req.session.SC1 = npcscObject.SC1;
+            req.session.SCA1 = npcscObject.SCA1;
+            req.session.SC2 = npcscObject.SC2;
+            req.session.SCA2 = npcscObject.SCA2;
+
+            res.render('story-npcSC', { text: req.session.npc_atk, SC1: req.session.SC1, SCA1: req.session.SCA1, SC2: req.session.SC2, SCA2: req.session.SCA2, })
             break;
+        
         // ...Add more cases as needed
+
         default:
             // Handle an unknown event type
             console.error(`Unknown event type: ${event.type}`);
@@ -324,7 +337,7 @@ router.get('/story-event', async (req, res) => {
 });
 
 // Creates dialogue with NPC based on the selected buttons
-router.get('/npc-dialogue', async (req, res) => {
+router.get('/story-npcCHAT', async (req, res) => {
 
     const questionKey = req.query.question;
     let qtopic;
@@ -364,7 +377,22 @@ router.get('/npc-dialogue', async (req, res) => {
     req.session.Q2 = dialogueObject.Q2;
     req.session.A2 = dialogueObject.A2;
 
-    res.render('npc-dialogue', {Q1: req.session.Q1, A1: req.session.A1, Q2: req.session.Q2, A2: req.session.A2, goal: req.session.goal, NPC: NPC, s_start: req.session.s_start, questions: req.session.questions});
+    res.render('story-npcCHAT', {Q1: req.session.Q1, A1: req.session.A1, Q2: req.session.Q2, A2: req.session.A2, goal: req.session.goal, NPC: NPC, s_start: req.session.s_start, questions: req.session.questions});
+    
+});
+
+
+// ***For testing only, allows console logs for scene in development ***//
+router.post('/skip', async (req, res) => {
+
+    // *** ChatGPT line to test here **//
+    const npcscText = await openAI.generateText(generateNPCSC(characters, NPC, enemies), model, 1600);
+    console.log(npcscText);
+    // *** End test area **//
+
+    res.render('story', {
+
+    });
     
 });
 

@@ -26,6 +26,12 @@
             <button type="submit">Start New Game</button>
             <% } %>
         </form>
+
+        <form class="form-class" action="/story/skip" method="post">
+            <% if (typeof summary !== 'undefined') { %>
+            <button type="submit">(Test Prompt)</button>
+            <% } %>
+        </form>
         
         <form class="form-class" action="/story/generateStory" method="post">
             <% if (typeof summary == 'undefined') { %>
