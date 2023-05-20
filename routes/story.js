@@ -86,11 +86,11 @@ const generateDialogue = (qtopic, NPC, characters) => {
     }`;
 };
 
-const generateNPCSC = (characters, NPC, enemies) => {
+const generateNPCSC = (characters, selectedClass, NPC, enemies) => {
     return `As they finish talking, ${characters[0].name} and ${NPC} are ambushed by a ${enemies[0]} and a ${enemies[1]}. ${characters[0].name} employs various skills in response to the surprise attack.
 
     1. In two sentences, depict the unfolding attack. Do not refer to the enemies with "the". Remember that the action is just starting.
-    2. Choose two different skill checks. For each, provide a brief action phrase starting with "Try to" indicating how the skill check is used. Remember that the player is ${characters[0].name}.
+    2. Choose two different skill checks. For each, provide a brief action phrase starting with "Try to" indicating how the skill check is used. Remember that the player is ${characters[0].name} and is a ${selectedClass}.
 
     Format your response as follows:
     
@@ -252,6 +252,11 @@ router.post('/generateStory', async (req, res) => {
             "12": { "type": "Boss" },
         };
        
+        if (!req.session.selectedClass) {
+            const randomClass = getRandomElement(random_class);
+            req.session.selectedClass = randomClass;
+            console.log('Random class: ', randomClass);
+        }
 
         console.log('Character Class:', req.session.selectedClass);
         console.log('Summary:', req.session.summary);
@@ -287,12 +292,6 @@ router.get('/story-event', async (req, res) => {
 
             const randomVerb = getRandomElement(verb_location);
 
-            if (!req.session.selectedClass) {
-                const randomClass = getRandomElement(random_class);
-                req.session.selectedClass = randomClass;
-                console.log('Random class: ', randomClass);
-            }
-
             const introText = await openAI.generateText(generateIntro(req.session.selectedClass, randomVerb, req.session.s_start, NPC, req.session.npc_role), model, 800);
 
             res.render('story-intro', { text: introText  });
@@ -314,7 +313,7 @@ router.get('/story-event', async (req, res) => {
 
         case 'story-npcSC':
 
-            const npcscText = await openAI.generateText(generateNPCSC(characters, NPC, enemies), model, 1600);
+            const npcscText = await openAI.generateText(generateNPCSC(characters, req.session.selectedClass, NPC, enemies), model, 1600);
             const npcscObject = JSON.parse(npcscText);
             
             req.session.npc_atk = npcscObject.npc_atk;
