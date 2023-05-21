@@ -24,12 +24,12 @@
         <p class="form-class">What will you do?</p>
 
         <!-- Interactive button(s) for the player -->         
-        <form class="form-class" action="/story/npc-dialogue/" method="get">
+        <form class="form-class" action="/story/story-npcSC2" method="get">
             <input type="hidden" name="skillcheck" value="<%- SC1 %>">
             <button type="submit"><%- SC1 %></button>
         </form>
         
-        <form class="form-class" action="/story/npc-dialogue/" method="get">
+        <form class="form-class" action="/story/story-npcSC2" method="get">
             <input type="hidden" name="skillcheck" value="<%- SC2 %>">
             <button type="submit"><%- SC2 %></button>
         </form>
@@ -38,5 +38,3 @@
 </div>
 
 <script src="/scripts/story.js"></script>
-
-<%- include("templates/footer") %>

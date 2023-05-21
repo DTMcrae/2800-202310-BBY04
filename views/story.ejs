@@ -27,11 +27,12 @@
             <% } %>
         </form>
 
-        <form class="form-class" action="/story/skip" method="post">
+        <!-- ***For testing prompts*** -->
+        <!-- <form class="form-class" action="/story/test" method="post">
             <% if (typeof summary !== 'undefined') { %>
             <button type="submit">(Test Prompt)</button>
             <% } %>
-        </form>
+        </form> -->
         
         <form class="form-class" action="/story/generateStory" method="post">
             <% if (typeof summary == 'undefined') { %>
@@ -47,5 +48,3 @@
 </div>
 
 <script src="/scripts/story.js"></script>
-
-<%- include("templates/footer") %>

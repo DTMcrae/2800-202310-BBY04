@@ -105,6 +105,16 @@ const generateNPCSC = (characters, selectedClass, NPC, enemies) => {
 
 };
 
+const generateNPCSC2 = (SC, SCA, rollResult, npcPrompt, scPrompt, characters, selectedClass, NPC, enemies) => {
+    return `We are in the middle of a scene where ${characters[0].name} and ${NPC} are ambushed by a ${enemies[0]} and a ${enemies[1]}.
+    
+    ${characters[0].name} does an ${SC} check to ${SCA}. The skill check is a ${rollResult}.
+    
+    Describe the outcome of the skill check event in three sentences. Remember that ${characters[0].name} is a ${selectedClass}. 
+    ${NPC} ${npcPrompt}. ${characters[0].name} ${scPrompt}. End the scene with ${characters[0].name} continuing the fight.`
+
+};
+
 const generateEventPrompt = (eventNumber, events, NPC, goal, s_start, s_boss, characters, enemies, boss) => {
     const eventType = events[eventNumber].type;
     let prompt = "";
@@ -189,6 +199,29 @@ function getThreeRandomElements(array) {
     }
 
     return Array.from(indices).map(index => array[index]);
+}
+
+// *** Temp Diceroll function ***//
+function rollD20() {
+    let roll = Math.floor(Math.random() * 20) + 1;
+    let result = '';
+
+    if (roll === 1) {
+        result = 'Critical Failure';
+    } else if (roll <= 5) {
+        result = 'Failure';
+    } else if (roll <= 10) {
+        result = 'Partial Success';
+    } else if (roll < 20) {
+        result = 'Success';
+    } else {
+        result = 'Critical Success';
+    }
+
+    return {
+        roll: roll,
+        result: result
+    };
 }
 
 
@@ -313,7 +346,7 @@ router.get('/story-event', async (req, res) => {
 
         case 'story-npcSC':
 
-            const npcscText = await openAI.generateText(generateNPCSC(characters, req.session.selectedClass, NPC, enemies), model, 1600);
+            const npcscText = await openAI.generateText(generateNPCSC(characters, req.session.selectedClass, NPC, enemies), model, 3000);
             const npcscObject = JSON.parse(npcscText);
             
             req.session.npc_atk = npcscObject.npc_atk;
@@ -321,6 +354,12 @@ router.get('/story-event', async (req, res) => {
             req.session.SCA1 = npcscObject.SCA1;
             req.session.SC2 = npcscObject.SC2;
             req.session.SCA2 = npcscObject.SCA2;
+
+            console.log('npc_atk:', req.session.npc_atk);
+            console.log('SC1:', req.session.SC1);
+            console.log('SCA1:', req.session.SCA1);
+            console.log('SC2:', req.session.SC2);
+            console.log('SCA2:', req.session.SCA2);
 
             res.render('story-npcSC', { text: req.session.npc_atk, SC1: req.session.SC1, SCA1: req.session.SCA1, SC2: req.session.SC2, SCA2: req.session.SCA2, })
             break;
@@ -380,13 +419,61 @@ router.get('/story-npcCHAT', async (req, res) => {
     
 });
 
+router.get('/story-npcSC2', async (req, res) => {
+
+    let rollResult = rollD20();
+    console.log('Skill Check Dice roll:' + rollResult.roll);
+    console.log('Skill Check Result:' + rollResult.result);   
+
+    let scPrompt;
+    let npcPrompt;
+
+    switch(rollResult.result) {
+        case 'Critical Failure':
+            npcPrompt = "is knocked unconcious.";
+            scPrompt = "takes damage and has to fight both enemies alone.";
+            break;
+        case 'Failure':
+            npcPrompt = "is injured and cannot fight.";
+            scPrompt = "has to fight both enemies alone.";
+            break;
+        case 'Partial Success':
+            npcPrompt = "readies for battle";
+            scPrompt = "fights both enemies together.";
+            break;
+        case 'Success':
+            npcPrompt = "takes out one enemy.";
+            scPrompt = "fights the other enemy alone.";
+            break;
+        case 'Critical Success':
+            npcPrompt = "is impressed by your skill";
+            scPrompt = "defeats one enemy and they fight the other enemy together.";
+            break;
+    }
+
+    let SC;
+    let SCA;
+
+    if (req.query.skillcheck === req.session.SC1) {
+        SC = req.session.SC1;
+        SCA = req.session.SCA1;
+    } else {
+        SC = req.session.SC2;
+        SCA = req.session.SCA2;
+    }
+
+    const npcsc2Text = await openAI.generateText(generateNPCSC2(SC, SCA, rollResult.result, npcPrompt, scPrompt, characters, req.session.selectedClass, NPC, enemies), model, 1600);
+    console.log(npcsc2Text);
+
+    res.render('story-npcSC2', { text: npcsc2Text, });
+});
+
 
 // ***For testing only, allows console logs for scene in development ***//
-router.post('/skip', async (req, res) => {
+router.post('/test', async (req, res) => {
 
     // *** ChatGPT line to test here **//
-    const npcscText = await openAI.generateText(generateNPCSC(characters, NPC, enemies), model, 1600);
-    console.log(npcscText);
+
     // *** End test area **//
 
     res.render('story', {
