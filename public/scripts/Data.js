@@ -1,34 +1,61 @@
-const db = require('../databaseConnections.js');
+const { userCollection, 
+  classesCollection, 
+  equipmentCollection,
+  levelCollection,
+  monstersCollection,
+  npcCollection,
+  partyMemCollection,
+  scenarioCollection,
+  sessionCollection,
+  spellsCollection,
+  userCharCollection,
+  userSavedCollection  
+} = require('../../databaseConnection.js');
 const { ObjectId, Code } = require('mongodb');
 
 class Data {
-  constructor() {
-    this.monstersCollection = db.getMonstersCollection();
-    this.equipCollection = db.getEquipmentCollection();
-    this.levelCollection = db.getLevelCollection();
-    this.spellsCollection = db.getSpellsCollection();
-    this.usercharCollection = db.getUsercharCollection();
-  }
 
-//function for loading equip into an array
-async fetchEquipmentOptions() {
-    const equipmentList = await this.equipCollection.find().toArray();
+  //function for loading equip into an array
+  async fetchEquipmentOptions() {
+    const equipmentList = await equipmentCollection.collection.find().toArray();
     return equipmentList.map((equip) => equip.Name).join(', ');
-    }
+  }
     
-    //function for loading all the monster names into an array
-    async getMonsterNames() {
-    const monstersList = await this.monstersCollection.find({}, { projection: { _id: 0, name: 1 } }).toArray();
-    return monsterList = monsters.map(monster => monster.name);
-    }
-    
+  //function for loading all the monster names into an array
+  async getMonsterNames() {
+    const monstersList = await monstersCollection.collection.find({ legendary: null }, { projection: { _id: 0, name: 1 } }).toArray();
+    return monstersList.map(monster => monster.name);
+}
+
     //fucntion for return an object containing spefic Monster information
     async getMonsterInfo(name) {
-    const monsterInfo = await this.monstersCollection.findOne({ name: name });
-    return monsterInfo;
+      const monsterInfo = await monstersCollection.collection.findOne({ name: name });
+      return monsterInfo;
     }
-    
-    //function for defing ac
+
+    async getBossMonsterNames() {
+      const bossMonstersList = await monstersCollection.collection.find({ legendary: { $ne: null } }, { projection: { _id: 0, name: 1 } }).toArray();
+      return bossMonstersList.map(bossMonster => bossMonster.name);
+  }
+  
+  async getBossMonsterDetails(name) {
+    const bossMonsterDetails = await monstersCollection.collection.findOne({ name: name, legendary: { $ne: null } });
+    return bossMonsterDetails;
+}
+
+
+  //function for loading all npc with thier background into an object array
+  async getNpc() {
+    const npcList = await npcCollection.collection.find({}, { projection: { _id: 0, name: 1, background: 1 } }).toArray();
+    return npcList.map(npc => ({ name: npc.name, background: npc.background }));
+  }
+  //function of returning all the npc details
+  async getNpcDetails(name, background) {
+    const npcDetails = await npcCollection.collection.findOne({ name: name, background: background });
+    return npcDetails;
+}
+  
+  //function for defing ac
     async calculateAC(character) {
       let baseAC = 10; // base AC when no armor is worn
       let dexMod = Math.floor((character.AbilityScores.Dexterity - 10) / 2); // calculate Dexterity modifier
@@ -79,7 +106,7 @@ async fetchEquipmentOptions() {
     
     async getLevelUpData(userClass, userLevel) {
       try {
-          const levelData = await this.levelCollection.findOne({ class: userClass });
+          const levelData = await levelCollection.collection.findOne({ class: userClass });
           return levelData;
       } catch (err) {
           console.error(err);
@@ -89,7 +116,7 @@ async fetchEquipmentOptions() {
     
     async getSpellData(userClass, userLevel) {
       try {
-          const spellData = await this.spellsCollection.find({ classes: new RegExp(userClass, 'i'), level: { $lte: userLevel } }).toArray();
+          const spellData = await spellsCollection.collection.find({ classes: new RegExp(userClass, 'i'), level: { $lte: userLevel } }).toArray();
           return spellData;
       } catch (err) {
           console.error(err);
@@ -100,7 +127,7 @@ async fetchEquipmentOptions() {
     async spellcasting(userClass) {
       try {
           // For Wizards and Druids at level 1, we will only fetch level 0 (cantrips) and level 1 spells.
-          const spellData = await this.spellsCollection.find({ classes: new RegExp(userClass, 'i'), level: { $in: [0, 1] } }).toArray();
+          const spellData = await spellsCollection.collection.find({ classes: new RegExp(userClass, 'i'), level: { $in: [0, 1] } }).toArray();
           return spellData;
       } catch (err) {
           console.error(err);
@@ -121,7 +148,7 @@ async fetchEquipmentOptions() {
     */
     
     async getPlayerInventory(characterId) {
-        const result = await this.usercharCollection.aggregate([
+        const result = userCharCollection.collection.aggregate([
             { $match: { _id: ObjectId(characterId) } },
             {
             $lookup: {
@@ -143,7 +170,7 @@ async fetchEquipmentOptions() {
     }
     
     async getPlayerEquippedItems(characterId) {
-        const result = await this.usercharCollection.aggregate([
+        const result = await userCharCollection.collection.aggregate([
           { $match: { _id: ObjectId(characterId) } },
           {
             $lookup: {
@@ -165,13 +192,12 @@ async fetchEquipmentOptions() {
     }
 }
 
-module.exports = { Data };
-
-// Example Code
-
-// const { Data } = require('./Data.js'); // replace './Data.js' with the actual path to your Data.js file
-
-// const data = new Data();
-
-// Now you can use methods of the Data instance
-// data.getMonsterNames().then(names => console.log(names)).catch(err => console.error(err));
+module.exports = {
+  calculateAC,
+  getMonsterNames,
+  getMonsterInfo,
+  getBossMonsterNames,
+  getBossMonsterDetails,
+  getNpc,
+  getNpcDetails
+};

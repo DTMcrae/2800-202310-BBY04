@@ -1,14 +1,35 @@
-const MongoClient = require('mongodb').MongoClient;
-
 require('dotenv').config();
 
-const uri = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_HOST}/${process.env.MONGODB_DATABASE}?retryWrites=true&w=majority`;
+const mongodb_host = process.env.MONGODB_HOST;
+const mongodb_user = process.env.MONGODB_USER;
+const mongodb_password = process.env.MONGODB_PASSWORD;
+const mongodb_database = process.env.MONGODB_DATABASE;
 
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const MongoClient = require("mongodb").MongoClient;
+const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true`;
 
-async function connectToDatabase() {
-    await client.connect();
-    return client;
+const client = new MongoClient(atlasURI, { useNewUrlParser: true, useUnifiedTopology: true });
+const db = client.db(mongodb_database);
+
+class DbCollection {
+  constructor(collectionName) {
+    this.collection = db.collection(collectionName);
+  }
 }
 
-module.exports = { connectToDatabase };
+const collections = {
+  userCollection: new DbCollection('USERAUTH'),
+  classesCollection: new DbCollection('CLASSES'),
+  equipmentCollection: new DbCollection('EQUIPMENT'),
+  levelCollection: new DbCollection('LEVEL'),
+  monstersCollection: new DbCollection('MONSTERS'),
+  npcCollection: new DbCollection('NPC'),
+  partyMemCollection: new DbCollection('PARTYMEM'),
+  scenarioCollection: new DbCollection('SCENARIO'),
+  sessionCollection: new DbCollection('SESSION'),
+  spellsCollection: new DbCollection('SPELLS'),
+  userCharCollection: new DbCollection('USERCHAR'),
+  userSavedCollection: new DbCollection('USERSAVED'),
+};
+
+module.exports = collections;

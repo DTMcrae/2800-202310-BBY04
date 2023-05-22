@@ -8,10 +8,14 @@ const ObjectId = require('mongodb').ObjectId;
 const bcrypt = require('bcrypt');
 const saltRounds = 12;
 const path = require('path');
+// const {
+//     Configuration,
+//     OpenAIApi
+// } = require("openai");
 
 // forget password modules
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
+//const bodyParser = require('body-parser');
+//const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
@@ -36,52 +40,114 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 const mailgun_api_secret = process.env.MAILGUN_API_SECRET;
 /* END secret section */
 
+//Dasebase connection
+const { userCollection, 
+    classesCollection, 
+    equipmentCollection,
+    levelCollection,
+    monstersCollection,
+    npcCollection,
+    partyMemCollection,
+    scenarioCollection,
+    sessionCollection,
+    spellsCollection,
+    userCharCollection,
+    userSavedCollection  
+} = require('./databaseConnection');
+
+//password variables
+const formData = require('form-data');
+const Mailgun = require('mailgun.js');
+const mailgun = new Mailgun(formData);
+const mg = mailgun.client({
+    username: 'api',
+    key: mailgun_api_secret,
+});
+
+// Generate a random token for the password reset link
+function generateToken() {
+    return crypto.randomBytes(20).toString('hex');
+}
+
+function requireLogin(req, res, next) {
+    if (req.session.authenticated) {
+        next();
+    } else {
+        res.redirect('/userLoginScreen');
+    }
+}
+
+// Send the password reset email
+function sendPasswordResetEmail(user, token) {
+
+    // ******************* WILL NEED TO UPDATE DOMAIN WITH OUR CYCLISH.SH DOMAIN
+    const resetLink = `https://mydnd.cyclic.app/reset/${token}`;
+    // ******************* WILL NEED TO UPDATE DOMAIN WITH OUR CYCLISH.SH DOMAIN
+
+    mg.messages
+        .create('sandbox5227049b12c7448491caa1aa0c761516.mailgun.org', {
+            from: 'Mailgun Sandbox <postmaster@sandbox5227049b12c7448491caa1aa0c761516.mailgun.org>',
+            to: user.email,
+            subject: 'Password Reset Request',
+            text: `Hi ${user.name},\n\nYou are receiving this email because you (or someone else) has requested a password reset for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\nhttp://localhost:3000/reset/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n\nBest regards,\nThe D&D Dudes`,
+        })
+        .then((msg) => console.log(msg))
+        .catch((err) => console.log(err));
+}
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'))
 
+//review
 app.use('/scripts', express.static("public/scripts"));
+const combat = require('./public/scripts/combatManager')
+//end of review
 
-const {
-    connectToDatabase
-} = include('databaseConnection');
-let userCollection;
-
-async function init() {
-    const database = await connectToDatabase();
-    userCollection = database.db(mongodb_database).collection('USERAUTH');
-    // console.log("database connection:", {
-    //     serverConfig: userCollection.s.serverConfig,
-    //     options: userCollection.s.options
-    // });
-}
-
-init();
-
+app.use(express.static(__dirname + '/public'));
 
 app.use(express.urlencoded({
     extended: false
 }));
-// app.use(bodyParser.json());
+//app.use(bodyParser.json());
+
+// var mongoStore = MongoStore.create({
+//     mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
+//     crypto: {
+//         secret: mongodb_session_secret
+//     }
+// })
+
+// app.use(session({
+//     secret: node_session_secret,
+//     saveUninitialized: false,
+//     resave: true
+// }));
 
 var mongoStore = MongoStore.create({
-    mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
-    crypto: {
-        secret: mongodb_session_secret
-    }
+	mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`,
+	collectionName: 'session',
+	crypto: {
+		secret: mongodb_session_secret
+	}
 })
 
-app.use(express.static(__dirname + '/public'));
-
-app.use(session({
+app.use(session({ 
     secret: node_session_secret,
-    saveUninitialized: false,
-    resave: true
-}));
+	store: mongoStore, //default is memory store 
+	saveUninitialized: false, 
+	resave: true
+}
+));
 
-const {
-    Configuration,
-    OpenAIApi
-} = require("openai");
+/*--------------------------------------------------------------------------------------------------end of connections and imports-----------------------------------------------------------------------------------*/
+
+app.get('/', (req, res) => {
+    if(req.session.authenticated) {
+        res.redirect('/LandingScreen');
+        return;
+    }
+    res.render("userLoginScreen");
+});
 
 app.get('/LandingScreen', async (req, res) => {
     if (!req.session.authenticated) {
@@ -118,77 +184,11 @@ app.get('/passwordReset', (req, res) => {
     res.render('passwordReset');
 });
 
-app.get('/characterSelection', (req, res) => {
-    res.render('characterSelection');
-});
-
-app.get('/characterSelectionEasterEgg', (req, res) => {
-    res.render('characterSelectionEasterEgg');
-});
-
-app.get('/', (req, res) => {
-    if(req.session.authenticated) {
-        res.redirect('/LandingScreen');
-        return;
-    }
-    res.render("userLoginScreen");
-});
-
-app.get('/characterSelected', async (req, res) => {
-    try {
-        const selectedCharacter = req.query.class;
-        const database = await connectToDatabase();
-        const dbo = database.db(mongodb_database).collection('CLASSES');
-
-        const characterData = await dbo.findOne({
-            Class: selectedCharacter,
-            Level: 1
-        });
-
-        req.session.selectedClass = selectedCharacter;
-
-        if (characterData) {
-            res.render('characterSelected', {
-                characterData
-            }); // Pass characterData as a local variable
-        } else {
-            res.status(404).json({
-                error: 'Character not found'
-            });
-        }
-    } catch (error) {
-        console.error('Error fetching character data:', error);
-        res.status(500).json({
-            error: 'Internal Server Error'
-        });
-    }
-});
-
-app.post('/saveCharacter', async (req, res) => {
-
-    const database = await connectToDatabase();
-    const dbo = database.db(mongodb_database).collection('USERCHAR');
-
-    const characterStats = req.body;
-
-    console.log('Saving character:', characterStats);
-
-    dbo.insertOne(characterStats, (err, result) => {
-        if (err) {
-            console.error('Error saving character:', err);
-            res.sendStatus(500);
-        } else {
-            console.log('Character saved successfully');
-            res.sendStatus(200);
-        }
-    });
-});
-
 app.get('/userInfo', async (req, res) => {
     const userId = req.session.userID;
 
     // Fetch user data from MongoDB based on the provided ID
-    const user = await userCollection.findOne({
+    const user = await userCollection.collection.findOne({
         _id: new ObjectId(userId)
     });
 
@@ -201,32 +201,6 @@ app.get('/userInfo', async (req, res) => {
         user
     });
 });
-
-// Story Generation
-app.get('/story', (req, res) => {
-    res.render('story');
-});
-
-const story = require('./routes/story.js');
-
-// Story Initialization Middleware
-app.use((req, res, next) => {
-    if (typeof req.session.summary === 'undefined') {
-        req.session.summary = '';
-    }
-    for (let i = 1; i <= 12; i++) {
-        if (typeof req.session[`event${i}`] === 'undefined') {
-            req.session[`event${i}`] = '';
-        }
-    }
-    if (typeof req.session.currentEvent === 'undefined') {
-        req.session.currentEvent = 0;
-    }
-    next();
-});
-
-// Generates Story Pages
-app.use('/story', story);
 
 app.post('/submitUser', async (req, res) => {
     var name = req.body.name;
@@ -259,7 +233,7 @@ app.post('/submitUser', async (req, res) => {
     // User bcrypt to hash user's password
     var hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    await userCollection.insertOne({
+    await userCollection.collection.insertOne({
         name: name,
         email: email,
         password: hashedPassword,
@@ -267,7 +241,7 @@ app.post('/submitUser', async (req, res) => {
     });
     console.log("Inserted user");
 
-    const result = await userCollection.find({
+    const result = await userCollection.collection.find({
         email: email
     }).project({
         type: 1,
@@ -308,7 +282,7 @@ app.post('/loggingin', async (req, res) => {
         return;
     }
 
-    const result = await userCollection.find({
+    const result = await userCollection.collection.find({
         email: email
     }).project({
         type: 1,
@@ -345,14 +319,6 @@ app.post('/loggingin', async (req, res) => {
     }
 });
 
-function requireLogin(req, res, next) {
-    if (req.session.authenticated) {
-        next();
-    } else {
-        res.redirect('/userLoginScreen');
-    }
-}
-
 app.post('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
@@ -363,24 +329,7 @@ app.post('/logout', (req, res) => {
     });
 });
 
-const combat = require('./public/scripts/combatManager')
-
-app.use("/combat", combat);
-
 // Forget password Begin
-
-const formData = require('form-data');
-const Mailgun = require('mailgun.js');
-const mailgun = new Mailgun(formData);
-const mg = mailgun.client({
-    username: 'api',
-    key: mailgun_api_secret,
-});
-
-// Generate a random token for the password reset link
-function generateToken() {
-    return crypto.randomBytes(20).toString('hex');
-}
 
 // Render password reset form screen
 app.get('/reset/:token', (req, res) => {
@@ -392,29 +341,11 @@ app.get('/reset/:token', (req, res) => {
     });
 });
 
-// Send the password reset email
-function sendPasswordResetEmail(user, token) {
-
-    // ******************* WILL NEED TO UPDATE DOMAIN WITH OUR CYCLISH.SH DOMAIN
-    const resetLink = `https://mydnd.cyclic.app/reset/${token}`;
-    // ******************* WILL NEED TO UPDATE DOMAIN WITH OUR CYCLISH.SH DOMAIN
-
-    mg.messages
-        .create('sandbox5227049b12c7448491caa1aa0c761516.mailgun.org', {
-            from: 'Mailgun Sandbox <postmaster@sandbox5227049b12c7448491caa1aa0c761516.mailgun.org>',
-            to: user.email,
-            subject: 'Password Reset Request',
-            text: `Hi ${user.name},\n\nYou are receiving this email because you (or someone else) has requested a password reset for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\nhttp://localhost:3000/reset/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n\nBest regards,\nThe D&D Dudes`,
-        })
-        .then((msg) => console.log(msg))
-        .catch((err) => console.log(err));
-}
-
 // Handle the password reset request
 app.post('/forgot', async (req, res) => {
     const email = req.body.email;
 
-    const user = await userCollection.findOne({
+    const user = await userCollection.collection.findOne({
         email: email,
     });
 
@@ -447,8 +378,8 @@ app.post('/forgot', async (req, res) => {
 // Handle the password reset form submission
 app.post('/reset/:token', async (req, res) => {
     const token = req.params.token;
-
-    const user = await userCollection.findOne({
+ 
+    const user = await userCollection.collection.findOne({
         resetPasswordToken: token,
         resetPasswordExpires: {
             $gt: Date.now(),
@@ -469,7 +400,7 @@ app.post('/reset/:token', async (req, res) => {
     const newPassword = req.body.password;
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-    await userCollection.updateOne({
+    await userCollection.collection.updateOne({
         _id: user._id,
     }, {
         $set: {
@@ -491,14 +422,105 @@ app.post('/reset/:token', async (req, res) => {
 
 // Forget password End
 
-app.use(express.static(__dirname + "/public"));
+/*--------------------------------------------------------------------------------------------------end of langing page registration and login-----------------------------------------------------------------------------------*/
+
+app.get('/characterSelection', (req, res) => {
+    res.render('characterSelection');
+});
+
+app.get('/characterSelectionEasterEgg', (req, res) => {
+    res.render('characterSelectionEasterEgg');
+});
+
+app.get('/characterSelected', async (req, res) => {
+    try {
+        const selectedCharacter = req.query.class;
+        // const database = await connectToDatabase();
+        // const dbo = database.db(mongodb_database).collection('CLASSES');
+
+
+        const characterData = await classesCollection.collection.findOne({
+            Class: selectedCharacter,
+            Level: 1
+        });
+
+        req.session.selectedClass = selectedCharacter;
+
+        if (characterData) {
+            res.render('characterSelected', {
+                characterData
+            }); // Pass characterData as a local variable
+        } else {
+            res.status(404).json({
+                error: 'Character not found'
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching character data:', error);
+        res.status(500).json({
+            error: 'Internal Server Error'
+        });
+    }
+});
+
+app.post('/saveCharacter', async (req, res) => {
+
+    // const database = await connectToDatabase();
+    // const dbo = database.db(mongodb_database).collection('USERCHAR');
+
+    const characterStats = req.body;
+
+    console.log('Saving character:', characterStats);
+
+    userCollection.collection.insertOne(characterStats, (err, result) => {
+        if (err) {
+            console.error('Error saving character:', err);
+            res.sendStatus(500);
+        } else {
+            console.log('Character saved successfully');
+            res.sendStatus(200);
+        }
+    });
+});
+
+/*--------------------------------------------------------------------------------------------------end of user character-----------------------------------------------------------------------------------*/
+
+// Story Generation
+app.get('/story', (req, res) => {
+    res.render('story');
+});
+
+const story = require('./routes/story.js');
+
+// Story Initialization Middleware
+app.use((req, res, next) => {
+    if (typeof req.session.summary === 'undefined') {
+        req.session.summary = '';
+    }
+    for (let i = 1; i <= 12; i++) {
+        if (typeof req.session[`event${i}`] === 'undefined') {
+            req.session[`event${i}`] = '';
+        }
+    }
+    if (typeof req.session.currentEvent === 'undefined') {
+        req.session.currentEvent = 0;
+    }
+    next();
+});
+
+// Generates Story Pages
+app.use('/story', story);
+
+/*--------------------------------------------------------------------------------------------------end of story-----------------------------------------------------------------------------------*/
+
+app.use("/combat", combat);
+
+/*--------------------------------------------------------------------------------------------------end of combat-----------------------------------------------------------------------------------*/
 
 app.get("*", (req, res) => {
     res.status(404);
     res.send("Page not found - 404");
 })
-
-
 
 app.listen(port, () => {
     console.log("Node application listening on port " + port);
