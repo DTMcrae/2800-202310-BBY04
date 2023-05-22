@@ -49,7 +49,6 @@ let userCollection;
 async function init() {
     const database = await connectToDatabase();
     userCollection = database.db(mongodb_database).collection('USERAUTH');
-    console.log("Initialize function called");
     // console.log("database connection:", {
     //     serverConfig: userCollection.s.serverConfig,
     //     options: userCollection.s.options
@@ -63,7 +62,8 @@ app.use(express.urlencoded({
 // app.use(bodyParser.json());
 
 var mongoStore = MongoStore.create({
-    mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
+    mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`,
+    collectionName: 'session',
     crypto: {
         secret: mongodb_session_secret
     }
@@ -73,6 +73,7 @@ app.use(express.static(__dirname + '/public'));
 
 app.use(session({
     secret: node_session_secret,
+    store: mongoStore,
     saveUninitialized: false,
     resave: true
 }));
