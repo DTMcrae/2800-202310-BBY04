@@ -7,7 +7,7 @@
 <form id="roller" method="post">
     <button id="atkRoll" class="btn btn-secondary p-2 mb-2" style="width:25rem" type="button">Roll 1d20</button>
     <button id="dmgRoll" class="btn btn-secondary p-2 mb-2" style="width:25rem" dice="<%-Amount%>d<%-Dice%>" type="button">Roll <%- Amount %>d<%- Dice %></button>
-    <button id="continue" class="btn btn-secondary p-2 mb-2 disabled" style="width:25rem" type="button">Next</button>
+    <button id="continue" class="btn btn-secondary p-2 mb-2 loader disabled" style="width:25rem" type="button">Next</button>
 </form>
 </div>
 <% } %>
@@ -69,4 +69,6 @@
     }
 </script>
 
+<%- include("templates/combatLoadModal") %>
+<%- include("templates/combatErrorModal") %>
 <%- include("templates/combatBodyEnd") %>
