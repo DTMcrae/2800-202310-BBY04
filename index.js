@@ -500,6 +500,6 @@ app.get("*", (req, res) => {
 
 
 
-app.listen(port, () => {
+init().then(() => app.listen(port, () => {
     console.log("Node application listening on port " + port);
-});
+}));
