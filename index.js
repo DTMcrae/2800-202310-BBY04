@@ -83,6 +83,8 @@ const {
 } = require("openai");
 
 app.get('/LandingScreen', async (req, res) => {
+    console.log("Arrived at Landing Screen");
+    console.log("Authenticated:", req.session.authenticated);
     if (!req.session.authenticated) {
         res.redirect('/userLoginScreen');
         return;
@@ -331,7 +333,7 @@ app.post('/loggingin', async (req, res) => {
         req.session.cookie.maxAge = expireTime;
         req.session.type = result[0].type;
         req.session.userID = result[0]._id;
-
+        console.log("Authenticated:", req.session.authenticated);
 
         res.redirect('/LandingScreen');
         return;
