@@ -49,13 +49,12 @@ let userCollection;
 async function init() {
     const database = await connectToDatabase();
     userCollection = database.db(mongodb_database).collection('USERAUTH');
+    console.log("Initialize function called");
     // console.log("database connection:", {
     //     serverConfig: userCollection.s.serverConfig,
     //     options: userCollection.s.options
     // });
 }
-
-init();
 
 
 app.use(express.urlencoded({
