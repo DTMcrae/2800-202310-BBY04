@@ -192,13 +192,6 @@ console.log(`Server is running on port ${port}`);
 
 //test level up page
 app.get('/levelup', async (req, res) => {
-  const testCharacterData = {
-      name: "Test Wizard",
-      currentLevel: 1,
-      class: "Wizard",
-      subclass: "",
-      nextLevel: 2
-  };
 
   const levelUpData = await getLevelUpData(testCharacterData.class, testCharacterData.nextLevel);
   const spellData = await spellcasting(testCharacterData.class);

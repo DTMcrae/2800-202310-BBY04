@@ -24,6 +24,7 @@ confirmButton.addEventListener('click', function () {
 
     // Object to store the character data
     const characterData = {
+        userID: req.session.userID, //saving the user's id as a forgein key
         class: classElement.innerText,
         level: levelElement.innerText,
         abilityScores: getListItemTexts('abilityScoresList'),
