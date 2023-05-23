@@ -4,7 +4,7 @@
 <% if(typeof Dice !=='undefined') {%>
 <div class="options d-flex fixed-bottom flex-column pb-5 mb-4 ml-auto mr-auto" style="max-width: 25rem;">
 <p class="text-center">Roll!</p>
-<% if (typeof roll !== 'undefined') {%>
+<% if (typeof roll !== 'undefined' && roll !== 0) {%>
     <form id="roller" action="/combat/generatePlayerAction/<%- roll[0] %>_<%- roll[1] %>" method="post">
         <button id="atkRoll" class="btn btn-secondary p-2 mb-2 disabled" style="width:25rem" type="button">Roll 1d20</button>
         <button id="dmgRoll" class="btn btn-secondary p-2 mb-2 disabled" style="width:25rem" dice="<%-Amount%>d<%-Dice%>"
@@ -42,7 +42,7 @@
     </div>
 </div>
 
-<% if (typeof roll ==='undefined' ) {%>
+<% if (typeof roll ==='undefined' || roll === 0) {%>
 <script src="/scripts/DiceClient.js"></script>
 <script>
     this.atkRoll = undefined;
