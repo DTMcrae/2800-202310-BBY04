@@ -34,15 +34,15 @@ const emotion_NPC = ['desperate', 'hopeless', 'fearful', 'anxious', 'weary', 'sk
 const verb_location = ['living in', 'arriving at', 'visiting', 'exploring', 'investigating', 'found themselves in', 'randomly found', 'lived all their life in'];
 
 // Test values for story generation
-const NPC = 'Alistair';
+// const NPC = 'Alistair';
 
-const characters = [
-  { name: 'River', class: 'Druid' },
-  { name: 'Thorin', class: 'Fighter' }
-];
+// const characters = [
+//   { name: 'River', class: 'Druid' },
+//   { name: 'Thorin', class: 'Fighter' }
+// ];
 
-const enemies = ['bandit', 'goblin'];
-const boss = 'Beholder';
+// const enemies = ['bandit', 'goblin'];
+// const boss = 'Beholder';
 
 
 // The general story prompt asks for an adventure summary and event types
@@ -329,6 +329,9 @@ router.post('/generateStory', async (req, res) => {
 router.get('/story-event', async (req, res) => {
 
     const event = getNextEvent(req);
+    const characters = req.session.characters;
+    const monsterNames = req.session.monsterNames;
+    const npcList = req.session.npcList;
     
     // Generates a different event page depending on the next event type
     switch (event.type) {

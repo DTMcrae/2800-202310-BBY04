@@ -111,19 +111,6 @@ app.use(express.urlencoded({
 }));
 //app.use(bodyParser.json());
 
-// var mongoStore = MongoStore.create({
-//     mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
-//     crypto: {
-//         secret: mongodb_session_secret
-//     }
-// })
-
-// app.use(session({
-//     secret: node_session_secret,
-//     saveUninitialized: false,
-//     resave: true
-// }));
-
 var mongoStore = MongoStore.create({
 	mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`,
 	collectionName: 'SESSION',
@@ -473,15 +460,14 @@ app.post('/saveCharacter', async (req, res) => {
 
     console.log('Saving character:', characterStats);
 
-    userCollection.collection.insertOne(characterStats, (err, result) => {
-        if (err) {
-            console.error('Error saving character:', err);
-            res.sendStatus(500);
-        } else {
-            console.log('Character saved successfully');
-            res.sendStatus(200);
-        }
-    });
+    try {
+        const result = await userCollection.collection.insertOne(characterStats);
+        console.log('Character saved successfully');
+        res.sendStatus(200);
+    } catch (err) {
+        console.error('Error saving character:', err);
+        res.sendStatus(500);
+    }
 });
 
 /*--------------------------------------------------------------------------------------------------end of user character-----------------------------------------------------------------------------------*/
