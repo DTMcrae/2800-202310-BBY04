@@ -8,7 +8,7 @@ const Dice = require('./Dice.js');
 const openAI = new CombatAI(process.env.OPENAI_KEY);
 
 //Preset enemy and player information for testing.
-function presetPlayers() { return [{ name: "Draeven", class: "Ranger", maxHP: 10, hp: 99, ac: 12, gold: 0, actions: [{ name: "Greatbow" }, { name: "Dagger" }, { name: "Axe" }, { name: "Quarterstaff" }] }] }
+function presetPlayers() { return [{ name: "Draeven", class: "Ranger", maxHP: 10, hp: 99, ac: 12, gold: 0, actions: [{ name: "Greatbow" }, { name: "Dagger" }, { name: "Axe" }, { name: "Quarterstaff" }] }, { name: "Asha", class: "Rogue", maxHP: 10, hp: 99, ac: 12, gold: 0, actions: [{ name: "Greatbow" }, { name: "Dagger" }, { name: "Axe" }, { name: "Quarterstaff" }] }] }
 function presetEnemies() { return [{ name: "Goblin 1", hp: 7, ac: 9, desc: "A goblin wielding a dagger." }, { name: "Goblin 2", hp: 7, ac: 9, desc: "A goblin wielding a bow." }] }
 var players = [];
 var enemies = [];
@@ -16,14 +16,14 @@ var enemies = [];
 const prompts = new CombatPrompts();
 var initiative = new TurnOrder();
 
-router.get('/', (req, res) => {
+router.get('*', (req, res) => {
     // if(!req.session.authenticated)
     // {
     //     res.redirect("/userLoginScreen");
     //     return;
     // }
 
-    initializeCombat(req, res);
+    if(!req.session.combatInit) initializeCombat(req, res);
     req.session.lastURL = req.url;
 
     var currentActor = initiative.currentTurn();
@@ -59,6 +59,7 @@ function initializeCombat(req, res) {
     })
 
     initiative.assignNew(actors);
+    req.session.combatInit = true;
     this.combatEnded = false;
 }
 
@@ -129,7 +130,6 @@ function combatStatus() {
 
 //Checks if the response from chatGPT is null, and redirects to an error page.
 function verifyResponse(req, res, response, url) {
-    response = null;
     if(response === null) {
         //The below function works similar to a standard redirect, but treats it as a post request.
         res.redirect(307,url);
@@ -148,6 +148,7 @@ router.post("/victory", async (req,res) => {
     if (data.Result !== undefined) outro = data.Result.CombatOutro;
     else outro = data.CombatOutro;
 
+    req.session.combatInit = false;
     res.render("combatVictory", {
         summary: outro,
         players: players,
@@ -165,6 +166,7 @@ router.post("/defeat", async (req, res) => {
     if(data.Result !== undefined) outro = data.Result.CombatOutro;
     else outro = data.CombatOutro;
 
+    req.session.combatInit = false;
     res.render("combatDefeat", {
         summary: outro,
         players: players, 
@@ -194,21 +196,22 @@ router.post("/selectTarget/:target", async (req, res) => {
 
     let actor = initiative.getActorData(req.session.combatActor);
 
-    //Get the dice that needs to be rolled from chatGPT.
 
     var roll;
 
     if(actor.actions[req.session.combatAction].DamageDice === undefined) {
-    response = await openAI.generateRollRequest(prompts.generateBasicActionPrompt(actor.name, actor.actions[req.session.combatAction], req.params.target));
 
-    if(!verifyResponse(req,res,response,"/combat/selectTarget/" + req.params.target));
+        response = await openAI.generateRollRequest(prompts.generateBasicActionPrompt(actor.name, actor.actions[req.session.combatAction], req.params.target));
+
+        if(!verifyResponse(req,res,response,"/combat/selectAction/" + req.session.combatActor + "=" + req.session.combatAction));
     
-    response = formatResponse(response);
+        response = formatResponse(response);
 
-    let data = JSON.parse(response);
-    roll = (data.DamageDice).split('d');
-    actor.actions[req.session.combatAction].DamageDice = roll;
+        let data = JSON.parse(response);
+        roll = (data.DamageDice).split('d');
+        actor.actions[req.session.combatAction].DamageDice = roll;
     }
+
     else {
         roll = actor.actions[req.session.combatAction].DamageDice;
     }
@@ -218,7 +221,8 @@ router.post("/selectTarget/:target", async (req, res) => {
         Amount: roll[0],
         history: req.session.history,
         players: players,
-        isPlayer: true
+        isPlayer: true,
+        roll: req.session.combatRoll
     });
 });
 
@@ -233,6 +237,8 @@ router.post('/generatePlayerAction/:roll', async(req,res) => {
     let result = req.params.roll;
     result = result.toString().split('_');
 
+    req.session.combatRoll = result;
+
     let current = initiative.currentTurn();
 
     try {
@@ -243,10 +249,12 @@ router.post('/generatePlayerAction/:roll', async(req,res) => {
         let playerPrompt = prompts.playerTurnPrompt(current, prompts.assignAction(current.actions[req.session.combatAction], result[0], result[1]), initiative.getActorData(req.session.combatTarget), 300, 0.75);
 
         let text = await openAI.generateResponse(systemPrompt, playerPrompt);
-        if (!verifyResponse(req, res, text, '/combat')) {
+        if (!verifyResponse(req, res, text, '/combat/selectTarget/' + req.session.combatTarget)) {
             return;
         };
         text = formatResponse(text);
+
+        req.session.combatRoll = 0;
 
         // Store the received action, and update the history.
         updateHistory(req, JSON.parse(text));
