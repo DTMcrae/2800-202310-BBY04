@@ -192,12 +192,4 @@ class Data {
     }
 }
 
-module.exports = {
-  calculateAC,
-  getMonsterNames,
-  getMonsterInfo,
-  getBossMonsterNames,
-  getBossMonsterDetails,
-  getNpc,
-  getNpcDetails
-};
+module.exports = Data;

@@ -18,7 +18,8 @@ const path = require('path');
 //const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-
+const Data = require('./public/scripts/Data.js');
+const data = new Data();
 
 const port = process.env.PORT || 3000;
 
@@ -53,7 +54,7 @@ const { userCollection,
     spellsCollection,
     userCharCollection,
     userSavedCollection  
-} = require('./databaseConnection');
+} = require('./databaseConnection.js');
 
 //password variables
 const formData = require('form-data');
@@ -125,7 +126,7 @@ app.use(express.urlencoded({
 
 var mongoStore = MongoStore.create({
 	mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`,
-	collectionName: 'session',
+	collectionName: 'SESSION',
 	crypto: {
 		secret: mongodb_session_secret
 	}
@@ -486,14 +487,93 @@ app.post('/saveCharacter', async (req, res) => {
 /*--------------------------------------------------------------------------------------------------end of user character-----------------------------------------------------------------------------------*/
 
 // Story Generation
-app.get('/story', (req, res) => {
-    res.render('story');
+app.get('/story', async (req, res) => {
+    const userID = req.session.userID;
+    
+    // Check if userId exists
+    if (!userID) {
+        // Handle case when user is not logged in
+        return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    try {
+
+        const players = await userCharCollection.collection.find({ userID: new ObjectId(userID) }).toArray();
+
+        const mainChar = players.map(async (myPlayer) => {
+            const ac = await data.calculateAC(myPlayer);
+    
+            const Player = {
+                name: myPlayer.name, // replace 'name' with the correct field name for the character's name
+                class: myPlayer.Class,
+                maxHP: myPlayer.maxHP, // replace 'maxHP' with the correct field name for maxHP
+                hp: myPlayer.hp, // replace 'hp' with the correct field name for current HP
+                ac: ac,
+                gold: myPlayer.gold, // replace 'gold' with the correct field name for gold
+                actions: myPlayer.actions // replace 'actions' with the correct field name for actions
+            };
+            return Player;
+        });
+    
+        const partyMembers = await partyMemCollection.collection.find({}).toArray(); // replace with the correct query if necessary
+    
+        const presetPartyMembers = partyMembers.map(async (member) => {
+            const ac = await data.calculateAC(member);
+    
+            const partyMember = {
+                name: member.Name, // replace 'name' with the correct field name for the character's name
+                class: member.Class,
+                maxHP: member.maxHP, // replace 'maxHP' with the correct field name for maxHP
+                hp: member.hp, // replace 'hp' with the correct field name for current HP
+                ac: ac,
+                gold: member.gold, // replace 'gold' with the correct field name for gold
+                actions: member.actions // replace 'actions' with the correct field name for actions
+            };
+    
+            if (member.Domain) {
+                partyMember.domain = member.Domain;
+            }
+    
+            return partyMember;
+        });
+    
+        // Await all promises from map functions
+        const [mainCharObjects, presetPartyMemObjects] = await Promise.all([Promise.all(mainChar), Promise.all(presetPartyMembers)]);
+    
+        // Now we have arrays of objects, and we want to make sure we have exactly one main character and two party members
+        // For main character, we'll just take the first one (assuming there is at least one)
+        const mainCharObject = mainCharObjects[0];
+    
+        // For party members, we'll take the first two (assuming there are at least two)
+        const [partyMemObject1, partyMemObject2] = presetPartyMemObjects;
+    
+        // Now construct the allCharacters array
+        const characters = [mainCharObject, partyMemObject1, partyMemObject2];
+
+        const monsterNames = await data.getMonsterNames();
+        // const monsterInfo = await data.getMonsterInfo(name);
+        const npcList = await data.getNpc();
+        // const npcDetails = await data.getNpcDetails(name, background);
+    
+        req.session.characters = characters;
+        req.session.monsterNames = monsterNames;
+        req.session.npcList = npcList;
+    } catch (error) {
+        console.error('Error fetching character data:', error);
+    }
+
+    res.render('story', { characters: characters });
 });
+// add the below functions to your route to access them
+// const characters = req.session.characters;
+// const monsterNames = req.session.monsterNames;
+// const npcList = req.session.npcList;
 
 const story = require('./routes/story.js');
 
 // Story Initialization Middleware
 app.use((req, res, next) => {
+    const userId = req.session.userId;
     if (typeof req.session.summary === 'undefined') {
         req.session.summary = '';
     }

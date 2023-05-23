@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const OpenAI = require('../scripts/openai/openAI.js');
-const { ObjectId } = require('mongodb');
-const calculateAC = require('../public/scripts/Data.js');
 
 const openAI = new OpenAI(process.env.OPENAI_KEY);
 const model = 'gpt-3.5-turbo';
@@ -21,75 +19,7 @@ const { userCollection,
     spellsCollection,
     userCharCollection,
     userSavedCollection  
-} = require('../../databaseConnection.js');
-
-const userId = req.session.userId;
-
-try {
-    const players = await userCharCollection.collection.find({ userId: new ObjectId(userId) }).toArray();
-
-    const mainChar = players.map(async (myPlayer) => {
-        const ac = await calculateAC(myPlayer);
-
-        const Player = {
-            name: myPlayer.name, // replace 'name' with the correct field name for the character's name
-            class: myPlayer.Class,
-            maxHP: myPlayer.maxHP, // replace 'maxHP' with the correct field name for maxHP
-            hp: myPlayer.hp, // replace 'hp' with the correct field name for current HP
-            ac: ac,
-            gold: myPlayer.gold, // replace 'gold' with the correct field name for gold
-            actions: myPlayer.actions // replace 'actions' with the correct field name for actions
-        };
-        return Player;
-    });
-
-    const partyMembers = await partyMemCollection.collection.find({}).toArray(); // replace with the correct query if necessary
-
-    const presetPartyMembers = partyMembers.map(async (member) => {
-        const ac = await calculateAC(member);
-
-        const partyMember = {
-            name: member.Name, // replace 'name' with the correct field name for the character's name
-            class: member.Class,
-            maxHP: member.maxHP, // replace 'maxHP' with the correct field name for maxHP
-            hp: member.hp, // replace 'hp' with the correct field name for current HP
-            ac: ac,
-            gold: member.gold, // replace 'gold' with the correct field name for gold
-            actions: member.actions // replace 'actions' with the correct field name for actions
-        };
-
-        if (member.Domain) {
-            partyMember.domain = member.Domain;
-        }
-
-        return partyMember;
-    });
-
-    // Await all promises from map functions
-    const [mainCharObjects, presetPartyMemObjects] = await Promise.all([Promise.all(mainChar), Promise.all(presetPartyMembers)]);
-
-    // Now we have arrays of objects, and we want to make sure we have exactly one main character and two party members
-    // For main character, we'll just take the first one (assuming there is at least one)
-    const mainCharObject = mainCharObjects[0];
-
-    // For party members, we'll take the first two (assuming there are at least two)
-    const [partyMemObject1, partyMemObject2] = presetPartyMemObjects;
-
-    // Now construct the allCharacters array
-    const characters = [mainCharObject, partyMemObject1, partyMemObject2];
-
-    console.log(characters); // Now allCharacters is an array containing all the character objects
-} catch (error) {
-    console.error('Error fetching character data:', error);
-}
-
-const monsterNames = await data.getMonsterNames();
-const monsterInfo = await data.getMonsterInfo(name);
-const bossMonsterNames = await data.getBossMonsterNames();
-const bossMonsterDetails = await data.getBossMonsterDetails(name);
-const npcList = await data.getNpc();
-const npcDetails = await data.getNpcDetails(name, background);
-
+} = require('../databaseConnection.js');
 /*----------------------------------------------------------------------------end of Database connections loading variables------------------------------------------------------------------------------------------------------------------*/
 
 // Arrays for story generation. (note: N is for "Normal" games, B is for BCIT "Easter egg games")
@@ -106,10 +36,10 @@ const verb_location = ['living in', 'arriving at', 'visiting', 'exploring', 'inv
 // Test values for story generation
 const NPC = 'Alistair';
 
-// const characters = [
-//   { name: 'River', class: 'Druid' },
-//   { name: 'Thorin', class: 'Fighter' }
-// ];
+const characters = [
+  { name: 'River', class: 'Druid' },
+  { name: 'Thorin', class: 'Fighter' }
+];
 
 const enemies = ['bandit', 'goblin'];
 const boss = 'Beholder';
