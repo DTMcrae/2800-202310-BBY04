@@ -34,14 +34,14 @@ const emotion_NPC = ['desperate', 'hopeless', 'fearful', 'anxious', 'weary', 'sk
 const verb_location = ['living in', 'arriving at', 'visiting', 'exploring', 'investigating', 'found themselves in', 'randomly found', 'lived all their life in'];
 
 // Test values for story generation
-// const NPC = 'Alistair';
+const NPC = 'Alistair';
 
-// const characters = [
-//   { name: 'River', class: 'Druid' },
-//   { name: 'Thorin', class: 'Fighter' }
-// ];
+const characters = [
+  { name: 'River', class: 'Druid' },
+  { name: 'Thorin', class: 'Fighter' }
+];
 
-// const enemies = ['bandit', 'goblin'];
+const enemies = ['bandit', 'goblin'];
 // const boss = 'Beholder';
 
 
@@ -127,55 +127,55 @@ const generateNPCSC2 = (SC, SCA, rollResult, npcPrompt, scPrompt, characters, se
 
 };
 
-const generateEventPrompt = (eventNumber, events, NPC, goal, s_start, s_boss, characters, enemies, boss) => {
-    const eventType = events[eventNumber].type;
-    let prompt = "";
+// const generateEventPrompt = (eventNumber, events, NPC, goal, s_start, s_boss, characters, enemies, boss) => {
+//     const eventType = events[eventNumber].type;
+//     let prompt = "";
 
-    switch(eventType) {
+//     switch(eventType) {
         
-        // Narratives that set up a scene
-        case "Story_Intro":
-            prompt = `Describe the initial setting of "${s_start} in three sentences. This is the start of a new story for ${characters[0].name} and ${characters[1].name}. End the scene by having a worried "${NPC}" call over ${characters[0].name} and ${characters[1].name}.`;
-            break;
+//         // Narratives that set up a scene
+//         case "Story_Intro":
+//             prompt = `Describe the initial setting of "${s_start} in three sentences. This is the start of a new story for ${characters[0].name} and ${characters[1].name}. End the scene by having a worried "${NPC}" call over ${characters[0].name} and ${characters[1].name}.`;
+//             break;
 
-        case "Story_Event":
-            prompt = `Describe the setting, the situation, the characters' actions, and any complications. This is not the climax of the story.`;
-            break;
+//         case "Story_Event":
+//             prompt = `Describe the setting, the situation, the characters' actions, and any complications. This is not the climax of the story.`;
+//             break;
         
-        // NPC interaction events and outcomes
-        case "NPC_Quest":
-            prompt = `"${NPC}" tells ${characters[0].name} that they must ${goal}. Remember that the characters are already talking. Only ${NPC} speaks in this scene. Write the DnD scene with mostly dialogue in five sentences.`;
-            break;
+//         // NPC interaction events and outcomes
+//         case "NPC_Quest":
+//             prompt = `"${NPC}" tells ${characters[0].name} that they must ${goal}. Remember that the characters are already talking. Only ${NPC} speaks in this scene. Write the DnD scene with mostly dialogue in five sentences.`;
+//             break;
 
-         case "NPC_Q1":
-            prompt = `"${NPC}" provides more details about the goal to ${goal}. Write the dialogue in five sentences.`;
-            break;
+//          case "NPC_Q1":
+//             prompt = `"${NPC}" provides more details about the goal to ${goal}. Write the dialogue in five sentences.`;
+//             break;
         
-        case "NPC_Q2":
-            prompt = `"${NPC}" provides more details about the ${boss}. ${NPC} is not fully confident about the details, but they describe why ${boss} started ${conflict}. Write the dialogue in three sentences.`;
-            break;
+//         case "NPC_Q2":
+//             prompt = `"${NPC}" provides more details about the ${boss}. ${NPC} is not fully confident about the details, but they describe why ${boss} started ${conflict}. Write the dialogue in three sentences.`;
+//             break;
 
-        // Adventure and battle skill checks and outcomes
-        case "SkillCheck_prompt":
-            prompt = `${characters[0].name} and ${characters[1].name} accept the quest. As they leave "${setting2}, they are ambushed by "${enemies[0].name}" and ${characters[0].name} has to do a skill check. Describe the challenge and ask the player to roll a d20.`;
-            break;
+//         // Adventure and battle skill checks and outcomes
+//         case "SkillCheck_prompt":
+//             prompt = `${characters[0].name} and ${characters[1].name} accept the quest. As they leave "${setting2}, they are ambushed by "${enemies[0].name}" and ${characters[0].name} has to do a skill check. Describe the challenge and ask the player to roll a d20.`;
+//             break;
         
-        // Setting up a battle
-        case "Battle":
-            prompt = `The party have to fight "${enemies[0].name}" and "${enemies[1].name}" at ${setting3}. Describe the opponents.`;
-            break;
+//         // Setting up a battle
+//         case "Battle":
+//             prompt = `The party have to fight "${enemies[0].name}" and "${enemies[1].name}" at ${setting3}. Describe the opponents.`;
+//             break;
         
-        case "Boss battle":
-            prompt = `The party faces the climactic boss battle against "${boss}" at ${s_boss}. Describe the boss, the environment, the party's strategy, and the flow of the battle. Do not reveal the outcome yet.`;
-            break;
+//         case "Boss battle":
+//             prompt = `The party faces the climactic boss battle against "${boss}" at ${s_boss}. Describe the boss, the environment, the party's strategy, and the flow of the battle. Do not reveal the outcome yet.`;
+//             break;
 
-        default:
-            prompt = `Write a four line poem about the ${goal}.`;
-            break;
-    }
+//         default:
+//             prompt = `Write a four line poem about the ${goal}.`;
+//             break;
+//     }
 
-    return prompt;
-};
+//     return prompt;
+// };
 
 // This line serves static files from the 'images' directory
 router.use(express.static('images'));
@@ -186,32 +186,32 @@ function getRandomElement(array) {
     return array[randomIndex];
 }
 
-function getTwoRandomElements(array) {
-    let firstIndex = Math.floor(Math.random() * array.length);
-    let secondIndex = firstIndex;
+// function getTwoRandomElements(array) {
+//     let firstIndex = Math.floor(Math.random() * array.length);
+//     let secondIndex = firstIndex;
     
-    // Ensure the second index is not the same as the first
-    while (secondIndex === firstIndex) {
-        secondIndex = Math.floor(Math.random() * array.length);
-    }
+//     // Ensure the second index is not the same as the first
+//     while (secondIndex === firstIndex) {
+//         secondIndex = Math.floor(Math.random() * array.length);
+//     }
 
-    return [array[firstIndex], array[secondIndex]];
-}
+//     return [array[firstIndex], array[secondIndex]];
+// }
 
-function getThreeRandomElements(array) {
-    let indices = new Set();
+// function getThreeRandomElements(array) {
+//     let indices = new Set();
 
-    if(array.length < 3) {
-        throw new Error("Input array should have at least 3 unique elements");
-    }
+//     if(array.length < 3) {
+//         throw new Error("Input array should have at least 3 unique elements");
+//     }
     
-    while(indices.size < 3) {
-        let randomIndex = Math.floor(Math.random() * array.length);
-        indices.add(randomIndex);
-    }
+//     while(indices.size < 3) {
+//         let randomIndex = Math.floor(Math.random() * array.length);
+//         indices.add(randomIndex);
+//     }
 
-    return Array.from(indices).map(index => array[index]);
-}
+//     return Array.from(indices).map(index => array[index]);
+// }
 
 // *** Temp Diceroll function ***//
 function rollD20() {
@@ -268,8 +268,14 @@ router.post('/generateStory', async (req, res) => {
         const randomType = getRandomElement(types);
         console.log('Story type: ', randomType);
 
+        //pulling monster and npc names from session
+        // const monsterNames = req.session.monsterNames;
+        const npcList = req.session.npcList;
+        const nString = JSON.stringify(npcList)
+        // const characters = req.session.characters;
+
         // Creates the story and parses the text into a JSON object
-        const responseText = await openAI.generateText(generateStoryPrompt(randomType, bcit), model, 1600);
+        const responseText = await openAI.generateText(generateStoryPrompt(randomType, bcit), model);
         const responseObject = JSON.parse(responseText);
 
         // Store the generated story summary and events in the session
@@ -330,8 +336,6 @@ router.get('/story-event', async (req, res) => {
 
     const event = getNextEvent(req);
     const characters = req.session.characters;
-    const monsterNames = req.session.monsterNames;
-    const npcList = req.session.npcList;
     
     // Generates a different event page depending on the next event type
     switch (event.type) {

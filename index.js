@@ -461,7 +461,7 @@ app.post('/saveCharacter', async (req, res) => {
     console.log('Saving character:', characterStats);
 
     try {
-        const result = await userCollection.collection.insertOne(characterStats);
+        const result = await userCharCollection.collection.insertOne(characterStats);
         console.log('Character saved successfully');
         res.sendStatus(200);
     } catch (err) {
@@ -544,11 +544,11 @@ app.get('/story', async (req, res) => {
         req.session.characters = characters;
         req.session.monsterNames = monsterNames;
         req.session.npcList = npcList;
+        res.render('story', { characters: characters });
     } catch (error) {
         console.error('Error fetching character data:', error);
     }
 
-    res.render('story', { characters: characters });
 });
 // add the below functions to your route to access them
 // const characters = req.session.characters;
@@ -559,7 +559,7 @@ const story = require('./routes/story.js');
 
 // Story Initialization Middleware
 app.use((req, res, next) => {
-    const userId = req.session.userId;
+    const userID = req.session.userID;
     if (typeof req.session.summary === 'undefined') {
         req.session.summary = '';
     }
