@@ -52,11 +52,22 @@ class Data {
   //function for loading all npc with thier background into an object array
   async getNpc() {
     const npcList = await npcCollection.collection.aggregate([
+        { 
+          $match: {
+            name: { $not: /Character/ }, // filter out documents where the name contains 'Character'
+            stats_1: { $ne: 0 }, // filter out documents where 'stats_1' is not equal to 0
+            stats_2: { $ne: 0 }, // repeat for all stats
+            stats_3: { $ne: 0 },
+            stats_4: { $ne: 0 },
+            stats_5: { $ne: 0 },
+            stats_6: { $ne: 0 }
+          }
+        },
         { $sample: { size: 5 } },
-        { $project: { _id: 0, name: 1, background: 1 } }
+        { $project: { _id: 0, char_id: 1, name: 1, background: 1 } }
     ]).toArray();
     return npcList.map(npc => ({ name: npc.name, background: npc.background }));
-}
+  }
 
   //function of returning all the npc details
   async getNpcDetails(name, background) {

@@ -17,9 +17,14 @@ class OpenAI {
             const response = await this.openai.createChatCompletion({
                 model: "gpt-3.5-turbo",
                 messages: [{
-                    role: "system",
-                    content: "You are a story narrator creating a fantasy story based on DnD 5e",
-                }],
+                        role: "system",
+                        content: "You are a story narrator creating a fantasy story based on DnD 5e"
+                    },
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
                 temperature: temp,
             });
             console.log(`request cost: ${response.data.usage.total_tokens} tokens`);

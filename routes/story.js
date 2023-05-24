@@ -63,9 +63,9 @@ const generateStoryPrompt = (NPC, monster, randomType, bcit) => {
     - "s_travel": The name of a location they need to travel through to reach the central conflict or goal. Only provide the name.
     - "s_boss": The location where the central conflict or goal can be resolved. Only provide the name.
     - "npc_role": The role of the NPC who tells you about the adventure. Only provide their title.
-    - "npm_name": Select an NPC this array ${NPC}
-    - "monster_1": Select a monster appropriate for the setting from this array ${monster} 
-    - "monster_2": Select a monster appropriate for the setting from this array ${monster} 
+    - "npm_name": Look at this list of potential characters: ${NPC}. Choose one that fits the story best and provide their name from the list.
+    - "monster_1": Consider this list of monsters: ${monster}. Select a monster appropriate for the adventure and provide their name from the list. Do not invent a new monster.
+    - "monster_2": Consider this list of monsters: ${monster}. Select a monster appropriate for the adventure and provide their name from the list. Do not invent a new monster.
     
     Please structure your response in the following format:
     
@@ -112,7 +112,7 @@ const generateDialogue = (qtopic, NPC, characters) => {
 };
 
 const generateNPCSC = (characters, selectedClass, NPC, enemies) => {
-    return `As they finish talking, ${characters[0].name} and ${NPC} are ambushed by a ${enemies[0]} and a ${enemies[1]}. ${characters[0].name} employs various skills in response to the surprise attack.
+    return `As they finish talking, ${characters[0].name} and ${NPC} are ambushed by two ${enemies[0]}s. ${characters[0].name} employs various skills in response to the surprise attack.
 
     1. In two sentences, depict the unfolding attack. Do not refer to the enemies with "the". Remember that the action is just starting.
     2. Choose two different skill checks. For each, provide a brief action phrase starting with "Try to" indicating how the skill check is used. Remember that the player is ${characters[0].name} and is a ${selectedClass}.
@@ -130,7 +130,7 @@ const generateNPCSC = (characters, selectedClass, NPC, enemies) => {
 };
 
 const generateNPCSC2 = (SC, SCA, rollResult, npcPrompt, scPrompt, characters, selectedClass, NPC, enemies) => {
-    return `We are in the middle of a scene where ${characters[0].name} and ${NPC} are in the middle of a conversation when they are ambushed by a ${enemies[0]} and a ${enemies[1]}.
+    return `We are in the middle of a scene where ${characters[0].name} and ${NPC} are in the middle of a conversation when they are ambushed by two ${enemies[0]}s.
     
     ${characters[0].name} does an ${SC} check to ${SCA}. The skill check is a ${rollResult}.
     
@@ -142,7 +142,7 @@ const generateNPCSC2 = (SC, SCA, rollResult, npcPrompt, scPrompt, characters, se
 };
 
 const generateNPCSC3 = (npcPrompt, npcReaction, characters, NPC, enemies, goal, s_travel) => {
-    return `In this scene, ${characters[0].name} has defeated the ${enemies[0]} and the ${enemies[1]} ${npcPrompt} ${NPC}.
+    return `In this scene, ${characters[0].name} has defeated two ${enemies[0]}s ${npcPrompt} ${NPC}.
     
     ${npcReaction} with ${characters[0].name}'s abilities, ${NPC} tells ${characters[0].name} that they need to team up to ${goal}. ${NPC} advises that in order to do so, they need to navigate through ${s_travel}.
     
@@ -150,17 +150,18 @@ const generateNPCSC3 = (npcPrompt, npcReaction, characters, NPC, enemies, goal, 
 
 };
 
-const generateJourney = (characters, selectedClass, NPC, s_travel) => {
-    return `In this scene, ${characters[0].name} and ${NPC} are navigating through ${s_travel}.
+const generateJourney = (characters, selectedClass, NPC, s_travel, enemies) => {
+    return `In this adventure, ${characters[0].name} and ${NPC} are navigating through ${s_travel}.
 
+    There are two scenes:
     1. Describe the setting and how the characters feel during their travels in four sentences.
-    2. Create a problem that prevents ${characters[0].name} and ${NPC} from travelling through ${s_travel}. The problem must be something that can be resolved by a skill check for a ${selectedClass}. The problem must not be about fighting an enemy.
+    2. ${enemies[1]} appears and creates an obstacle that prevents ${characters[0].name} and ${NPC} from travelling further. The problem must be something that can be resolved by a skill check for a ${selectedClass} by ${characters[0].name}. Set up the problem but do not resolve it. The problem must not be about fighting an enemy. Write this scene in two sentences.
 
     Format your response as follows:
     
     {
-      "journey_text": "Description of the scene",
-      "journey_problem": "The problem they need to overcome",
+      "journey_text": "Description of the first scene",
+      "journey_problem": "Description of the second scene",
     }`
 
 };
@@ -411,7 +412,7 @@ router.get('/story-event', async (req, res) => {
 
         case 'story-journey':
 
-            const journeyText = await openAI.generateText(generateJourney(characters, req.session.selectedClass, NPC, req.session.s_travel), model, 3000);
+            const journeyText = await openAI.generateText(generateJourney(characters, req.session.selectedClass, NPC, req.session.s_travel, req.session.enemies), model, 3000);
             const journeyObject = JSON.parse(journeyText);
 
             req.session.journey_text = journeyObject.journey_text;
@@ -586,7 +587,7 @@ router.get('/story-journey2', async (req, res) => {
 
     const NPC = req.session.npc_name;
 
-    const journey2Text = await openAI.generateText(generateJourney2(req.session.journey_problem, characters, req.session.selectedClass, NPC, req.session.s_travel), model, 3000);
+    const journey2Text = await openAI.generateText(generateJourney2(req.session.journey_problem, characters, req.session.selectedClass, NPC, req.session.s_travel, req.session.enemies), model, 3000);
     const journey2Object = JSON.parse(journey2Text);
 
     console.log('journey 2 text:', journey2Text);
@@ -617,6 +618,14 @@ router.post('/test', async (req, res) => {
     // *** ChatGPT line to test here **//
     const NPC = req.session.npc_name;
 
+    const journeyText = await openAI.generateText(generateJourney(characters, req.session.selectedClass, NPC, req.session.s_travel, req.session.enemies), model, 3000);
+    const journeyObject = JSON.parse(journeyText);
+
+    req.session.journey_text = journeyObject.journey_text;
+    req.session.journey_problem = journeyObject.journey_problem;
+
+    console.log('journey_text:', req.session.journey_text);
+    console.log('journey_problem:', req.session.journey_problem);
     // *** End test area **//
 
     res.render('story', {
