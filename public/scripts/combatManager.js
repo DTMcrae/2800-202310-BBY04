@@ -69,6 +69,8 @@ router.get('*', async (req, res) => {
         return;
     }
 
+    console.log(req.session);
+
     if(!req.session.combatInit) startCombat(req);
     req.session.lastURL = req.url;
 
@@ -88,7 +90,7 @@ function startCombat(req) {
     let actors = [];
 
     //Assign the preset players/enemies
-    let players = presetPlayers();
+    let players = (req.session.characters !== undefined) ? req.session.characters : presetPlayers();
     let enemies = presetEnemies();
 
     //Roll initiative for each player
