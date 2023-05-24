@@ -1,16 +1,33 @@
 @media (max-width: 6000px) {
   body {
-    background-image: url(../images/Landing_Page_backgroun_HiRes.jpg);
+    background-image: url(../images/Landing_Page_backgroun_HiRes2.jpg);
     background-size: 100% auto;
     background-repeat: repeat-y;
   }
 
-  #button-container {
+  #button_Container {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: auto auto auto;
+    /* grid-template-areas: 
+      "b1 b2"
+      "b3 b4"
+      "b5 b6"; */
+    grid-gap: 20px;
     justify-content: center;
     align-items: center;
   }
+
+  .menu-button {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    text-align: center;
+    width: 200px;
+    margin: 0 auto;
+  }
+  
 }
 
 @media (max-width: 600px) {
@@ -21,17 +38,25 @@
   h1 {
     color: black;
   }
-}
 
-.menu-button {
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  text-align: center;
-  width: 250px;
-  margin: 0 auto;
+  .menu-button {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    text-align: center;
+    width: 250px;
+    margin: 0 auto;
+  }
+
+  #button_Container {
+    display: grid;
+    grid-template-columns: auto;
+    grid-gap: 20px;
+    justify-content: center;
+    align-items: center;
+  }
 }
 
 .user-welcome {
