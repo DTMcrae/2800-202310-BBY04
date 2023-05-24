@@ -585,6 +585,68 @@ app.use("/combat", combat);
 
 /*--------------------------------------------------------------------------------------------------end of combat-----------------------------------------------------------------------------------*/
 
+app.get('/levelup/:characterId', async (req, res) => {
+    try {
+      // fetch character data from the database
+      const characterData = await userCharCollection.collection.findOne({ _id: ObjectId(req.params.characterId) });
+  
+      // parse class and level
+      const className = characterData.class.replace('Give Your Wizard a Name', '').trim();
+      let currentLevel = parseInt(characterData.level.replace('Level: ', '').trim());
+      let nextLevel = currentLevel + 1;      
+  
+      // fetch level up and spell data
+      const levelUpData = await data.getLevelUpData(className, nextLevel);
+      const spellData = await data.getSpellData(className, nextLevel);
+  
+      // update character data
+      const updatedCharacterData = {
+        ...characterData,
+        level: 'Level: ' + nextLevel.toString(),
+        ...levelUpData,
+        spells: spellData
+      };          
+  
+      // update character in the database
+      await userCharCollection.collection.updateOne({ _id: ObjectId(req.params.characterId) }, { $set: updatedCharacterData });
+  
+      // render the level up page
+      res.render('levelup', { updatedCharacterData, spells: updatedCharacterData.spells });
+  
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error while leveling up');
+    }
+});
+  
+app.post('/levelup', (req, res) => {
+    let selectedSkills = req.body.skillSelection;
+  
+    // If more than 3 skills are selected, return an error message
+    if(selectedSkills.length > 3) {
+      res.send("You can only select 3 skills");
+      return;
+    }
+  
+    // Assuming you have the user's id stored in a variable called userId
+    let userId = req.session.userId;
+  
+    // Update the spells field in the user's document in the collection
+    userCharCollection.collection.updateOne(
+        { _id: userId }, 
+        { $set: { spells: selectedSkills } }
+      )
+      .then(result => {
+        console.log(result);
+        res.send("Skills updated successfully");
+      })
+      .catch(err => {
+        console.log(err);
+        res.send("Error updating skills");
+      });      
+});
+  
+/*----------------------------------------------------------------------------------------------------end of leveling up-------------------------------------------------------------------------------*/  
 app.use("/loadGame", loadGame);
 
 app.get("*", (req, res) => {
