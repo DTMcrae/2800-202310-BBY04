@@ -1,0 +1,32 @@
+body {
+    background-image: url("../images/load_bg_large.jpg");
+    color: white;
+}
+
+h5 {
+    color: white;
+}
+
+h6 {
+    color: rgb(185, 185, 185);
+}
+
+p {
+    color: white;
+}
+
+.save-card {
+    max-width: 30rem;
+    width: 100%;
+}
+
+.transparent {
+    background-color: rgba(43, 43, 43, .75);
+}
+
+@media only screen and (max-width: 500px) {
+    body {
+        background-image: url("../images/load_bg.jpg");
+        background-position: 50% 0%;
+    }
+}
