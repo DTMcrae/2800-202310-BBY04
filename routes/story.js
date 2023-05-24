@@ -36,10 +36,11 @@ const verb_location = ['living in', 'arriving at', 'visiting', 'exploring', 'inv
 // Test values for story generation
 // const NPC = 'Alistair';
 
-const characters = [
-  { name: 'River', class: 'Druid' },
-  { name: 'Thorin', class: 'Fighter' }
-];
+const characters = userCharCollection.characters;
+// [
+//   { name: 'River', class: 'Druid' },
+//   { name: 'Thorin', class: 'Fighter' }
+// ];
 
 // const enemies = ['bandit', 'goblin'];
 // const boss = 'Beholder';
