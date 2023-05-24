@@ -34,26 +34,14 @@ const random_class = ['barbarian', 'bard', 'cleric', 'druid', 'fighter', 'monk',
 const emotion_NPC = ['desperate', 'hopeless', 'fearful', 'anxious', 'weary', 'skeptical', 'grateful', 'resigned', 'suspicious', 'regretful', 'grieiving', 'nervous', 'awestruck', 'excited', 'curious', 'hopeful', 'relieved', 'happy'];
 const verb_location = ['living in', 'arriving at', 'visiting', 'exploring', 'investigating', 'found themselves in', 'randomly found', 'lived all their life in'];
 
-// Test values for story generation
-// const NPC = 'Alistair';
 
-const characters = [{
-        name: 'Alistair',
-        class: 'Druid'
-    },
-    {
-        name: 'Thorin',
-        class: 'Fighter'
-    }
-];
-
-// const enemies = ['bandit', 'goblin'];
-// const boss = 'Beholder';
+const characters = userCharCollection.characters;
 
 
 // The general story prompt asks for an adventure summary and event types
 const generateStoryPrompt = (NPC, monster, randomType, bcit) => {
-
+    console.log(NPC);
+    console.log(monster);
     return `Imagine you are creating a detailed DnD adventure ${randomType} ${bcit}. Please provide the following details:
 
     - "title": The title of the adventure.
@@ -63,7 +51,7 @@ const generateStoryPrompt = (NPC, monster, randomType, bcit) => {
     - "s_travel": The name of a location they need to travel through to reach the central conflict or goal. Only provide the name.
     - "s_boss": The location where the central conflict or goal can be resolved. Only provide the name.
     - "npc_role": The role of the NPC who tells you about the adventure. Only provide their title.
-    - "npm_name": Look at this list of potential characters: ${NPC}. Choose one that fits the story best and provide their name from the list.
+    - "npc_name": Look at this list of potential characters: ${NPC}. Choose one that fits the story best and provide their name from the list.
     - "monster_1": Consider this list of monsters: ${monster}. Select a monster appropriate for the adventure and provide their name from the list. Do not invent a new monster.
     - "monster_2": Consider this list of monsters: ${monster}. Select a monster appropriate for the adventure and provide their name from the list. Do not invent a new monster.
     
@@ -266,7 +254,7 @@ router.post('/generateStory', async (req, res) => {
         const npcList = req.session.npcList;
         const nString = JSON.stringify(npcList);
         // const characters = req.session.characters;
-
+        // async() => await openAI.generateDM();
         // Creates the story and parses the text into a JSON object
         const responseText = await openAI.generateText(generateStoryPrompt(nString, mString, randomType, bcit), model);
         const responseObject = JSON.parse(responseText);
@@ -343,6 +331,7 @@ router.post('/generateStory', async (req, res) => {
 
         // Sends title and summary to the story generation screen
         res.render('story', {
+            userID: req.session.userID,
             title: req.session.title,
             summary: req.session.summary,
         });
@@ -359,8 +348,6 @@ router.post('/generateStory', async (req, res) => {
 router.get('/story-event', async (req, res) => {
 
     const event = getNextEvent(req);
-    const NPC = req.session.npc_name;
-    const enemies = req.session.enemies;
 
     // Generates a different event page depending on the next event type
     switch (event.type) {
@@ -369,7 +356,7 @@ router.get('/story-event', async (req, res) => {
 
             const randomVerb = getRandomElement(verb_location);
 
-            const introText = await openAI.generateText(generateIntro(req.session.selectedClass, randomVerb, req.session.s_start, NPC, req.session.npc_role), model, 800);
+            const introText = await openAI.generateText(generateIntro(req.session.selectedClass, randomVerb, req.session.s_start, req.session.npcSelected, req.session.npc_role), model, 800);
 
             res.render('story-intro', {
                 text: introText
@@ -380,7 +367,7 @@ router.get('/story-event', async (req, res) => {
 
             const randomEmotion = getRandomElement(emotion_NPC);
 
-            const npcText = await openAI.generateText(generateNPC(NPC, randomEmotion, characters, req.session.goal), model, 800);
+            const npcText = await openAI.generateText(generateNPC(req.session.npcSelected, randomEmotion, characters, req.session.goal), model, 800);
             console.log(npcText);
 
             // Generates an array of questions to ask the NPC
@@ -390,7 +377,7 @@ router.get('/story-event', async (req, res) => {
                 text: npcText,
                 emotion: randomEmotion,
                 goal: req.session.goal,
-                NPC: NPC,
+                NPC: req.session.npc_name,
                 s_start: req.session.s_start,
                 questions: req.session.questions,
                 npc_role: req.session.npc_role
@@ -400,7 +387,7 @@ router.get('/story-event', async (req, res) => {
 
         case 'story-npcSC':
 
-            const npcscText = await openAI.generateText(generateNPCSC(characters, req.session.selectedClass, NPC, enemies), model, 3000);
+            const npcscText = await openAI.generateText(generateNPCSC(characters, req.session.selectedClass, req.session.npcSelected, req.session.enemies), model, 3000);
             const npcscObject = JSON.parse(npcscText);
 
             req.session.npc_atk = npcscObject.npc_atk;
@@ -426,7 +413,7 @@ router.get('/story-event', async (req, res) => {
 
         case 'story-journey':
 
-            const journeyText = await openAI.generateText(generateJourney(characters, req.session.selectedClass, NPC, req.session.s_travel, req.session.enemies), model, 3000);
+            const journeyText = await openAI.generateText(generateJourney(characters, req.session.selectedClass, req.session.npc_name, req.session.s_travel, req.session.enemies), model, 3000);
             const journeyObject = JSON.parse(journeyText);
 
             req.session.journey_text = journeyObject.journey_text;
@@ -455,7 +442,6 @@ router.get('/story-npcCHAT', async (req, res) => {
 
     const questionKey = req.query.question;
     let qtopic;
-    const NPC = req.session.npc_name;
 
     // Removes a question if it was already asked
     const questionIndex = req.session.questions.indexOf(questionKey);
@@ -466,7 +452,7 @@ router.get('/story-npcCHAT', async (req, res) => {
     // Changes the prompts based on the button pressed
     switch (questionKey) {
         case 'mission':
-            qtopic = 'why ' + NPC + ' needs a ' + req.session.selectedClass + ' to ' + req.session.goal;
+            qtopic = 'why ' + req.session.npcSelected + ' needs a ' + req.session.selectedClass + ' to ' + req.session.goal;
             break;
 
         case 'npc':
@@ -483,7 +469,7 @@ router.get('/story-npcCHAT', async (req, res) => {
     console.log('Question Index:', questionIndex);
     console.log('QTopic:', qtopic);
 
-    const dialogueText = await openAI.generateText(generateDialogue(qtopic, NPC, characters), model, 800);
+    const dialogueText = await openAI.generateText(generateDialogue(qtopic, req.session.npcSelected, characters), model, 800);
     console.log('Response from OpenAI: ', dialogueText);
     const dialogueObject = JSON.parse(dialogueText);
 
@@ -498,7 +484,7 @@ router.get('/story-npcCHAT', async (req, res) => {
         Q2: req.session.Q2,
         A2: req.session.A2,
         goal: req.session.goal,
-        NPC: NPC,
+        NPC: req.session.npc_name,
         s_start: req.session.s_start,
         questions: req.session.questions
     });
@@ -506,9 +492,6 @@ router.get('/story-npcCHAT', async (req, res) => {
 });
 
 router.get('/story-npcSC2', async (req, res) => {
-
-    const NPC = req.session.npc_name;
-    const enemies = req.session.enemies;
 
     let rollResult = rollD20();
     console.log('Skill Check Dice roll:' + rollResult.roll);
@@ -552,7 +535,7 @@ router.get('/story-npcSC2', async (req, res) => {
         SCA = req.session.SCA2;
     }
 
-    const npcsc2Text = await openAI.generateText(generateNPCSC2(SC, SCA, req.session.rollResult, npcPrompt, scPrompt, characters, req.session.selectedClass, NPC, enemies), model, 1600);
+    const npcsc2Text = await openAI.generateText(generateNPCSC2(SC, SCA, req.session.rollResult, npcPrompt, scPrompt, characters, req.session.selectedClass, req.session.npc_name, req.session.enemies), model, 1600);
     console.log(npcsc2Text);
 
     res.render('story-npcSC2', {
@@ -627,9 +610,6 @@ router.get('/story-journey2', async (req, res) => {
 
 router.get('/story-journey3', async (req, res) => {
 
-    const NPC = req.session.npc_name;
-    const enemies = req.session.enemies;
-
     let rollResult = rollD20();
     console.log('Skill Check Dice roll:' + rollResult.roll);
     console.log('Skill Check Result:' + rollResult.result);
@@ -686,7 +666,7 @@ router.get('/story-journey3', async (req, res) => {
         SCA = req.session.SCA4;
     }
 
-    const journey3Text = await openAI.generateText(generateJourney3(req.session.journey_problem, SC, SCA, req.session.rollResult, npcPrompt, scPrompt, enemyPrompt, characters, req.session.selectedClass, NPC, enemies), model, 1600);
+    const journey3Text = await openAI.generateText(generateJourney3(req.session.journey_problem, SC, SCA, req.session.rollResult, npcPrompt, scPrompt, enemyPrompt, characters, req.session.selectedClass, req.session.npc_name, req.session.enemies), model, 1600);
     console.log(journey3Text);
 
     res.render('story-journey3', {

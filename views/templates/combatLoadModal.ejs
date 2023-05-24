@@ -1,0 +1,26 @@
+<div class="modal fade" id="loadModal" tabindex="-1" role="dialog" aria-labelledby="loadModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loadModalLongTitle">Thinking...</h5>
+            </div>
+            <div class="modal-body">
+                <p>Your Dungeon Master is taking a moment to think...</p>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.loader').forEach(element => {
+        element.addEventListener('click', () => {
+            if(element.classList.contains('disabled')) return;
+            $('#loadModal').modal({ backdrop: 'static', keyboard: false });
+            $('#loadModal').modal("show");
+        });
+    })
+</script>

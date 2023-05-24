@@ -42,10 +42,10 @@ class OpenAI {
             // Send a request to the OpenAI API to generate text
             const response = await this.openai.createChatCompletion({
                 model: "gpt-3.5-turbo",
-                messages: [{
-                    role: "user",
-                    content: prompt,
-                }],
+                messages: [
+                    {role: "system",content: "You are a story narrator creating a fantasy story based on DnD 5e"},
+                    {role: "user",content: prompt}
+                ],
                 max_tokens: tokens,
                 temperature: temp,
             });

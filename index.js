@@ -14,7 +14,7 @@ const path = require('path');
 // } = require("openai");
 
 // forget password modules
-//const bodyParser = require('body-parser');
+const bodyParser = require('body-parser');
 //const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
@@ -101,7 +101,8 @@ app.set('views', path.join(__dirname, 'views'))
 
 //review
 app.use('/scripts', express.static("public/scripts"));
-const combat = require('./public/scripts/combatManager')
+const combat = require('./public/scripts/combatManager');
+const loadGame = require('./public/scripts/loadGame');
 //end of review
 
 app.use(express.static(__dirname + '/public'));
@@ -109,7 +110,7 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({
     extended: false
 }));
-//app.use(bodyParser.json());
+app.use(bodyParser.json());
 
 var mongoStore = MongoStore.create({
 	mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`,
@@ -422,34 +423,35 @@ app.get('/characterSelectionEasterEgg', (req, res) => {
 
 app.get('/characterSelected', async (req, res) => {
     try {
-        const selectedCharacter = req.query.class;
-        // const database = await connectToDatabase();
-        // const dbo = database.db(mongodb_database).collection('CLASSES');
-
-
-        const characterData = await classesCollection.collection.findOne({
-            Class: selectedCharacter,
-            Level: 1
+      const selectedCharacter = req.query.class;
+  
+      const characterData = await classesCollection.collection.findOne({
+        Class: selectedCharacter,
+        Level: 1
+      });
+  
+      const userID = req.session.userID; 
+  
+      req.session.selectedClass = selectedCharacter;
+  
+      if (characterData) {
+        res.render('characterSelected', {
+          characterData,
+          userID 
         });
-
-        req.session.selectedClass = selectedCharacter;
-
-        if (characterData) {
-            res.render('characterSelected', {
-                characterData
-            }); // Pass characterData as a local variable
-        } else {
-            res.status(404).json({
-                error: 'Character not found'
-            });
-        }
+      } else {
+        res.status(404).json({
+          error: 'Character not found'
+        });
+      }
     } catch (error) {
-        console.error('Error fetching character data:', error);
-        res.status(500).json({
-            error: 'Internal Server Error'
-        });
+      console.error('Error fetching character data:', error);
+      res.status(500).json({
+        error: 'Internal Server Error'
+      });
     }
-});
+  });
+  
 
 app.post('/saveCharacter', async (req, res) => {
 
@@ -484,14 +486,14 @@ app.get('/story', async (req, res) => {
     
     try {
 
-        const players = await userCharCollection.collection.find({ userID: new ObjectId(userID) }).toArray();
+        const players = await userCharCollection.collection.find({ userID: userID }).toArray();
 
         const mainChar = players.map(async (myPlayer) => {
             const ac = await data.calculateAC(myPlayer);
     
             const Player = {
                 name: myPlayer.name, // replace 'name' with the correct field name for the character's name
-                class: myPlayer.Class,
+                class: myPlayer.class,
                 maxHP: myPlayer.maxHP, // replace 'maxHP' with the correct field name for maxHP
                 hp: myPlayer.hp, // replace 'hp' with the correct field name for current HP
                 ac: ac,
@@ -544,7 +546,7 @@ app.get('/story', async (req, res) => {
         req.session.characters = characters;
         req.session.monsterNames = monsterNames;
         req.session.npcList = npcList;
-        res.render('story', { characters: characters });
+        res.render('story', { userID: req.session.userID, characters: characters });
     } catch (error) {
         console.error('Error fetching character data:', error);
     }
@@ -582,6 +584,70 @@ app.use('/story', story);
 app.use("/combat", combat);
 
 /*--------------------------------------------------------------------------------------------------end of combat-----------------------------------------------------------------------------------*/
+
+app.get('/levelup/:characterId', async (req, res) => {
+    try {
+      // fetch character data from the database
+      const characterData = await userCharCollection.collection.findOne({ _id: ObjectId(req.params.characterId) });
+  
+      // parse class and level
+      const className = characterData.class.replace('Give Your Wizard a Name', '').trim();
+      let currentLevel = parseInt(characterData.level.replace('Level: ', '').trim());
+      let nextLevel = currentLevel + 1;      
+  
+      // fetch level up and spell data
+      const levelUpData = await data.getLevelUpData(className, nextLevel);
+      const spellData = await data.getSpellData(className, nextLevel);
+  
+      // update character data
+      const updatedCharacterData = {
+        ...characterData,
+        level: 'Level: ' + nextLevel.toString(),
+        ...levelUpData,
+        spells: spellData
+      };          
+  
+      // update character in the database
+      await userCharCollection.collection.updateOne({ _id: ObjectId(req.params.characterId) }, { $set: updatedCharacterData });
+  
+      // render the level up page
+      res.render('levelup', { updatedCharacterData, spells: updatedCharacterData.spells });
+  
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error while leveling up');
+    }
+});
+  
+app.post('/levelup', (req, res) => {
+    let selectedSkills = req.body.skillSelection;
+  
+    // If more than 3 skills are selected, return an error message
+    if(selectedSkills.length > 3) {
+      res.send("You can only select 3 skills");
+      return;
+    }
+  
+    // Assuming you have the user's id stored in a variable called userId
+    let userId = req.session.userId;
+  
+    // Update the spells field in the user's document in the collection
+    userCharCollection.collection.updateOne(
+        { _id: userId }, 
+        { $set: { spells: selectedSkills } }
+      )
+      .then(result => {
+        console.log(result);
+        res.send("Skills updated successfully");
+      })
+      .catch(err => {
+        console.log(err);
+        res.send("Error updating skills");
+      });      
+});
+  
+/*----------------------------------------------------------------------------------------------------end of leveling up-------------------------------------------------------------------------------*/  
+app.use("/loadGame", loadGame);
 
 app.get("*", (req, res) => {
     res.status(404);

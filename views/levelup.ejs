@@ -4,27 +4,33 @@
         <title>DnD Level Up</title>
     </head>
     <body>
-        <h1>Character: <%= characterData.name %></h1>
-        <p>Current Level: <%= characterData.currentLevel %></p>
-        <p>Next Level: <%= characterData.currentLevel + 1 %></p>
+        <h1>Character: <%= updatedCharacterData.name %></h1>
+        <p>Current Level: <%= updatedCharacterData.level.replace('Level:', '').trim() %></p>
+        <p>Next Level: <%= parseInt(updatedCharacterData.level.replace('Level:', '').trim()) + 1 %></p>               
         
-        <h2>Skill Options:</h2>
-        <ul>
-            <% for(let skill of skillOptions) { %>
-                <li><%= skill %></li>
-            <% } %>
-        </ul>
+        <form action="/levelup" method="POST">
+            <h2>Skill Options:</h2>
+            <ul>
+                <% for(let spell of spells) { %>
+                    <li>
+                      <input type="checkbox" id="<%= spell.name %>" name="skillSelection" value="<%= spell.name %>">
+                      <label for="<%= spell.name %>"><%= spell.name %></label>
+                    </li>
+                <% } %>                      
+            </ul>
+            <input type="submit" value="Submit">
+          </form>          
 
-        <% if(characterData.currentLevel === 1) { %>
+        <% if(updatedCharacterData.level.replace('Level: ', '').trim() === '1') { %>
             <h2>Subclass Options:</h2>
             <ul>
                 <% for(let subclass of subclassOptions) { %>
                     <li><%= subclass %></li>
                 <% } %>
             </ul>
-        <% } else { %>
-            <h2>Subclass Details:</h2>
-            <p><%= characterData.subclass %></p>
-        <% } %>
+            <% } else { %>
+                <h2>Subclass Details:</h2>
+                <p><%= updatedCharacterData.subclass %></p>
+            <% } %>            
     </body>
 </html>
