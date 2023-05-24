@@ -101,7 +101,8 @@ app.set('views', path.join(__dirname, 'views'))
 
 //review
 app.use('/scripts', express.static("public/scripts"));
-const combat = require('./public/scripts/combatManager')
+const combat = require('./public/scripts/combatManager');
+const loadGame = require('./public/scripts/loadGame');
 //end of review
 
 app.use(express.static(__dirname + '/public'));
@@ -582,6 +583,8 @@ app.use('/story', story);
 app.use("/combat", combat);
 
 /*--------------------------------------------------------------------------------------------------end of combat-----------------------------------------------------------------------------------*/
+
+app.use("/loadGame", loadGame);
 
 app.get("*", (req, res) => {
     res.status(404);
