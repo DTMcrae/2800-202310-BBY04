@@ -29,7 +29,7 @@ const bcitN = '';
 const bcitB = 'at BCIT';
 
 // Arrays for event generation to randomize either the event or the emotion in the scene
-const random_class = ['barbarian', 'bard', 'cleric', 'druid', 'fighter', 'monk', 'paladin', 'ranger', 'rogue', 'sorcerer', 'warlock', 'wizard', 'BCIT student'];
+const random_class = ['barbarian', 'bard', 'cleric', 'druid', 'fighter', 'monk', 'paladin', 'ranger', 'rogue', 'sorcerer', 'warlock', 'wizard', 'BCIT Nerd'];
 const emotion_NPC = ['desperate', 'hopeless', 'fearful', 'anxious', 'weary', 'skeptical', 'grateful', 'resigned', 'suspicious', 'regretful', 'grieiving', 'nervous', 'awestruck', 'excited', 'curious', 'hopeful', 'relieved', 'happy'];
 const verb_location = ['living in', 'arriving at', 'visiting', 'exploring', 'investigating', 'found themselves in', 'randomly found', 'lived all their life in'];
 
@@ -37,7 +37,7 @@ const verb_location = ['living in', 'arriving at', 'visiting', 'exploring', 'inv
 // const NPC = 'Alistair';
 
 const characters = [
-  { name: 'River', class: 'Druid' },
+  { name: 'Alistair', class: 'Druid' },
   { name: 'Thorin', class: 'Fighter' }
 ];
 
@@ -54,10 +54,12 @@ const generateStoryPrompt = (NPC, monster, randomType, bcit) => {
     - "summary": An overall summary of the adventure that describes the central conflict or goal. Please write the summary in three sentences. Leave the outcome a mystery to maintain the suspense.
     - "goal": Describe the central goal of the adventure in one sentence. Use the format "<action> the <noun>"
     - "s_start": The name of the location where the story starts. Only provide the name.
-    - "s_soss": The location where the central conflict or goal can be resolved. Only provide the name.
+    - "s_travel": The name of a location they need to travel through to reach the central conflict or goal. Only provide the name.
+    - "s_boss": The location where the central conflict or goal can be resolved. Only provide the name.
     - "npc_role": The role of the NPC who tells you about the adventure. Only provide their title.
-    - Please use npc's from this array ${NPC}
-    - Please use monster's from this array ${monster} 
+    - "npm_name": Select an NPC this array ${NPC}
+    - "monster_1": Select a monster appropriate for the setting from this array ${monster} 
+    - "monster_2": Select a monster appropriate for the setting from this array ${monster} 
     
     Please structure your response in the following format:
     
@@ -66,10 +68,12 @@ const generateStoryPrompt = (NPC, monster, randomType, bcit) => {
       "summary": "<summary>",
       "goal": "<goal>",
       "s_start": "<setting>"
+      "s_travel: "<setting>"
       "s_boss": "<setting>"
       "npc_role": "<role>"
       "npc_name" : "<name>"
-      "monster_name" : "<name>"
+      "monster_1" : "<monster name>"
+      "monster_2" : "<monster name>"
     
     }`;
 };
@@ -115,70 +119,30 @@ const generateNPCSC = (characters, selectedClass, NPC, enemies) => {
       "SCA1": "How the first skill check is used",
       "SC2": "Second Skill",
       "SCA2": "How the second skill check is used",
-
     }`
 
 };
 
 const generateNPCSC2 = (SC, SCA, rollResult, npcPrompt, scPrompt, characters, selectedClass, NPC, enemies) => {
-    return `We are in the middle of a scene where ${characters[0].name} and ${NPC} are ambushed by a ${enemies[0]} and a ${enemies[1]}.
+    return `We are in the middle of a scene where ${characters[0].name} and ${NPC} are in the middle of a conversation when they are ambushed by a ${enemies[0]} and a ${enemies[1]}.
     
     ${characters[0].name} does an ${SC} check to ${SCA}. The skill check is a ${rollResult}.
     
     Describe the outcome of the skill check event in three sentences. Remember that ${characters[0].name} is a ${selectedClass}. 
-    ${NPC} ${npcPrompt}. ${characters[0].name} ${scPrompt}. End the scene with ${characters[0].name} continuing the fight.`
+    ${NPC} ${npcPrompt}. 
+    ${characters[0].name} ${scPrompt}. 
+    End the scene with ${characters[0].name} continuing the fight.`
 
 };
 
-// const generateEventPrompt = (eventNumber, events, NPC, goal, s_start, s_boss, characters, enemies, boss) => {
-//     const eventType = events[eventNumber].type;
-//     let prompt = "";
+const generateNPCSC3 = (npcPrompt, npcReaction, characters, NPC, enemies, goal, s_travel) => {
+    return `In this scene, ${characters[0].name} has defeated the ${enemies[0]} and the ${enemies[1]} ${npcPrompt} ${NPC}.
+    
+    ${npcReaction} with ${characters[0].name}'s abilities, ${NPC} tells ${characters[0].name} that they need to team up to ${goal}. ${NPC} advises that in order to do so, they need to navigate through ${s_travel}.
+    
+    Describe scene in five sentences.`
 
-//     switch(eventType) {
-        
-//         // Narratives that set up a scene
-//         case "Story_Intro":
-//             prompt = `Describe the initial setting of "${s_start} in three sentences. This is the start of a new story for ${characters[0].name} and ${characters[1].name}. End the scene by having a worried "${NPC}" call over ${characters[0].name} and ${characters[1].name}.`;
-//             break;
-
-//         case "Story_Event":
-//             prompt = `Describe the setting, the situation, the characters' actions, and any complications. This is not the climax of the story.`;
-//             break;
-        
-//         // NPC interaction events and outcomes
-//         case "NPC_Quest":
-//             prompt = `"${NPC}" tells ${characters[0].name} that they must ${goal}. Remember that the characters are already talking. Only ${NPC} speaks in this scene. Write the DnD scene with mostly dialogue in five sentences.`;
-//             break;
-
-//          case "NPC_Q1":
-//             prompt = `"${NPC}" provides more details about the goal to ${goal}. Write the dialogue in five sentences.`;
-//             break;
-        
-//         case "NPC_Q2":
-//             prompt = `"${NPC}" provides more details about the ${boss}. ${NPC} is not fully confident about the details, but they describe why ${boss} started ${conflict}. Write the dialogue in three sentences.`;
-//             break;
-
-//         // Adventure and battle skill checks and outcomes
-//         case "SkillCheck_prompt":
-//             prompt = `${characters[0].name} and ${characters[1].name} accept the quest. As they leave "${setting2}, they are ambushed by "${enemies[0].name}" and ${characters[0].name} has to do a skill check. Describe the challenge and ask the player to roll a d20.`;
-//             break;
-        
-//         // Setting up a battle
-//         case "Battle":
-//             prompt = `The party have to fight "${enemies[0].name}" and "${enemies[1].name}" at ${setting3}. Describe the opponents.`;
-//             break;
-        
-//         case "Boss battle":
-//             prompt = `The party faces the climactic boss battle against "${boss}" at ${s_boss}. Describe the boss, the environment, the party's strategy, and the flow of the battle. Do not reveal the outcome yet.`;
-//             break;
-
-//         default:
-//             prompt = `Write a four line poem about the ${goal}.`;
-//             break;
-//     }
-
-//     return prompt;
-// };
+};
 
 // This line serves static files from the 'images' directory
 router.use(express.static('images'));
@@ -188,33 +152,6 @@ function getRandomElement(array) {
     const randomIndex = Math.floor(Math.random() * array.length);
     return array[randomIndex];
 }
-
-// function getTwoRandomElements(array) {
-//     let firstIndex = Math.floor(Math.random() * array.length);
-//     let secondIndex = firstIndex;
-    
-//     // Ensure the second index is not the same as the first
-//     while (secondIndex === firstIndex) {
-//         secondIndex = Math.floor(Math.random() * array.length);
-//     }
-
-//     return [array[firstIndex], array[secondIndex]];
-// }
-
-// function getThreeRandomElements(array) {
-//     let indices = new Set();
-
-//     if(array.length < 3) {
-//         throw new Error("Input array should have at least 3 unique elements");
-//     }
-    
-//     while(indices.size < 3) {
-//         let randomIndex = Math.floor(Math.random() * array.length);
-//         indices.add(randomIndex);
-//     }
-
-//     return Array.from(indices).map(index => array[index]);
-// }
 
 // *** Temp Diceroll function ***//
 function rollD20() {
@@ -279,7 +216,7 @@ router.post('/generateStory', async (req, res) => {
         // const characters = req.session.characters;
 
         // Creates the story and parses the text into a JSON object
-        const responseText = await openAI.generateText(generateStoryPrompt(nString, monsterNames, randomType, bcit), model);
+        const responseText = await openAI.generateText(generateStoryPrompt(nString, mString, randomType, bcit), model);
         const responseObject = JSON.parse(responseText);
 
         // Store the generated story summary and events in the session
@@ -288,15 +225,19 @@ router.post('/generateStory', async (req, res) => {
         req.session.title = responseObject.title;
         req.session.goal = responseObject.goal;
         req.session.s_start = responseObject.s_start;
+        req.session.s_travel = responseObject.s_travel;
         req.session.s_boss = responseObject.s_boss;
         req.session.npc_role = responseObject.npc_role;
+        req.session.npc_name = responseObject.npc_name;
+
+        req.session.enemies = [responseObject.monster_1, responseObject.monster_2];
 
         req.session.currentEvent = 1;
         req.session.events = {
             "1": { "type": "story-intro" },
             "2": { "type": "story-npc" },
             "3": { "type": "story-npcSC" },
-            "4": { "type": "story-npcsc" },
+            "4": { "type": "story-journey" },
             "5": { "type": "SkillCheck_prompt" },
             "6": { "type": "SkillCheck_fail" },
             "7": { "type": "SkillCheck_partial" },
@@ -318,8 +259,11 @@ router.post('/generateStory', async (req, res) => {
         console.log('Title:', req.session.title);
         console.log('Goal:', req.session.goal);
         console.log('Start location:', req.session.s_start);
+        console.log('Travel location:', req.session.s_travel);
         console.log('Boss location:', req.session.s_boss);
         console.log('NPC role:', req.session.npc_role);
+        console.log('NPC name:', req.session.npc_name);
+        console.log('Enemies:', req.session.enemies);
 
         // Sends title and summary to the story generation screen
         res.render('story', {
@@ -339,7 +283,8 @@ router.post('/generateStory', async (req, res) => {
 router.get('/story-event', async (req, res) => {
 
     const event = getNextEvent(req);
-    const characters = req.session.characters;
+    const NPC = req.session.npc_name;
+    const enemies = req.session.enemies;
     
     // Generates a different event page depending on the next event type
     switch (event.type) {
@@ -402,6 +347,7 @@ router.get('/story-npcCHAT', async (req, res) => {
 
     const questionKey = req.query.question;
     let qtopic;
+    const NPC = req.session.npc_name;
     
     // Removes a question if it was already asked
     const questionIndex = req.session.questions.indexOf(questionKey);
@@ -444,14 +390,18 @@ router.get('/story-npcCHAT', async (req, res) => {
 
 router.get('/story-npcSC2', async (req, res) => {
 
+    const NPC = req.session.npc_name;
+    const enemies = req.session.enemies;
+
     let rollResult = rollD20();
     console.log('Skill Check Dice roll:' + rollResult.roll);
     console.log('Skill Check Result:' + rollResult.result);   
 
     let scPrompt;
     let npcPrompt;
+    req.session.rollResult = rollResult.result;
 
-    switch(rollResult.result) {
+    switch(req.session.rollResult) {
         case 'Critical Failure':
             npcPrompt = "is knocked unconcious.";
             scPrompt = "takes damage and has to fight both enemies alone.";
@@ -485,10 +435,44 @@ router.get('/story-npcSC2', async (req, res) => {
         SCA = req.session.SCA2;
     }
 
-    const npcsc2Text = await openAI.generateText(generateNPCSC2(SC, SCA, rollResult.result, npcPrompt, scPrompt, characters, req.session.selectedClass, NPC, enemies), model, 1600);
+    const npcsc2Text = await openAI.generateText(generateNPCSC2(SC, SCA, req.session.rollResult, npcPrompt, scPrompt, characters, req.session.selectedClass, NPC, enemies), model, 1600);
     console.log(npcsc2Text);
 
-    res.render('story-npcSC2', { text: npcsc2Text, });
+    res.render('story-npcSC2', { text: npcsc2Text, rollResult: rollResult.roll });
+});
+
+router.get('/story-npcSC3', async (req, res) => {
+
+    let npcPrompt;
+    let npcReaction;
+
+    switch(req.session.rollResult) {
+        case 'Critical Failure':
+            npcPrompt = "and wakes up the wounded";
+            npcReaction = "Despite appearing concerned and unimpressed";
+            break;
+        case 'Failure':
+            npcPrompt = "and tends to the wounded";
+            npcReaction = "Despite appearing disappointed";
+            break;
+        case 'Partial Success':
+            npcPrompt = "with";
+            npcReaction = "Appearing content";
+            break;
+        case 'Success':
+            npcPrompt = "with";
+            npcReaction = "Clearly impressed";
+            break;
+        case 'Critical Success':
+            npcPrompt = "with";
+            npcReaction = "Appearing pleasantly surprised and clearly impressed";
+            break;
+    }
+
+    const npcsc3Text = await openAI.generateText(generateNPCSC3(npcPrompt, npcReaction, characters, req.session.npc_name, req.session.enemies, req.session.goal, req.session.s_travel), model, 1600);
+    console.log(npcsc3Text);
+
+    res.render('story-npcSC3', { text: npcsc3Text, });
 });
 
 
