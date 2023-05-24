@@ -7,11 +7,11 @@ const imageLocation = params.get('image');
 const imgElement = document.getElementById('characterImage');
 const classElement = document.getElementById('characterClass');
 const levelElement = document.getElementById('levelHeading');
+const characterNameInput = document.getElementById('characterName');
 
 // Update the elements on the characterSelected screen with the parameters
 if (characterClass && imageLocation) {
     imgElement.src = imageLocation;
-    classElement.innerText = characterClass;
 }
 
 // Reference to the "Confirm Character" button
@@ -19,16 +19,20 @@ const confirmButton = document.getElementById('confirmButton');
 
 // Retrieve the userID from the data attribute of the confirm button
 const userID = confirmButton.getAttribute('data-userid');
-
 console.log("userID " + userID);
 
 // Event listener to the "Confirm Character" button
 confirmButton.addEventListener('click', function () {
     console.log('Confirm button clicked');
 
+    // Retrieve the character name from the input field
+    const characterName = characterNameInput.value;
+    console.log("characterName " + characterName);
+
     // Object to store the character data
     const characterData = {
         userID: userID, // Saving the user's id as a foreign key
+        name: characterName,
         class: classElement.innerText,
         level: levelElement.innerText,
         abilityScores: getListItemTexts('abilityScoresList'),
