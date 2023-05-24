@@ -485,7 +485,7 @@ app.get('/story', async (req, res) => {
     
     try {
 
-        const players = await userCharCollection.collection.find({ userID: new ObjectId(userID) }).toArray();
+        const players = await userCharCollection.collection.find({ userID: userID }).toArray();
 
         const mainChar = players.map(async (myPlayer) => {
             const ac = await data.calculateAC(myPlayer);

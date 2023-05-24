@@ -67,7 +67,7 @@ class Data {
   //function for defing ac
     async calculateAC(character) {
       let baseAC = 10; // base AC when no armor is worn
-      let dexMod = Math.floor((character.AbilityScores.Dexterity - 10) / 2); // calculate Dexterity modifier
+      let dexMod = Math.floor((Number((character.abilityScores[1]).split(" ")) - 10) / 2); // calculate Dexterity modifier
     
       // the AC values and max DEX mod bonus are predefined for simplicity. Ideally, these should be in a database or another data structure
       const armorValues = {
