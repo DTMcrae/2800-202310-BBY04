@@ -22,7 +22,8 @@ const userID = confirmButton.getAttribute('data-userid');
 console.log("userID " + userID);
 
 // Event listener to the "Confirm Character" button
-confirmButton.addEventListener('click', function () {
+confirmButton.addEventListener('click', function (event) {
+    event.preventDefault();
     console.log('Confirm button clicked');
 
     // Retrieve the character name from the input field
@@ -51,16 +52,16 @@ confirmButton.addEventListener('click', function () {
             },
             body: JSON.stringify(characterData)
         })
-        .then(response => {
-            if (response.ok) {
-                console.log('Character saved successfully');
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                window.location.href = '/story';
             } else {
-                console.error('Failed to save character:', response.status);
+                console.error("Error saving data.");
             }
+        }).catch((error) => {
+            console.error("Error: ", error);
         })
-        .catch(error => {
-            console.error('Error saving character:', error);
-        });
 });
 
 function arrayToMap(array) {
