@@ -7,8 +7,9 @@ const model = 'gpt-3.5-turbo';
 
 /*----------------------------------------------------------------------------Database connections loading variables------------------------------------------------------------------------------------------------------------------*/
 //Dasebase connection
-const { userCollection, 
-    classesCollection, 
+const {
+    userCollection,
+    classesCollection,
     equipmentCollection,
     levelCollection,
     monstersCollection,
@@ -18,12 +19,12 @@ const { userCollection,
     sessionCollection,
     spellsCollection,
     userCharCollection,
-    userSavedCollection  
+    userSavedCollection
 } = require('../databaseConnection.js');
 /*----------------------------------------------------------------------------end of Database connections loading variables------------------------------------------------------------------------------------------------------------------*/
 
 // Arrays for story generation. (note: N is for "Normal" games, B is for BCIT "Easter egg games")
-const typesN = ['', '', '', '', 'about a lost villager', 'about fighting bandit raiders', 'about fighting a gang of thugs', 'about a bounty hunt', 'about fighting goblins', 'about a magic portal', 'about defending a village', 'about stealing back an artifact', 'about a haunted mansion', 'about a separated couple', 'about a missing royal', 'about a rescue', 'about a heist', 'about a rivalry', 'about a journey', 'about an intruder', 'about a rebellion', 'about an artifact', 'about a prophecy', 'about a tournament', 'about an escape', 'about a hunt', 'about a treasure hunt', 'about strange magic', 'about a tower defense', 'about a lost cat',];
+const typesN = ['', '', '', '', 'about a lost villager', 'about fighting bandit raiders', 'about fighting a gang of thugs', 'about a bounty hunt', 'about fighting goblins', 'about a magic portal', 'about defending a village', 'about stealing back an artifact', 'about a haunted mansion', 'about a separated couple', 'about a missing royal', 'about a rescue', 'about a heist', 'about a rivalry', 'about a journey', 'about an intruder', 'about a rebellion', 'about an artifact', 'about a prophecy', 'about a tournament', 'about an escape', 'about a hunt', 'about a treasure hunt', 'about strange magic', 'about a tower defense', 'about a lost cat', ];
 const typesB = ['', 'about time travel back to BCIT opening in 1969', 'about squeaky classroom chairs', 'about a campus coffee shortage', 'about an extremely long line at Tim Horton\'s', 'about loud noises at the BCIT library', 'about an overcrowded BCIT gym', 'about find a parking spot', 'about a lost student', 'about fighting a rival school', 'about fighting school bullies', 'about missing textbooks', 'about a cursed exam', 'about a magic portal', 'about defending the campus', 'about stealing back stolen documents', 'about a haunted building', 'about separated friends', 'about a team of students working on an AI project', 'about an Easter Egg mission', 'about AI', 'about a student imposter', 'about a rescue', 'about restoring power to campus', 'about cursed code', 'about rogue AI', 'about escaping a virtual reality program', 'about a cybersecurity breach', 'about a vanishing classroom', 'about a lost cat'];
 const bcitN = '';
 const bcitB = 'at BCIT';
@@ -36,9 +37,14 @@ const verb_location = ['living in', 'arriving at', 'visiting', 'exploring', 'inv
 // Test values for story generation
 // const NPC = 'Alistair';
 
-const characters = [
-  { name: 'Alistair', class: 'Druid' },
-  { name: 'Thorin', class: 'Fighter' }
+const characters = [{
+        name: 'Alistair',
+        class: 'Druid'
+    },
+    {
+        name: 'Thorin',
+        class: 'Fighter'
+    }
 ];
 
 // const enemies = ['bandit', 'goblin'];
@@ -78,12 +84,12 @@ const generateStoryPrompt = (NPC, monster, randomType, bcit) => {
     }`;
 };
 
-const generateIntro = (selectedClass, verb, s_start, NPC, npc_role) => {    
+const generateIntro = (selectedClass, verb, s_start, NPC, npc_role) => {
     return `Start a DnD adventure about a player character of the "${selectedClass}" class who is "${verb}" "${s_start}" in four sentences. Refer to the character as "you" after introducing them. Describe the character and the setting. End the scene by having ${NPC} the ${npc_role} call out to the main character. Don't introduce any conflict. `;
 };
 
 const generateNPC = (NPC, emotion, characters, goal) => {
-    return `A "${emotion}" "${NPC}" tells ${characters[0].name} that they must ${goal}. Remember that they are already talking. Describe the scene in two sentences.`;
+    return `A "${emotion}" "${NPC}" tells ${characters[0].name} that they must ${goal}. Describe the scene in three sentences.`;
 };
 
 const generateDialogue = (qtopic, NPC, characters) => {
@@ -155,6 +161,22 @@ const generateJourney = (characters, selectedClass, NPC, s_travel) => {
     {
       "journey_text": "Description of the scene",
       "journey_problem": "The problem they need to overcome",
+    }`
+
+};
+
+const generateJourney2 = (problem, characters, selectedClass, NPC, s_travel) => {
+    return `We are in the middle of a scene where ${characters[0].name} and ${NPC} are navigating ${s_travel}. ${problem}.
+
+    Choose two different skill checks. For each, provide a brief action phrase starting with "Try to" indicating how the skill check is used. Remember that the player is ${characters[0].name} and is a ${selectedClass}.
+
+    Format your response as follows:
+    
+    {
+      "SC3": "First Skill",
+      "SCA3": "How the first skill check is used",
+      "SC4": "Second Skill",
+      "SCA4": "How the second skill check is used",
     }`
 
 };
@@ -249,20 +271,44 @@ router.post('/generateStory', async (req, res) => {
 
         req.session.currentEvent = 1;
         req.session.events = {
-            "1": { "type": "story-intro" },
-            "2": { "type": "story-npc" },
-            "3": { "type": "story-npcSC" },
-            "4": { "type": "story-journey" },
-            "5": { "type": "SkillCheck_prompt" },
-            "6": { "type": "SkillCheck_fail" },
-            "7": { "type": "SkillCheck_partial" },
-            "8": { "type": "SkillCheck_success" },
-            "9": { "type": "SkillCheck_full" },
-            "10": { "type": "Battle" },
-            "11": { "type": "Story_Event" },
-            "12": { "type": "Boss" },
+            "1": {
+                "type": "story-intro"
+            },
+            "2": {
+                "type": "story-npc"
+            },
+            "3": {
+                "type": "story-npcSC"
+            },
+            "4": {
+                "type": "story-journey"
+            },
+            "5": {
+                "type": "SkillCheck_prompt"
+            },
+            "6": {
+                "type": "SkillCheck_fail"
+            },
+            "7": {
+                "type": "SkillCheck_partial"
+            },
+            "8": {
+                "type": "SkillCheck_success"
+            },
+            "9": {
+                "type": "SkillCheck_full"
+            },
+            "10": {
+                "type": "Battle"
+            },
+            "11": {
+                "type": "Story_Event"
+            },
+            "12": {
+                "type": "Boss"
+            },
         };
-       
+
         if (!req.session.selectedClass) {
             const randomClass = getRandomElement(random_class);
             req.session.selectedClass = randomClass;
@@ -300,7 +346,7 @@ router.get('/story-event', async (req, res) => {
     const event = getNextEvent(req);
     const NPC = req.session.npc_name;
     const enemies = req.session.enemies;
-    
+
     // Generates a different event page depending on the next event type
     switch (event.type) {
 
@@ -310,7 +356,9 @@ router.get('/story-event', async (req, res) => {
 
             const introText = await openAI.generateText(generateIntro(req.session.selectedClass, randomVerb, req.session.s_start, NPC, req.session.npc_role), model, 800);
 
-            res.render('story-intro', { text: introText  });
+            res.render('story-intro', {
+                text: introText
+            });
             break;
 
         case 'story-npc':
@@ -323,7 +371,15 @@ router.get('/story-event', async (req, res) => {
             // Generates an array of questions to ask the NPC
             req.session.questions = ['mission', 'npc', 'setting'];
 
-            res.render('story-npc', { text: npcText, emotion: randomEmotion, goal: req.session.goal, NPC: NPC, s_start: req.session.s_start, questions: req.session.questions, npc_role: req.session.npc_role});
+            res.render('story-npc', {
+                text: npcText,
+                emotion: randomEmotion,
+                goal: req.session.goal,
+                NPC: NPC,
+                s_start: req.session.s_start,
+                questions: req.session.questions,
+                npc_role: req.session.npc_role
+            });
 
             break;
 
@@ -331,7 +387,7 @@ router.get('/story-event', async (req, res) => {
 
             const npcscText = await openAI.generateText(generateNPCSC(characters, req.session.selectedClass, NPC, enemies), model, 3000);
             const npcscObject = JSON.parse(npcscText);
-            
+
             req.session.npc_atk = npcscObject.npc_atk;
             req.session.SC1 = npcscObject.SC1;
             req.session.SCA1 = npcscObject.SCA1;
@@ -344,10 +400,16 @@ router.get('/story-event', async (req, res) => {
             console.log('SC2:', req.session.SC2);
             console.log('SCA2:', req.session.SCA2);
 
-            res.render('story-npcSC', { text: req.session.npc_atk, SC1: req.session.SC1, SCA1: req.session.SCA1, SC2: req.session.SC2, SCA2: req.session.SCA2, })
+            res.render('story-npcSC', {
+                text: req.session.npc_atk,
+                SC1: req.session.SC1,
+                SCA1: req.session.SCA1,
+                SC2: req.session.SC2,
+                SCA2: req.session.SCA2,
+            })
             break;
 
-            case 'story-journey':
+        case 'story-journey':
 
             const journeyText = await openAI.generateText(generateJourney(characters, req.session.selectedClass, NPC, req.session.s_travel), model, 3000);
             const journeyObject = JSON.parse(journeyText);
@@ -358,9 +420,12 @@ router.get('/story-event', async (req, res) => {
             console.log('journey_text:', req.session.journey_text);
             console.log('journey_problem:', req.session.journey_problem);
 
-            res.render('story-journey', { text: req.session.journey_text, })
+            res.render('story-journey', {
+                text: req.session.journey_text,
+            })
+            break;
 
-        // ...Add more cases as needed
+            // ...Add more cases as needed
 
         default:
             // Handle an unknown event type
@@ -376,11 +441,11 @@ router.get('/story-npcCHAT', async (req, res) => {
     const questionKey = req.query.question;
     let qtopic;
     const NPC = req.session.npc_name;
-    
+
     // Removes a question if it was already asked
     const questionIndex = req.session.questions.indexOf(questionKey);
     if (questionIndex > -1) {
-      req.session.questions.splice(questionIndex, 1);
+        req.session.questions.splice(questionIndex, 1);
     }
 
     // Changes the prompts based on the button pressed
@@ -412,8 +477,17 @@ router.get('/story-npcCHAT', async (req, res) => {
     req.session.Q2 = dialogueObject.Q2;
     req.session.A2 = dialogueObject.A2;
 
-    res.render('story-npcCHAT', {Q1: req.session.Q1, A1: req.session.A1, Q2: req.session.Q2, A2: req.session.A2, goal: req.session.goal, NPC: NPC, s_start: req.session.s_start, questions: req.session.questions});
-    
+    res.render('story-npcCHAT', {
+        Q1: req.session.Q1,
+        A1: req.session.A1,
+        Q2: req.session.Q2,
+        A2: req.session.A2,
+        goal: req.session.goal,
+        NPC: NPC,
+        s_start: req.session.s_start,
+        questions: req.session.questions
+    });
+
 });
 
 router.get('/story-npcSC2', async (req, res) => {
@@ -423,13 +497,13 @@ router.get('/story-npcSC2', async (req, res) => {
 
     let rollResult = rollD20();
     console.log('Skill Check Dice roll:' + rollResult.roll);
-    console.log('Skill Check Result:' + rollResult.result);   
+    console.log('Skill Check Result:' + rollResult.result);
 
     let scPrompt;
     let npcPrompt;
     req.session.rollResult = rollResult.result;
 
-    switch(req.session.rollResult) {
+    switch (req.session.rollResult) {
         case 'Critical Failure':
             npcPrompt = "is knocked unconcious.";
             scPrompt = "takes damage and has to fight both enemies alone.";
@@ -444,7 +518,7 @@ router.get('/story-npcSC2', async (req, res) => {
             break;
         case 'Success':
             npcPrompt = "takes out one enemy.";
-            scPrompt = "fights the other enemy alone.";
+            scPrompt = "fights the other enemy together.";
             break;
         case 'Critical Success':
             npcPrompt = "is impressed by your skill";
@@ -466,7 +540,10 @@ router.get('/story-npcSC2', async (req, res) => {
     const npcsc2Text = await openAI.generateText(generateNPCSC2(SC, SCA, req.session.rollResult, npcPrompt, scPrompt, characters, req.session.selectedClass, NPC, enemies), model, 1600);
     console.log(npcsc2Text);
 
-    res.render('story-npcSC2', { text: npcsc2Text, rollResult: rollResult.roll });
+    res.render('story-npcSC2', {
+        text: npcsc2Text,
+        rollResult: rollResult.roll
+    });
 });
 
 router.get('/story-npcSC3', async (req, res) => {
@@ -474,7 +551,7 @@ router.get('/story-npcSC3', async (req, res) => {
     let npcPrompt;
     let npcReaction;
 
-    switch(req.session.rollResult) {
+    switch (req.session.rollResult) {
         case 'Critical Failure':
             npcPrompt = "and wakes up the wounded";
             npcReaction = "Despite appearing concerned and unimpressed";
@@ -500,7 +577,37 @@ router.get('/story-npcSC3', async (req, res) => {
     const npcsc3Text = await openAI.generateText(generateNPCSC3(npcPrompt, npcReaction, characters, req.session.npc_name, req.session.enemies, req.session.goal, req.session.s_travel), model, 1600);
     console.log(npcsc3Text);
 
-    res.render('story-npcSC3', { text: npcsc3Text, });
+    res.render('story-npcSC3', {
+        text: npcsc3Text,
+    });
+});
+
+router.get('/story-journey2', async (req, res) => {
+
+    const NPC = req.session.npc_name;
+
+    const journey2Text = await openAI.generateText(generateJourney2(req.session.journey_problem, characters, req.session.selectedClass, NPC, req.session.s_travel), model, 3000);
+    const journey2Object = JSON.parse(journey2Text);
+
+    console.log('journey 2 text:', journey2Text);
+
+    req.session.SC3 = journey2Object.SC3;
+    req.session.SCA3 = journey2Object.SCA3;
+    req.session.SC4 = journey2Object.SC4;
+    req.session.SCA4 = journey2Object.SCA4;
+
+    console.log('SC3:', req.session.SC3);
+    console.log('SCA3:', req.session.SCA3);
+    console.log('SC4:', req.session.SC4);
+    console.log('SCA4:', req.session.SCA4);
+
+    res.render('story-journey2', {
+        text: req.session.journey_problem,
+        SC3: req.session.SC3,
+        SCA3: req.session.SCA3,
+        SC4: req.session.SC4,
+        SCA4: req.session.SCA4,
+    })
 });
 
 
@@ -509,21 +616,13 @@ router.post('/test', async (req, res) => {
 
     // *** ChatGPT line to test here **//
     const NPC = req.session.npc_name;
-    
-    const journeyText = await openAI.generateText(generateJourney(characters, req.session.selectedClass, NPC, req.session.s_travel), model, 3000);
-    const journeyObject = JSON.parse(journeyText);
 
-    req.session.journey_text = journeyObject.journey_text;
-    req.session.journey_problem = journeyObject.journey_problem;
-
-    console.log('journey_text:', req.session.journey_text);
-    console.log('journey_problem:', req.session.journey_problem);
     // *** End test area **//
 
     res.render('story', {
 
     });
-    
+
 });
 
 module.exports = router;

@@ -1,0 +1,40 @@
+<%- include("templates/headerStart") %>
+
+<link rel="stylesheet" href="../styles/story.css">
+
+<%- include("templates/headerEnd") %>
+
+<div class="storygen">
+
+    <div class="center">
+
+        <div class = "storycreation">
+        <!-- Generates the loading animation -->
+        <div id="spinner" style="display: none;">
+            <img src="/images/loading.gif" class="loading" alt="Loading...">
+        </div>
+
+        <!-- Story text -->
+        <p class="form-class"><%- text %></p>
+        <p class="form-class">In response, you can:</p>
+
+        <p class="form-class"><%- SCA3 %> (<%- SC3 %>)</p>
+        <p class="form-class"><%- SCA4 %> (<%- SC4 %>)</p>
+
+        <p class="form-class">What will you do?</p>
+
+        <!-- Interactive button(s) for the player -->         
+        <form class="form-class" action="/story/story-journey3" method="get">
+            <input type="hidden" name="skillcheck" value="<%- SC3 %>">
+            <button type="submit"><%- SC3 %></button>
+        </form>
+        
+        <form class="form-class" action="/story/story-journey3" method="get">
+            <input type="hidden" name="skillcheck" value="<%- SC4 %>">
+            <button type="submit"><%- SC4 %></button>
+        </form>
+
+    </div>
+</div>
+
+<script src="/scripts/story.js"></script>
