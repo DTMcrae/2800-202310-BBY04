@@ -333,7 +333,6 @@ router.post('/generateStory', async (req, res) => {
 
         // Sends title and summary to the story generation screen
         res.render('story', {
-            userID: req.session.userID,
             title: req.session.title,
             summary: req.session.summary,
         });
