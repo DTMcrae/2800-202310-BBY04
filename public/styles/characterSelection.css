@@ -5,6 +5,28 @@
     }
 }
 
+@media (max-width: 6000px) {
+    body {
+      background-image: url(../images/Landing_Page_backgroun_HiRes2.jpg);
+      background-size: 100% auto;
+      background-repeat: repeat-y;
+    }
+    #CHAR_Container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 20px;
+      }
+      
+      .characterCard {
+        flex: 0 0 300px;
+        background-color: rgba(105, 105, 105, 0.658);
+        padding-top: 20px;
+        color: white;
+      }
+}
+
 h1 {
     display: flex;
     justify-content: center;
