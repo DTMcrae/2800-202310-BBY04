@@ -23,9 +23,14 @@ class Data {
     
   //function for loading all the monster names into an array
   async getMonsterNames() {
-    const monstersList = await monstersCollection.collection.find({ legendary: null }, { projection: { _id: 0, name: 1 } }).toArray();
+    const monstersList = await monstersCollection.collection.aggregate([
+        { $match: { cr: { $lte: '1/4' } } },
+        // { $sample: { size: 5 } },
+        { $project: { _id: 0, name: 1 } }
+    ]).toArray();
     return monstersList.map(monster => monster.name);
 }
+
 
     //fucntion for return an object containing spefic Monster information
     async getMonsterInfo(name) {
@@ -46,9 +51,13 @@ class Data {
 
   //function for loading all npc with thier background into an object array
   async getNpc() {
-    const npcList = await npcCollection.collection.find({}, { projection: { _id: 0, name: 1, background: 1 } }).toArray();
+    const npcList = await npcCollection.collection.aggregate([
+        { $sample: { size: 5 } },
+        { $project: { _id: 0, name: 1, background: 1 } }
+    ]).toArray();
     return npcList.map(npc => ({ name: npc.name, background: npc.background }));
-  }
+}
+
   //function of returning all the npc details
   async getNpcDetails(name, background) {
     const npcDetails = await npcCollection.collection.findOne({ name: name, background: background });
