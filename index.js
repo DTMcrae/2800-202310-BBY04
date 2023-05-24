@@ -459,12 +459,21 @@ app.post('/saveCharacter', async (req, res) => {
     // const dbo = database.db(mongodb_database).collection('USERCHAR');
 
     const characterStats = req.body;
+    var maxhp = await data.calculateMaxHP(characterStats);
+    var ac = await data.calculateAC(characterStats);
+    var actions = await data.getActions(characterStats)
+    characterStats.MaxHP = maxhp;
+    characterStats.HP = maxhp;
+    characterStats.AC = ac;
+    characterStats.Actions = actions;
 
     console.log('Saving character:', characterStats);
 
     try {
         const result = await userCharCollection.collection.insertOne(characterStats);
         console.log('Character saved successfully');
+        console.log("Result:",result);
+        req.session.charID = result.insertedId;
         res.sendStatus(200);
     } catch (err) {
         console.error('Error saving character:', err);
@@ -486,19 +495,22 @@ app.get('/story', async (req, res) => {
     
     try {
 
-        const players = await userCharCollection.collection.find({ userID: userID }).toArray();
+        const players = await userCharCollection.collection.find({ _id: new ObjectId(req.session.charID) }).toArray();
 
         const mainChar = players.map(async (myPlayer) => {
             const ac = await data.calculateAC(myPlayer);
+            const maxhp = await data.calculateMaxHP(myPlayer);
+            const hp = (myPlayer.HP !== undefined) ? myPlayer.HP : maxhp;
+            const actions = (myPlayer.Actions !== undefined) ? myPlayer.Actions : await data.getActions(myPlayer);
     
             const Player = {
-                name: myPlayer.name, // replace 'name' with the correct field name for the character's name
-                class: myPlayer.class,
-                maxHP: myPlayer.maxHP, // replace 'maxHP' with the correct field name for maxHP
-                hp: myPlayer.hp, // replace 'hp' with the correct field name for current HP
+                name: myPlayer.Name, // replace 'name' with the correct field name for the character's name
+                class: myPlayer.Class,
+                maxHP: maxhp, // replace 'maxHP' with the correct field name for maxHP
+                hp: hp, // replace 'hp' with the correct field name for current HP
                 ac: ac,
                 gold: myPlayer.gold, // replace 'gold' with the correct field name for gold
-                actions: myPlayer.actions // replace 'actions' with the correct field name for actions
+                actions: actions // replace 'actions' with the correct field name for actions
             };
             return Player;
         });
@@ -507,15 +519,18 @@ app.get('/story', async (req, res) => {
     
         const presetPartyMembers = partyMembers.map(async (member) => {
             const ac = await data.calculateAC(member);
+            const maxhp = await data.calculateMaxHP(member);
+            const hp = (member.HP !== undefined) ? member.HP : maxhp;
+            const actions = (member.Actions !== undefined) ? member.Actions : await data.getActions(member);
     
             const partyMember = {
                 name: member.Name, // replace 'name' with the correct field name for the character's name
                 class: member.Class,
-                maxHP: member.maxHP, // replace 'maxHP' with the correct field name for maxHP
-                hp: member.hp, // replace 'hp' with the correct field name for current HP
+                maxHP: maxhp, // replace 'maxHP' with the correct field name for maxHP
+                hp: hp, // replace 'hp' with the correct field name for current HP
                 ac: ac,
                 gold: member.gold, // replace 'gold' with the correct field name for gold
-                actions: member.actions // replace 'actions' with the correct field name for actions
+                actions: actions // replace 'actions' with the correct field name for actions
             };
     
             if (member.Domain) {
