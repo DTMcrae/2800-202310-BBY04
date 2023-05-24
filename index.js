@@ -492,7 +492,7 @@ app.get('/story', async (req, res) => {
     
             const Player = {
                 name: myPlayer.name, // replace 'name' with the correct field name for the character's name
-                class: myPlayer.Class,
+                class: myPlayer.class,
                 maxHP: myPlayer.maxHP, // replace 'maxHP' with the correct field name for maxHP
                 hp: myPlayer.hp, // replace 'hp' with the correct field name for current HP
                 ac: ac,
