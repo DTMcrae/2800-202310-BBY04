@@ -3,6 +3,8 @@ body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+    /* padding-top: 120px; */
+    padding-bottom: 80px; 
   }
   
   .footer-container {
@@ -11,9 +13,10 @@ body {
   }
   
   .content {
-    padding-bottom: 160px; /* Adjust this value to leave space for the footer */
+    padding-top: 20px;
+    padding-bottom: 160px; 
     overflow-y: auto;
-    height: calc(100% - 60px); /* Adjust this value to leave space for the footer */
+    height: calc(100% - 60px); 
   }
   
   footer {
@@ -21,7 +24,7 @@ body {
     bottom: 0;
     left: 0;
     width: 100%;
-    background-color: rgba(61, 57, 57, 0.973);
+    background-color: rgba(34, 32, 32, 0.973);
     color: white;
     bottom: -25px;
   }
