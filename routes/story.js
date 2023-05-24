@@ -122,9 +122,9 @@ const generateNPCSC = (characters, selectedClass, NPC, enemies) => {
     {
       "npc_atk": "Description of the attack",
       "SC1": "First Skill",
-      "SCA1": "How the first skill check is used",
+      "SCA1": "How the first skill check is used in one sentence",
       "SC2": "Second Skill",
-      "SCA2": "How the second skill check is used",
+      "SCA2": "How the second skill check is used in one sentence",
     }`
 
 };
@@ -175,10 +175,24 @@ const generateJourney2 = (problem, characters, selectedClass, NPC, s_travel) => 
     
     {
       "SC3": "First Skill",
-      "SCA3": "How the first skill check is used",
+      "SCA3": "How the first skill check is used in one sentence",
       "SC4": "Second Skill",
-      "SCA4": "How the second skill check is used",
+      "SCA4": "How the second skill check is used in one sentence",
     }`
+
+};
+
+const generateJourney3 = (problem, SC, SCA, rollResult, npcPrompt, scPrompt, enemyPrompt, characters, selectedClass, NPC, enemies) => {
+    return `We are in the middle of a scene: ${problem}.
+    
+    ${characters[0].name} does an ${SC} check to ${SCA}. The skill check is a ${rollResult}.
+    
+    Describe the outcome of the skill check event in four sentences. Remember that ${characters[0].name} is a ${selectedClass}. 
+    ${characters[0].name} ${scPrompt}
+    ${enemies[1]} ${enemyPrompt}
+    ${NPC} ${npcPrompt}
+
+    .`
 
 };
 
@@ -273,7 +287,7 @@ router.post('/generateStory', async (req, res) => {
         req.session.currentEvent = 1;
         req.session.events = {
             "1": {
-                "type": "story-intro"
+                "type": "story-journey"
             },
             "2": {
                 "type": "story-npc"
@@ -609,6 +623,76 @@ router.get('/story-journey2', async (req, res) => {
         SC4: req.session.SC4,
         SCA4: req.session.SCA4,
     })
+});
+
+router.get('/story-journey3', async (req, res) => {
+
+    const NPC = req.session.npc_name;
+    const enemies = req.session.enemies;
+
+    let rollResult = rollD20();
+    console.log('Skill Check Dice roll:' + rollResult.roll);
+    console.log('Skill Check Result:' + rollResult.result);
+
+    let scPrompt;
+    let enemyPrompt;
+    let npcPrompt;
+    let captured;
+    req.session.rollResult = rollResult.result;
+
+    switch (req.session.rollResult) {
+        case 'Critical Failure':
+            scPrompt = "tries to overcome the challenge and makes the problem worse.";
+            enemyPrompt = "calls for enemy allies and surrounds the characters.";
+            npcPrompt = "is speechless and has a grim look on their face as they are taken prisoner.";
+            captured = true;
+            break;
+        case 'Failure':
+            scPrompt = "tries to overcome the challenge and fails.";
+            enemyPrompt = "calls for enemy allies and surrounds the characters.";
+            npcPrompt = "moans in frustration as they are taken prisoner.";
+            captured = true;
+            break;
+        case 'Partial Success':
+            scPrompt = "almost overcomes the challenge but fails.";
+            enemyPrompt = "laughs and leaves.";
+            npcPrompt = "steps in to help and together our heroes overcome the challenge.";
+            captured = false;
+            break;
+        case 'Success':
+            scPrompt = "overcomes with the challenge.";
+            enemyPrompt = "acts frustrated and leaves.";
+            npcPrompt = "is relieved.";
+            captured = false;
+            break;
+        case 'Critical Success':
+            scPrompt = "overcomes with the challenge with great skill.";
+            enemyPrompt = "flees in terror.";
+            npcPrompt = "recognizes the enemy and yells that they need to follow it.";
+            captured = false;
+            break;
+    }
+
+    req.session.captured = captured;
+
+    let SC;
+    let SCA;
+
+    if (req.query.skillcheck === req.session.SC3) {
+        SC = req.session.SC3;
+        SCA = req.session.SCA3;
+    } else {
+        SC = req.session.SC4;
+        SCA = req.session.SCA4;
+    }
+
+    const journey3Text = await openAI.generateText(generateJourney3(req.session.journey_problem, SC, SCA, req.session.rollResult, npcPrompt, scPrompt, enemyPrompt, characters, req.session.selectedClass, NPC, enemies), model, 1600);
+    console.log(journey3Text);
+
+    res.render('story-journey3', {
+        text: journey3Text,
+        rollResult: rollResult.roll
+    });
 });
 
 
