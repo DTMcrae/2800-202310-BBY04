@@ -4,6 +4,8 @@ const CombatAI = require('./combatAI.js');
 const TurnOrder = require('./turnOrder.js');
 const CombatPrompts = require('./combatPrompts.js');
 const Dice = require('./Dice.js');
+const Crypto = require('crypto');
+const ObjectId = require('mongodb').ObjectId;
 
 const openAI = new CombatAI(process.env.OPENAI_KEY);
 
@@ -14,7 +16,53 @@ function presetEnemies() { return [{ name: "Goblin 1", hp: 7, ac: 9, desc: "A go
 const prompts = new CombatPrompts();
 const initiative = new TurnOrder();
 
-router.get('*', (req, res) => {
+const { userCollection,
+    monstersCollection,
+    npcCollection,
+    partyMemCollection,
+    userCharCollection,
+    userSavedCollection
+} = require('../.././databaseConnection.js');
+
+router.post("/load/:id", async (req, res) => {
+
+    //Something something load from database
+
+    //Assign req.session.turnOrder to the turnOrder stored in the database
+    //Assign req.session.history to the history stored in the database
+
+    id = req.params.id;
+
+    if (id === undefined) {
+        console.log("Bad ID");
+        req.redirect("/LandingPage");
+        return;
+    }
+
+    try {
+        var response = await userSavedCollection.collection.find({
+            storyID: id, userID: req.session.userID
+        }).project({
+            initiative: 1,
+            history: 1
+        }).toArray();
+
+        req.session.storyID = id;
+        req.session.turnOrder = response[0].initiative;
+        req.session.history = response[0].history;
+
+        console.log("TurnOrder:", response[0].initiative);
+
+    } catch (e) {
+        console.log(e);
+    }
+
+    req.session.combatInit = true;
+    this.combatEnded = false;
+    res.redirect('/combat');
+})
+
+router.get('*', async (req, res) => {
     if(!req.session.authenticated)
     {
         res.redirect("/userLoginScreen");
@@ -35,6 +83,7 @@ router.post('/', (req, res) => {
 
 //Placeholder function for assigning actors to combat.
 function startCombat(req) {
+
     req.session.history = [];
     let actors = [];
 
@@ -162,20 +211,53 @@ router.post("/save", async (req,res) => {
    var turnOrder = req.session.turnOrder;
    var history = req.session.history;
 
+   if(req.session.storyID !== undefined) {
+
+    try {
+        var result = await userSavedCollection.collection.find({
+            storyID: req.session.storyID
+            }).project({
+            initiative: 1,
+            history: 1
+        }).toArray();
+
+        if(result.length > 0) {
+            var updated = await userSavedCollection.collection.updateOne(
+                {storyID: req.session.storyID},
+                { $set: { gameState: "combat", initiative: turnOrder, history: history, date: new Date().toLocaleString() }}
+            );
+            console.log("Save Attempt:",updated);
+        }
+    } catch (e) {
+        console.log(e);
+    }
+
+   }
+   else {
+       var id = Crypto.randomBytes(20).toString('hex');
+        req.session.storyID = id;
+        var result = await userSavedCollection.collection.insertOne({
+            gameState: "combat",
+            userID: req.session.userID,
+            storyID: id,
+            initiative: turnOrder,
+            history: history,
+            date: new Date().toLocaleString(),
+        });
+        console.log("Story Save Result:", result);
+
+        var userUpdate = await userCollection.collection.updateOne(
+            { _id: new ObjectId(req.session.userID) },
+            {$addToSet: {userStories: id}}
+        );
+       console.log("User Update Result:", userUpdate);
+}
+    res.redirect("/combat");
+   /*
+   In case turnOrder cant be used as a string and must be broken down:
+   */
    //Something something save to database
 });
-
-router.get("/load/:id", async (req,res) => {
-
-    //Something something load from database
-
-    //Assign req.session.turnOrder to the turnOrder stored in the database
-    //Assign req.session.history to the history stored in the database
-
-    req.session.combatInit = true;
-    this.combatEnded = false;
-    res.redirect('/combat');
-})
 
 //Sends the user to the victory page, and generates a combat outro.
 router.post("/victory", async (req,res) => {
