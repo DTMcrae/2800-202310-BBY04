@@ -128,7 +128,7 @@ class Data {
     async calculateMaxHP(character) {
       var level = character.Level;
       var constitution = character.AbilityScores.Constitution;
-      var hitDie = getHitDie(character.Class);
+      var hitDie = this.getHitDie(character.Class);
 
       var result = (hitDie + (((hitDie / 2) + 1) * (level - 1)) + (Math.floor((constitution - 10) / 2) * level));
       console.log("MaxHP:", result);
@@ -166,6 +166,16 @@ class Data {
       default:
         return 6;
     }
+  }
+
+  async getActions(character) {
+    var result = [];
+    result.push({name: character.Equipment.Weapon});
+    if (character.Equipment.Ranged_Weapon !== undefined && character.Equipment.Ranged_Weapon !== "None") {
+      result.push({name: character.Equipment.Ranged_Weapon});
+    }
+
+    return result;
   }
     
     async getLevelUpData(userClass, userLevel) {
