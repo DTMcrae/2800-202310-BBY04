@@ -470,14 +470,12 @@ app.post('/saveCharacter', async (req, res) => {
     console.log('Saving character:', characterStats);
 
     try {
-        const result = await userCharCollection.collection.insertOne(characterStats);
-        console.log('Character saved successfully');
-        console.log("Result:",result);
+        var result = await userCharCollection.collection.insertOne(characterStats);
         req.session.charID = result.insertedId;
-        res.sendStatus(200);
+        res.json({success: true});
     } catch (err) {
         console.error('Error saving character:', err);
-        res.sendStatus(500);
+        res.json({ success: false, error: err })
     }
 });
 
@@ -496,6 +494,7 @@ app.get('/story', async (req, res) => {
     try {
 
         const players = await userCharCollection.collection.find({ _id: new ObjectId(req.session.charID) }).toArray();
+        console.log("Player:", players);
 
         const mainChar = players.map(async (myPlayer) => {
             const ac = await data.calculateAC(myPlayer);
@@ -557,11 +556,13 @@ app.get('/story', async (req, res) => {
         // const monsterInfo = await data.getMonsterInfo(name);
         const npcList = await data.getNpc();
         // const npcDetails = await data.getNpcDetails(name, background);
+
+        console.log("Characters:", characters);
     
         req.session.characters = characters;
         req.session.monsterNames = monsterNames;
         req.session.npcList = npcList;
-        res.render('story', { userID: req.session.userID, characters: characters });
+        res.render('story', { userID: req.session.userID, characters: req.session.characters });
     } catch (error) {
         console.error('Error fetching character data:', error);
     }
