@@ -1,24 +1,43 @@
-@media (max-width: 600px){
-    body{
-        background-image: url(../images/landing\ page\ background\ 3.png);
-    }
+@media (max-width: 6000px) {
+  body {
+    background-image: url(../images/Landing_Page_backgroun_HiRes.jpg);
+    background-size: 100% auto;
+    background-repeat: repeat-y;
+  }
+
+  #button-container {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    background-image: url(../images/landing\ page\ background\ 3.png);
+  }
+
+  h1 {
+    color: black;
+  }
 }
 
 .menu-button {
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    text-align: center;
-    width: 250px;
-    margin: 0 auto;
-  }
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  text-align: center;
+  width: 250px;
+  margin: 0 auto;
+}
 
-  .user-welcome {
-    text-align: center;
-  }
+.user-welcome {
+  text-align: center;
+}
 
-  a {
-    color: black;
-  }
+a {
+  color: black;
+}
