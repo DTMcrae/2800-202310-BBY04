@@ -4,6 +4,10 @@
         background-size: 100% auto;
         background-repeat: repeat-y;
     }
+    
+    h1 {
+        font-size: xx-large;
+    }
 }
 
 @media (max-width: 600px) {
@@ -18,4 +22,17 @@
     display: grid;
     justify-content: center;
     align-items: center;
+}
+
+input {
+        margin-bottom: 5px;
+    }
+
+#signup {
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+.login-container > a {
+    text-decoration: underline;
 }
