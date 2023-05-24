@@ -5,6 +5,15 @@ body {
     overflow-x: hidden;
     padding-bottom: 80px; 
   }
+
+  h1, h2, h3, h4, h5, h6, a, p, li, ul, span, div, input, textarea, button {
+    /* font-family: "Old English Text MT"; */
+    /* font-family: "Trajan Pro"; */
+    /* font-family: "Lombardic"; */
+    /* font-family: "Goudy Medieval"; */
+    /* font-family: "Celtic Garamond"; */
+    font-family: "Averia Serif Libre";  
+  }
   
   .footer-container {
     position: relative;
