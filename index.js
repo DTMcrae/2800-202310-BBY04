@@ -101,7 +101,8 @@ app.set('views', path.join(__dirname, 'views'))
 
 //review
 app.use('/scripts', express.static("public/scripts"));
-const combat = require('./public/scripts/combatManager')
+const combat = require('./public/scripts/combatManager');
+const loadGame = require('./public/scripts/loadGame');
 //end of review
 
 app.use(express.static(__dirname + '/public'));
@@ -545,7 +546,7 @@ app.get('/story', async (req, res) => {
         req.session.characters = characters;
         req.session.monsterNames = monsterNames;
         req.session.npcList = npcList;
-        res.render('story', { characters: characters });
+        res.render('story', { userID: req.session.userID, characters: characters });
     } catch (error) {
         console.error('Error fetching character data:', error);
     }
@@ -646,6 +647,7 @@ app.post('/levelup', (req, res) => {
 });
   
 /*----------------------------------------------------------------------------------------------------end of leveling up-------------------------------------------------------------------------------*/  
+app.use("/loadGame", loadGame);
 
 app.get("*", (req, res) => {
     res.status(404);
