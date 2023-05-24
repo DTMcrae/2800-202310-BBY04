@@ -32,13 +32,13 @@ confirmButton.addEventListener('click', function () {
     // Object to store the character data
     const characterData = {
         userID: userID, // Saving the user's id as a foreign key
-        name: characterName,
-        class: classElement.innerText,
-        level: levelElement.innerText,
-        abilityScores: getListItemTexts('abilityScoresList'),
-        equipment: getListItemTexts('equipmentList'),
-        skills: getListItemTexts('skillsList'),
-        abilities: getListItemTexts('abilitiesList')
+        Name: characterName,
+        Class: classElement.innerText,
+        Level: (levelElement.innerText).split(" ")[1],
+        AbilityScores: arrayToMap(getListItemTexts('abilityScoresList')),
+        Equipment: arrayToMap(getListItemTexts('equipmentList')),
+        Skills: getListItemTexts('skillsList'),
+        Abilities: getListItemTexts('abilitiesList')
     };
 
     console.log('Saving character data:', characterData);
@@ -62,6 +62,22 @@ confirmButton.addEventListener('click', function () {
             console.error('Error saving character:', error);
         });
 });
+
+function arrayToMap(array) {
+    var map = {};
+    array.forEach(element => {
+        var split = element.split(":");
+        var identifier = split[0];
+        var value = split[1].substring(1);
+
+        if (!isNaN(value)) {
+            value = Number(value);
+        }
+
+        map[identifier] = value;
+    });
+    return map;
+}
 
 // Helper function to get the text content of list items under the specific list element
 function getListItemTexts(listId) {
