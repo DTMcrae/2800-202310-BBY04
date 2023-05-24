@@ -255,10 +255,10 @@ router.post('/generateStory', async (req, res) => {
         const mString = JSON.stringify(monsterNames);
         const npcList = req.session.npcList;
         const nString = JSON.stringify(npcList);
-        // const characters = req.session.characters;
+        const characters = req.session.characters;
         // async() => await openAI.generateDM();
         // Creates the story and parses the text into a JSON object
-        const responseText = await openAI.generateText(generateStoryPrompt(nString, mString, req.session.characters, randomType, bcit), model);
+        const responseText = await openAI.generateText(generateStoryPrompt(nString, mString, characters, randomType, bcit), model);
         const responseObject = JSON.parse(responseText);
 
         // Store the generated story summary and events in the session
@@ -350,6 +350,7 @@ router.post('/generateStory', async (req, res) => {
 router.get('/story-event', async (req, res) => {
 
     const event = getNextEvent(req);
+    const characters = req.session.characters;
 
     // Generates a different event page depending on the next event type
     switch (event.type) {
@@ -443,6 +444,7 @@ router.get('/story-event', async (req, res) => {
 router.get('/story-npcCHAT', async (req, res) => {
 
     const questionKey = req.query.question;
+    const characters = req.session.characters;
     let qtopic;
 
     // Removes a question if it was already asked
@@ -498,6 +500,7 @@ router.get('/story-npcSC2', async (req, res) => {
     let rollResult = rollD20();
     console.log('Skill Check Dice roll:' + rollResult.roll);
     console.log('Skill Check Result:' + rollResult.result);
+    const characters = req.session.characters;
 
     let scPrompt;
     let npcPrompt;
@@ -550,6 +553,7 @@ router.get('/story-npcSC3', async (req, res) => {
 
     let npcPrompt;
     let npcReaction;
+    const characters = req.session.characters;
 
     switch (req.session.rollResult) {
         case 'Critical Failure':
@@ -585,6 +589,7 @@ router.get('/story-npcSC3', async (req, res) => {
 router.get('/story-journey2', async (req, res) => {
 
     const NPC = req.session.npc_name;
+    const characters = req.session.characters;
 
     const journey2Text = await openAI.generateText(generateJourney2(req.session.journey_problem, characters, req.session.selectedClass, NPC, req.session.s_travel, req.session.enemies), model, 3000);
     const journey2Object = JSON.parse(journey2Text);
@@ -615,6 +620,7 @@ router.get('/story-journey3', async (req, res) => {
     let rollResult = rollD20();
     console.log('Skill Check Dice roll:' + rollResult.roll);
     console.log('Skill Check Result:' + rollResult.result);
+    const characters = req.session.characters;
 
     let scPrompt;
     let enemyPrompt;
@@ -683,6 +689,7 @@ router.post('/test', async (req, res) => {
 
     // *** ChatGPT line to test here **//
     const NPC = req.session.npc_name;
+    const characters = req.session.characters;
 
     const journeyText = await openAI.generateText(generateJourney(characters, req.session.selectedClass, NPC, req.session.s_travel, req.session.enemies), model, 3000);
     const journeyObject = JSON.parse(journeyText);
