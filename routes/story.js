@@ -35,13 +35,15 @@ const emotion_NPC = ['desperate', 'hopeless', 'fearful', 'anxious', 'weary', 'sk
 const verb_location = ['living in', 'arriving at', 'visiting', 'exploring', 'investigating', 'found themselves in', 'randomly found', 'lived all their life in'];
 
 
-const characters = userCharCollection.characters;
+// const characters = userCharCollection.characters;
 
 
 // The general story prompt asks for an adventure summary and event types
-const generateStoryPrompt = (NPC, monster, randomType, bcit) => {
+const generateStoryPrompt = (NPC, monster, characters, randomType, bcit) => {
     console.log(NPC);
     console.log(monster);
+    console.log(characters);
+
     return `Imagine you are creating a detailed DnD adventure ${randomType} ${bcit}. Please provide the following details:
 
     - "title": The title of the adventure.
@@ -256,7 +258,7 @@ router.post('/generateStory', async (req, res) => {
         // const characters = req.session.characters;
         // async() => await openAI.generateDM();
         // Creates the story and parses the text into a JSON object
-        const responseText = await openAI.generateText(generateStoryPrompt(nString, mString, randomType, bcit), model);
+        const responseText = await openAI.generateText(generateStoryPrompt(nString, mString, req.session.characters, randomType, bcit), model);
         const responseObject = JSON.parse(responseText);
 
         // Store the generated story summary and events in the session
