@@ -546,7 +546,7 @@ app.get('/story', async (req, res) => {
         req.session.characters = characters;
         req.session.monsterNames = monsterNames;
         req.session.npcList = npcList;
-        res.render('story', { characters: characters });
+        res.render('story', { userID: req.session.userID, characters: characters });
     } catch (error) {
         console.error('Error fetching character data:', error);
     }
