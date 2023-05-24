@@ -53,7 +53,7 @@ class Data {
   async getNpc() {
     const npcList = await npcCollection.collection.aggregate([
         { $sample: { size: 5 } },
-        { $project: { _id: 0, name: 1, background: 1 } }
+        { $project: { _id: 0, char_id: 1, name: 1, background: 1 } }
     ]).toArray();
     return npcList.map(npc => ({ name: npc.name, background: npc.background }));
 }
@@ -115,23 +115,41 @@ class Data {
     
     async getLevelUpData(userClass, userLevel) {
       try {
-          const levelData = await levelCollection.collection.findOne({ class: userClass });
-          return levelData;
-      } catch (err) {
-          console.error(err);
-          return null;
-      }
-    }
+          const characterClassData = await levelCollection.collection.findOne({ class: userClass });
+          if (!characterClassData) {
+              throw new Error(`No data found for class: ${userClass}`);
+          }
+          
+          // construct the field name for the required level
+          const levelField = `lvl${userLevel}`;
     
-    async getSpellData(userClass, userLevel) {
-      try {
-          const spellData = await spellsCollection.collection.find({ classes: new RegExp(userClass, 'i'), level: { $lte: userLevel } }).toArray();
-          return spellData;
+          // get the data for the required level
+          const levelData = characterClassData[levelField];
+    
+          // if no data found for this level, return null or you can throw an error
+          if (!levelData) {
+              return null;
+              // or: throw new Error(`No data found for class: ${userClass}, level: ${userLevel}`);
+          }
+    
+          return levelData;
+          
       } catch (err) {
           console.error(err);
           return null;
       }
-    }
+    }    
+    
+      async getSpellData(userClass, userLevel) {
+        try {
+          const spellData = await spellsCollection.collection.find({ classes: new RegExp(userClass, 'i'), level: { $lte: userLevel + 1 } }).toArray();
+          return spellData;
+        } catch (err) {
+          console.error(err);
+          return null;
+        }
+      }
+    
     
     async spellcasting(userClass) {
       try {
