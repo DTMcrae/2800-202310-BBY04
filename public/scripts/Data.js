@@ -112,6 +112,49 @@ class Data {
     
       return ac;
     }
+
+    async calculateMaxHP(character) {
+      var level = character.Level;
+      var constitution = character.AbilityScores.Constitution;
+      var hitDie = getHitDie(character.Class);
+
+      var result = (hitDie + (((hitDie / 2) + 1) * (level - 1)) + (Math.floor((constitution - 10) / 2) * level));
+      console.log("MaxHP:", result);
+      return result;
+    }
+
+  getHitDie(characterClass) {
+    switch (characterClass) {
+      case "Druid":
+        return 8;
+      case "Fighter":
+        return 10;
+      case "Wizard":
+        return 6;
+      case "Warlock":
+        return 8;
+      case "Sorcerer":
+        return 6;
+      case "Rogue":
+        return 8;
+      case "Ranger":
+        return 10;
+      case "Paladin":
+        return 10;
+      case "Monk":
+        return 8;
+      case "Cleric":
+        return 8;
+      case "Bard":
+        return 8;
+      case "Barbarian":
+        return 12;
+      case "BCIT Nerd":
+        return 6;
+      default:
+        return 6;
+    }
+  }
     
     async getLevelUpData(userClass, userLevel) {
       try {
