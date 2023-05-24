@@ -34,19 +34,19 @@ const emotion_NPC = ['desperate', 'hopeless', 'fearful', 'anxious', 'weary', 'sk
 const verb_location = ['living in', 'arriving at', 'visiting', 'exploring', 'investigating', 'found themselves in', 'randomly found', 'lived all their life in'];
 
 // Test values for story generation
-const NPC = 'Alistair';
+// const NPC = 'Alistair';
 
 const characters = [
   { name: 'River', class: 'Druid' },
   { name: 'Thorin', class: 'Fighter' }
 ];
 
-const enemies = ['bandit', 'goblin'];
+// const enemies = ['bandit', 'goblin'];
 // const boss = 'Beholder';
 
 
 // The general story prompt asks for an adventure summary and event types
-const generateStoryPrompt = (randomType, bcit) => {
+const generateStoryPrompt = (NPC, monster, randomType, bcit) => {
 
     return `Imagine you are creating a detailed DnD adventure ${randomType} ${bcit}. Please provide the following details:
 
@@ -56,7 +56,8 @@ const generateStoryPrompt = (randomType, bcit) => {
     - "s_start": The name of the location where the story starts. Only provide the name.
     - "s_soss": The location where the central conflict or goal can be resolved. Only provide the name.
     - "npc_role": The role of the NPC who tells you about the adventure. Only provide their title.
-     
+    - Please use npc's from this array ${NPC}
+    - Please use monster's from this array ${monster} 
     
     Please structure your response in the following format:
     
@@ -67,6 +68,8 @@ const generateStoryPrompt = (randomType, bcit) => {
       "s_start": "<setting>"
       "s_boss": "<setting>"
       "npc_role": "<role>"
+      "npc_name" : "<name>"
+      "monster_name" : "<name>"
     
     }`;
 };
@@ -269,13 +272,14 @@ router.post('/generateStory', async (req, res) => {
         console.log('Story type: ', randomType);
 
         //pulling monster and npc names from session
-        // const monsterNames = req.session.monsterNames;
+        const monsterNames = req.session.monsterNames;
+        const mString = JSON.stringify(monsterNames);
         const npcList = req.session.npcList;
-        const nString = JSON.stringify(npcList)
+        const nString = JSON.stringify(npcList);
         // const characters = req.session.characters;
 
         // Creates the story and parses the text into a JSON object
-        const responseText = await openAI.generateText(generateStoryPrompt(randomType, bcit), model);
+        const responseText = await openAI.generateText(generateStoryPrompt(nString, monsterNames, randomType, bcit), model);
         const responseObject = JSON.parse(responseText);
 
         // Store the generated story summary and events in the session

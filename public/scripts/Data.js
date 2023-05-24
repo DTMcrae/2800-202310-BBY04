@@ -24,8 +24,8 @@ class Data {
   //function for loading all the monster names into an array
   async getMonsterNames() {
     const monstersList = await monstersCollection.collection.aggregate([
-        { $match: { legendary: null } },
-        { $sample: { size: 5 } },
+        { $match: { cr: { $lte: '1/4' } } },
+        // { $sample: { size: 5 } },
         { $project: { _id: 0, name: 1 } }
     ]).toArray();
     return monstersList.map(monster => monster.name);
