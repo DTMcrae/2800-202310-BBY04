@@ -7,24 +7,32 @@ const imageLocation = params.get('image');
 const imgElement = document.getElementById('characterImage');
 const classElement = document.getElementById('characterClass');
 const levelElement = document.getElementById('levelHeading');
+const characterNameInput = document.getElementById('characterName');
 
 // Update the elements on the characterSelected screen with the parameters
 if (characterClass && imageLocation) {
     imgElement.src = imageLocation;
-    classElement.innerText = characterClass;
 }
 
 // Reference to the "Confirm Character" button
-const confirmButton = document.querySelector('.confirmButton');
+const confirmButton = document.getElementById('confirmButton');
+
+// Retrieve the userID from the data attribute of the confirm button
+const userID = confirmButton.getAttribute('data-userid');
+console.log("userID " + userID);
 
 // Event listener to the "Confirm Character" button
 confirmButton.addEventListener('click', function () {
-
     console.log('Confirm button clicked');
+
+    // Retrieve the character name from the input field
+    const characterName = characterNameInput.value;
+    console.log("characterName " + characterName);
 
     // Object to store the character data
     const characterData = {
-        userID: req.session.userID, //saving the user's id as a forgein key
+        userID: userID, // Saving the user's id as a foreign key
+        name: characterName,
         class: classElement.innerText,
         level: levelElement.innerText,
         abilityScores: getListItemTexts('abilityScoresList'),
@@ -43,6 +51,16 @@ confirmButton.addEventListener('click', function () {
             },
             body: JSON.stringify(characterData)
         })
+        .then(response => {
+            if (response.ok) {
+                console.log('Character saved successfully');
+            } else {
+                console.error('Failed to save character:', response.status);
+            }
+        })
+        .catch(error => {
+            console.error('Error saving character:', error);
+        });
 });
 
 // Helper function to get the text content of list items under the specific list element
