@@ -140,7 +140,22 @@ const generateNPCSC3 = (npcPrompt, npcReaction, characters, NPC, enemies, goal, 
     
     ${npcReaction} with ${characters[0].name}'s abilities, ${NPC} tells ${characters[0].name} that they need to team up to ${goal}. ${NPC} advises that in order to do so, they need to navigate through ${s_travel}.
     
-    Describe scene in five sentences.`
+    Describe the scene in five sentences.`
+
+};
+
+const generateJourney = (characters, selectedClass, NPC, s_travel) => {
+    return `In this scene, ${characters[0].name} and ${NPC} are navigating through ${s_travel}.
+
+    1. Describe the setting and how the characters feel during their travels in four sentences.
+    2. Create a problem that prevents ${characters[0].name} and ${NPC} from travelling through ${s_travel}. The problem must be something that can be resolved by a skill check for a ${selectedClass}. The problem must not be about fighting an enemy.
+
+    Format your response as follows:
+    
+    {
+      "journey_text": "Description of the scene",
+      "journey_problem": "The problem they need to overcome",
+    }`
 
 };
 
@@ -331,7 +346,20 @@ router.get('/story-event', async (req, res) => {
 
             res.render('story-npcSC', { text: req.session.npc_atk, SC1: req.session.SC1, SCA1: req.session.SCA1, SC2: req.session.SC2, SCA2: req.session.SCA2, })
             break;
-        
+
+            case 'story-journey':
+
+            const journeyText = await openAI.generateText(generateJourney(characters, req.session.selectedClass, NPC, req.session.s_travel), model, 3000);
+            const journeyObject = JSON.parse(journeyText);
+
+            req.session.journey_text = journeyObject.journey_text;
+            req.session.journey_problem = journeyObject.journey_problem;
+
+            console.log('journey_text:', req.session.journey_text);
+            console.log('journey_problem:', req.session.journey_problem);
+
+            res.render('story-journey', { text: req.session.journey_text, })
+
         // ...Add more cases as needed
 
         default:
@@ -480,7 +508,16 @@ router.get('/story-npcSC3', async (req, res) => {
 router.post('/test', async (req, res) => {
 
     // *** ChatGPT line to test here **//
+    const NPC = req.session.npc_name;
+    
+    const journeyText = await openAI.generateText(generateJourney(characters, req.session.selectedClass, NPC, req.session.s_travel), model, 3000);
+    const journeyObject = JSON.parse(journeyText);
 
+    req.session.journey_text = journeyObject.journey_text;
+    req.session.journey_problem = journeyObject.journey_problem;
+
+    console.log('journey_text:', req.session.journey_text);
+    console.log('journey_problem:', req.session.journey_problem);
     // *** End test area **//
 
     res.render('story', {
