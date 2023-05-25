@@ -6,35 +6,19 @@
 
 <div class="content">
     <div class="user-welcome text-white">
-        <h1>Welcome <%= user %></h1>
+        <h1>Welcome, <%= user %></h1>
     </div>
     <br>
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <h2 class="menu-button">Return to Game</h2>
-                <br><br>
-                <h2 class="menu-button">Quick Start</h2>
-                <br><br>
-                <div>
-                    <h2 class="menu-button"><a href="/characterSelection">New Game</a></h2>
-                </div>
-                <br><br>
-                <h2 class="menu-button"><a href="/combat">Combat Trial</a></h2>
-                <br><br>
-                <div>
-                    <h2 class="menu-button"><a href="/loadGame">Load Game</a></h2>
-                </div>
-                <br><br>
-                <div>
-                    <h2 class="menu-button"><a href="/userInfo">User Info</a></h2>
-                </div>
-            </div>
-        </div>
+    <div class="container" id="button_Container">
+                <h5 class="menu-button" id="b1">Return to Game</h5>
+                <h5 class="menu-button" id="b2">Quick Start</h5>
+                <h5 class="menu-button" id="b3"><a href="/characterSelection">New Game</a></h5>
+                <h5 class="menu-button" id="b4"><a href="/combat">Combat Trial</a></h5>
+                <h5 class="menu-button" id="b5">Quit</h5>
+                <h5 class="menu-button" id="b6"><a href="/userInfo">User Info</a></h5>
     </div>
+    
 </div>
-
-
 
 <%- include("templates/footer") %>

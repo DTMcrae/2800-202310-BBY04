@@ -1,11 +1,38 @@
-@media (max-width: 600px){
-    body{
-        background-image: url(../images/Login\ Background\ 1.png);
+@media (max-width: 6000px) {
+    body {
+        background-image: url(../images/Login\ Background\ hi-res.jpg);
+        background-size: 100% auto;
+        background-repeat: repeat-y;
+    }
+    
+    h1 {
+        font-size: xx-large;
     }
 }
+
+@media (max-width: 600px) {
+    body {
+        background-image: url(../images/Login\ Background\ 1.png);
+        background-size: 100% auto; 
+        background-repeat: repeat-y;
+    }
+}
+
 .login-container {
     display: grid;
     justify-content: center;
     align-items: center;
-  }
-  
+}
+
+input {
+        margin-bottom: 5px;
+    }
+
+#signup {
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+.login-container > a {
+    text-decoration: underline;
+}
