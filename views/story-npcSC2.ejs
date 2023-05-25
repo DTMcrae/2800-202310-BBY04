@@ -1,4 +1,4 @@
-<%- include("templates/headerStart") %>
+<%- include("templates/storyHeaderStart") %>
 
 <link rel="stylesheet" href="../styles/story.css">
 
@@ -21,7 +21,7 @@
         <!-- Interactive button(s) for the player -->         
         <!-- ***NEEDS TO BE LINKED TO BATTLE SCREEN*** -->
         <form class="form-class" action="/story/story-npcSC3" method="get">
-            <button type="submit">Begin Battle</button>
+            <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Begin Battle</button>
         </form>
         </div>
 
@@ -29,3 +29,4 @@
 </div>
 
 <script src="/scripts/story.js"></script>
+<%- include("templates/storyFooter") %>

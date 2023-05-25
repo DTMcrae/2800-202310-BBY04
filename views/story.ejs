@@ -1,8 +1,8 @@
-<%- include("templates/headerStart") %>
+<%- include("templates/storyHeaderStart") %>
 
-<link rel="stylesheet" href="../styles/quickstart.css">
+<link rel="stylesheet" href="../styles/story.css">
 
-<%- include("templates/headerEnd") %>
+<%- include("templates/storyBodyStart") %>
 
 <div class="storygen">
 
@@ -23,27 +23,26 @@
         <!-- Story Gen: Buttons -->
         <form class="form-class" action="/story/story-event" method="get">
             <% if (typeof summary !== 'undefined') { %>
-            <button type="submit">Start New Game</button>
+            <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Start New Game</button>
             <% } %>
         </form>
 
         <!-- ***For testing prompts*** -->
-        <form class="form-class" action="/story/test" method="post">
+        <!-- <form class="form-class" action="/story/test" method="post">
             <% if (typeof summary !== 'undefined') { %>
             <button type="submit">(Test Prompt)</button>
             <% } %>
-        </form>
+        </form> -->
         
         <form class="form-class" action="/story/generateStory" method="post">
             <% if (typeof summary == 'undefined') { %>
             <h2>Start New Game</h2>
-            <p>Click the button to generate a new adventure!</p>
-            <button type="submit">Generate Story</button>
-            <br>
             <p><i>myD&D</i> uses the power of A.I. to generate a new storyline that will be completely unique for each individual playthrough!</p>
+            <p>Click the button to generate a new adventure!</p>
+            <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Generate Story</button>
             <% } else { %>
                 <br>
-            <button type="submit">Reroll Story</button>
+            <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Reroll Story</button>
             <% } %>
         </form>
         </div>
@@ -52,3 +51,4 @@
 </div>
 
 <script src="/scripts/story.js"></script>
+<%- include("templates/storyFooter") %>

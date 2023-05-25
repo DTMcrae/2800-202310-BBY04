@@ -1,4 +1,4 @@
-<%- include("templates/headerStart") %>
+<%- include("templates/storyHeaderStart") %>
 
 <link rel="stylesheet" href="/styles/story.css">
 
@@ -25,17 +25,17 @@
             <form class="form-class" action="/story/story-npcCHAT/?question=<%= questions[i] %>" method="get">
               <input type="hidden" name="question" value="<%= questions[i] %>">
               <% if (questions[i] === 'mission') { %>
-                <button type="submit">Ask About the Mission</button>
+                <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Ask About the Mission</button>
               <% } else if (questions[i] === 'npc') { %>
-                <button type="submit">Ask about <%- NPC %></button>
+                <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Ask about <%- NPC %></button>
               <% } else if (questions[i] === 'setting') { %>
-                <button type="submit">Ask about <%- s_start %></button>
+                <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Ask about <%- s_start %></button>
               <% } %>
             </form>
           <% } %>          
 
         <form class="form-class" action="/story/story-event" method="get">
-            <button type="submit">Let's move on</button>
+          <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Let's move on</button>
         </form>
         </div>
 
@@ -43,3 +43,4 @@
 </div>
 
 <script src="/scripts/story.js"></script>
+<%- include("templates/storyFooter") %>
