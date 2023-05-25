@@ -575,6 +575,9 @@ router.get('/story-npcSC2', async (req, res) => {
     const npcsc2Text = await openAI.generateText(generateNPCSC2(SC, SCA, req.session.rollResult, npcPrompt, scPrompt, req.session.characters, req.session.selectedClass, req.session.npcSelected, req.session.enemies), model, 1600);
     console.log(npcsc2Text);
 
+    req.session.combatInit = false;
+    req.session.combatSequence = 0;
+
     res.render('story-npcSC2', {
         text: npcsc2Text,
         rollResult: rollResult.roll
@@ -708,6 +711,9 @@ router.get('/story-boss2', async (req, res) => {
 
     const boss2Text = await openAI.generateText(generateBoss2(req.session.characters, req.session.npcSelected, req.session.s_boss, req.session.enemies, req.session.goal), model, 1600);
     console.log(boss2Text);
+
+    req.session.combatInit = false;
+    req.session.combatSequence = 0;
 
     res.render('story-boss2', {
         text: boss2Text,
