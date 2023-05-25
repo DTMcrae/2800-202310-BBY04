@@ -192,6 +192,15 @@ const generateBoss = (arrival, npcMood, characters, NPC, s_boss, enemies, goal) 
 
 };
 
+const generateBoss2 = (characters, NPC, s_boss, enemies, goal) => {
+    return `We are in the middle of the climactic scene right before the final battle where ${characters[0].name} and ${NPC} are at at ${s_boss}.
+    ${enemies[1]} knows that the heroes ${characters[0].name} and ${NPC} want to ${goal} and ${enemies[1]} is there to stop that from happening.
+    ${enemies[1]} will never let that happen and attacks.
+
+    Write the scene in four sentences. Remember that the scene has already started and all the characters have already been introduced. End the scene just as the fight begins.`
+
+};
+
 // This line serves static files from the 'images' directory
 router.use(express.static('images'));
 
@@ -635,7 +644,6 @@ router.get('/story-journey3', async (req, res) => {
     let scPrompt;
     let enemyPrompt;
     let npcPrompt;
-    let captured;
     req.session.rollResult = rollResult.result;
 
     switch (req.session.rollResult) {
@@ -688,21 +696,23 @@ router.get('/story-journey3', async (req, res) => {
     });
 });
 
+router.get('/story-boss2', async (req, res) => {
+
+    const boss2Text = await openAI.generateText(generateBoss2(req.session.characters, req.session.npcSelected, req.session.enemies, req.session.goal, req.session.s_boss), model, 1600);
+    console.log(boss2Text);
+
+    res.render('story-boss2', {
+        text: boss2Text,
+    });
+});
+
 
 // ***For testing only, allows console logs for scene in development ***//
 router.post('/test', async (req, res) => {
 
     // *** ChatGPT line to test here **//
-    const characters = req.session.characters;
-
-    const journeyText = await openAI.generateText(generateJourney(req.session.characters, req.session.selectedClass, req.session.npcSelected, req.session.s_travel, req.session.enemies), model, 3000);
-    const journeyObject = JSON.parse(journeyText);
-
-    req.session.journey_text = journeyObject.journey_text;
-    req.session.journey_problem = journeyObject.journey_problem;
-
-    console.log('journey_text:', req.session.journey_text);
-    console.log('journey_problem:', req.session.journey_problem);
+    const boss2Text = await openAI.generateText(generateBoss2(req.session.characters, req.session.npcSelected, req.session.enemies, req.session.goal, req.session.s_boss), model, 1600);
+    console.log(boss2Text);
     // *** End test area **//
 
     res.render('story', {
