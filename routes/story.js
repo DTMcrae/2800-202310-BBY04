@@ -193,11 +193,19 @@ const generateBoss = (arrival, npcMood, characters, NPC, s_boss, enemies, goal) 
 };
 
 const generateBoss2 = (characters, NPC, s_boss, enemies, goal) => {
-    return `We are in the middle of the climactic scene right before the final battle where ${characters[0].name} and ${NPC} are at at ${s_boss}.
+    return `We are in the middle of the climactic scene right before the final battle.
     ${enemies[1]} knows that the heroes ${characters[0].name} and ${NPC} want to ${goal} and ${enemies[1]} is there to stop that from happening.
     ${enemies[1]} will never let that happen and attacks.
 
-    Write the scene in four sentences. Remember that the scene has already started and all the characters have already been introduced. End the scene just as the fight begins.`
+    Write the scene in four sentences. Remember that all the characters are already talking. End the scene just as the fight begins.`
+
+};
+
+const generateBoss3 = (characters, NPC, enemies, goal) => {
+    return `In this scene, ${characters[0].name} and ${NPC} have defeated ${enemies[1]}.
+    ${characters[0].name} and ${NPC} are finally able to ${goal}.
+
+    Write the scene in four sentences.`
 
 };
 
@@ -698,11 +706,21 @@ router.get('/story-journey3', async (req, res) => {
 
 router.get('/story-boss2', async (req, res) => {
 
-    const boss2Text = await openAI.generateText(generateBoss2(req.session.characters, req.session.npcSelected, req.session.enemies, req.session.goal, req.session.s_boss), model, 1600);
+    const boss2Text = await openAI.generateText(generateBoss2(req.session.characters, req.session.npcSelected, req.session.s_boss, req.session.enemies, req.session.goal), model, 1600);
     console.log(boss2Text);
 
     res.render('story-boss2', {
         text: boss2Text,
+    });
+});
+
+router.get('/story-boss3', async (req, res) => {
+
+    const boss3Text = await openAI.generateText(generateBoss3(req.session.characters, req.session.npcSelected, req.session.enemies, req.session.goal, req.session.s_boss), model, 1600);
+    console.log(boss2Text);
+
+    res.render('story-boss3', {
+        text: boss3Text,
     });
 });
 
@@ -711,7 +729,7 @@ router.get('/story-boss2', async (req, res) => {
 router.post('/test', async (req, res) => {
 
     // *** ChatGPT line to test here **//
-    const boss2Text = await openAI.generateText(generateBoss2(req.session.characters, req.session.npcSelected, req.session.enemies, req.session.goal, req.session.s_boss), model, 1600);
+    const boss2Text = await openAI.generateText(generateBoss2(req.session.characters, req.session.npcSelected, req.session.s_boss, req.session.enemies, req.session.goal), model, 1600);
     console.log(boss2Text);
     // *** End test area **//
 
