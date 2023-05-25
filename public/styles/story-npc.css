@@ -8,8 +8,6 @@ h4 {
     align-content: center;
     width: 100%;
     color: #EEE;
-    margin-bottom: 20px;
-
 }
 
 h5 {
@@ -39,7 +37,8 @@ button {
     overflow-y: auto;
     margin-left: auto;
     margin-right: auto;
-    background-image: url(../images/story.png);
+    background-image: url(../images/story-npc.png);
+    background-color: black;
     background-size: cover;
     background-position: center;
 }

@@ -1,18 +1,9 @@
-<%- include("templates/headerStart") %>
+<%- include("templates/storyHeaderStart") %>
 
-<link rel="stylesheet" href="../styles/story.css">
+<link rel="stylesheet" href="../styles/story-journey.css">
 
-<%- include("templates/headerEnd") %>
+<%- include("templates/storyBodyStart") %>
 
-<div class="storygen">
-
-    <div class="center">
-
-        <div class = "storycreation">
-        <!-- Generates the loading animation -->
-        <div id="spinner" style="display: none;">
-            <img src="/images/loading.gif" class="loading" alt="Loading...">
-        </div>
 
         <!-- Story text -->
         <p class="form-class"><%- text %></p>
@@ -26,15 +17,13 @@
         <!-- Interactive button(s) for the player -->         
         <form class="form-class" action="/story/story-journey3" method="get">
             <input type="hidden" name="skillcheck" value="<%- SC3 %>">
-            <button type="submit"><%- SC3 %></button>
+            <button class="btn btn-secondary p-2 mb-2 loader" type="submit"><%- SC3 %></button>
         </form>
         
         <form class="form-class" action="/story/story-journey3" method="get">
             <input type="hidden" name="skillcheck" value="<%- SC4 %>">
-            <button type="submit"><%- SC4 %></button>
+            <button class="btn btn-secondary p-2 mb-2 loader" type="submit"><%- SC4 %></button>
         </form>
 
-    </div>
-</div>
 
-<script src="/scripts/story.js"></script>
+<%- include("templates/storyFooter") %>

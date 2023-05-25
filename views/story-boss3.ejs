@@ -1,29 +1,15 @@
-<%- include("templates/headerStart") %>
+<%- include("templates/storyHeaderStart") %>
 
-<link rel="stylesheet" href="../styles/story.css">
+<link rel="stylesheet" href="../styles/story-boss.css">
 
-<%- include("templates/headerEnd") %>
-
-<div class="storygen">
-
-    <div class="center">
-
-        <div class = "storycreation">
-        <!-- Generates the loading animation -->
-        <div id="spinner" style="display: none;">
-            <img src="/images/loading.gif" class="loading" alt="Loading...">
-        </div>
+<%- include("templates/storyBodyStart") %>
 
         <!-- Story text -->
         <p class="form-class"><%- text %></p>
 
         <!-- Interactive button(s) for the player -->        
         <form class="form-class" action="/story" method="get">
-            <button type="submit">Start A New Adventure?</button>
+            <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Start A New Adventure?</button>
         </form>
-        </div>
 
-    </div>
-</div>
-
-<script src="/scripts/story.js"></script>
+<%- include("templates/storyFooter") %>
