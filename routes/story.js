@@ -184,6 +184,14 @@ const generateJourney3 = (problem, SC, SCA, rollResult, npcPrompt, scPrompt, ene
 
 };
 
+const generateBoss = (arrival, npcMood, characters, NPC, s_boss, enemies, goal) => {
+    return `In this scene, ${characters[0].name} and ${NPC} arrive at ${s_boss} ${arrival}.
+    ${NPC} ${npcMood}. The villain of the story ${enemies[1]} knows they are there to ${goal}.
+
+    Start the scene with ${characters[0].name} and ${NPC} arriving. Then describe the setting and how the characters feel during their travels. Write the scene in four sentences.`
+
+};
+
 // This line serves static files from the 'images' directory
 router.use(express.static('images'));
 
@@ -275,7 +283,7 @@ router.post('/generateStory', async (req, res) => {
         req.session.currentEvent = 1;
         req.session.events = {
             "1": {
-                "type": "story-journey"
+                "type": "story-boss"
             },
             "2": {
                 "type": "story-npc"
@@ -405,7 +413,41 @@ router.get('/story-event', async (req, res) => {
             })
             break;
 
-            // ...Add more cases as needed
+        case 'story-boss':
+
+            let arrival;
+            let npcMood;
+        
+            switch (req.session.rollResult) {
+                case 'Critical Failure':
+                    arrival = "captured by the enemy";
+                    npcMood = "looks defeated and regretful";
+                    break;
+                case 'Failure':
+                    arrival = "captured by the enemy";
+                    npcMood = "is silently observing the enemy";
+                    break;
+                case 'Partial Success':
+                    arrival = "";
+                    npcMood = "looks around cautiously";
+                    break;
+                case 'Success':
+                    arrival = "";
+                    npcMood = "looks ready to fight";
+                    break;
+                case 'Critical Success':
+                    arrival = "";
+                    npcMood = "looks eager to fight";
+                    break;
+            }
+
+            const bossText = await openAI.generateText(generateBoss(arrival, npcMood, req.session.characters, req.session.npcSelected, req.session.s_boss, req.session.enemies, req.session.goal), model, 3000);
+            console.log('Boss Scene 1: ', bossText);
+
+            res.render('story-boss', {
+                text: bossText
+            });
+            break;
 
         default:
             // Handle an unknown event type
@@ -601,31 +643,26 @@ router.get('/story-journey3', async (req, res) => {
             scPrompt = "tries to overcome the challenge and makes the problem worse.";
             enemyPrompt = "calls for enemy allies and surrounds the characters.";
             npcPrompt = "is speechless and has a grim look on their face as they are taken prisoner.";
-            captured = true;
             break;
         case 'Failure':
             scPrompt = "tries to overcome the challenge and fails.";
             enemyPrompt = "calls for enemy allies and surrounds the characters.";
             npcPrompt = "moans in frustration as they are taken prisoner.";
-            captured = true;
             break;
         case 'Partial Success':
             scPrompt = "almost overcomes the challenge but fails.";
             enemyPrompt = "laughs and leaves.";
             npcPrompt = "steps in to help and together our heroes overcome the challenge.";
-            captured = false;
             break;
         case 'Success':
             scPrompt = "overcomes with the challenge.";
             enemyPrompt = "acts frustrated and leaves.";
             npcPrompt = "is relieved.";
-            captured = false;
             break;
         case 'Critical Success':
             scPrompt = "overcomes with the challenge with great skill.";
             enemyPrompt = "flees in terror.";
             npcPrompt = "recognizes the enemy and yells that they need to follow it.";
-            captured = false;
             break;
     }
 
