@@ -3,6 +3,75 @@
         background-image: url(../images/passwordResetConfirmationScreen.png);
         overflow-y: auto;
     }
+
+    .characterCard {
+        background-color: rgba(105, 105, 105, 0.658);
+        width: 80%;
+        margin: 0 auto;
+        padding-top: 20px;
+        color: white;
+        border-radius: 5%;
+    }
+}
+
+@media (min-width: 601px) {
+    body {
+        background-image: url(../images/Landing_Page_backgroun_HiRes.jpg);
+        overflow-y: auto;
+    }
+
+    .characterCard {
+        background-color: rgba(105, 105, 105, 0.849);
+        width: 50%;
+        margin: 0 auto;
+        padding-top: 20px;
+        color: white;
+        border-radius: 5%;
+    }
+
+    #char_Container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        grid-template-areas:
+            "ability_scores Equipment"
+            "Abilities Skills";
+    }
+
+    #ability_scores {
+        grid-area: ability_scores;
+    }
+
+    #Equipment {
+        grid-area: Equipment;
+    }
+
+    #Skills {
+        grid-area: Skills;
+    }
+
+    #Abilities {
+        grid-area: Abilities;
+    }
+
+    #name_Container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
+        grid-template-areas:
+          "name characterClass";
+      }
+      
+      #name {
+        grid-area: name;
+        text-align: right;
+      }
+      
+      #characterClass {
+        grid-area: characterClass;
+        text-align: left;
+      }
+      
 }
 
 h1 {
@@ -17,16 +86,8 @@ h1 {
 #characterImage {
     display: block;
     margin: 0 auto;
-    width: 80%;
-    height: 100%;
-}
-
-.characterCard {
-    background-color: rgba(105, 105, 105, 0.658);
-    width: 80%;
-    margin: 0 auto;
-    padding-top: 20px;
-    color: white;
+    height: 250px;
+    border-radius: 10%;
 }
 
 h2 {
@@ -41,8 +102,8 @@ h2 {
 .statsContainer {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-areas: 
-    "stats characteristics";
+    grid-template-areas:
+        "stats characteristics";
 }
 
 button {
@@ -52,13 +113,14 @@ button {
     width: 60%;
     height: 60%;
     margin: 0 auto;
+    border-radius: 10%;
 }
 
 .buttonContainer {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
-    "backButton confirmButton";
+        "backButton confirmButton";
     justify-content: center;
     align-content: center;
     width: 100%;
@@ -66,7 +128,8 @@ button {
     gap: 30px;
 }
 
-.backButton, .confirmButton {
+.backButton,
+.confirmButton {
     overflow: hidden;
     white-space: wrap;
     text-overflow: ellipsis;
@@ -74,9 +137,9 @@ button {
     height: 100%;
     font-weight: bold;
     color: black;
-  }
-  
-  .buttonLink {
+}
+
+.buttonLink {
     text-decoration: none;
 }
 
