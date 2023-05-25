@@ -205,7 +205,7 @@ const generateBoss3 = (characters, NPC, enemies, goal) => {
     return `In this scene, ${characters[0].name} and ${NPC} have defeated ${enemies[1]}.
     ${characters[0].name} and ${NPC} are finally able to ${goal}.
 
-    Write the scene in four sentences.`
+    Write the scene in four sentences. This is the climax of the story.`
 
 };
 
@@ -300,7 +300,7 @@ router.post('/generateStory', async (req, res) => {
         req.session.currentEvent = 1;
         req.session.events = {
             "1": {
-                "type": "story-boss"
+                "type": "story-intro"
             },
             "2": {
                 "type": "story-npc"
@@ -716,8 +716,8 @@ router.get('/story-boss2', async (req, res) => {
 
 router.get('/story-boss3', async (req, res) => {
 
-    const boss3Text = await openAI.generateText(generateBoss3(req.session.characters, req.session.npcSelected, req.session.enemies, req.session.goal, req.session.s_boss), model, 1600);
-    console.log(boss2Text);
+    const boss3Text = await openAI.generateText(generateBoss3(req.session.characters, req.session.npcSelected, req.session.enemies, req.session.goal), model, 1600);
+    console.log(boss3Text);
 
     res.render('story-boss3', {
         text: boss3Text,
@@ -729,8 +729,8 @@ router.get('/story-boss3', async (req, res) => {
 router.post('/test', async (req, res) => {
 
     // *** ChatGPT line to test here **//
-    const boss2Text = await openAI.generateText(generateBoss2(req.session.characters, req.session.npcSelected, req.session.s_boss, req.session.enemies, req.session.goal), model, 1600);
-    console.log(boss2Text);
+    const boss3Text = await openAI.generateText(generateBoss3(req.session.characters, req.session.npcSelected, req.session.enemies, req.session.goal), model, 1600);
+    console.log(boss3Text);
     // *** End test area **//
 
     res.render('story', {
