@@ -94,9 +94,19 @@ async function startCombat(req) {
 
     console.log("Enemies:", enemies);
 
-    if (enemies[0].name === undefined) {
-        for (var x = 0; x < enemies.length; x++) {
-            enemies[x] = await data.getMonsterInfo((enemies[x]).toLowerCase());
+    if (req.session.combatSequence === 0)
+    {
+        if (enemies[0].name === undefined) {
+            enemies[0] = await data.getMonsterInfo((enemies[0]).toLowerCase());
+            enemies[1] = enemies[0];
+        }
+    } 
+    else 
+    {
+        if (enemies[0].name === undefined) {
+            for (var x = 0; x < enemies.length; x++) {
+                enemies[x] = await data.getMonsterInfo((enemies[x]).toLowerCase());
+            }
         }
     }
 
@@ -154,10 +164,11 @@ function replaceNull(enemies) {
 //If the enemy dies and no enemies remain, combat ends in victory.
 //Returns a text string describing the result. (Damage taken or death)
 function parseDamage(req, data) {
-    if (data === 'undefiend' || data === null || data.Result.DamageDealt === undefined) return undefined;
+    if (data === undefined || data === null || data.Result.DamageDealt === undefined) return undefined;
     let target = (data.Target !== undefined) ? data.Target.Name : data.Result.SelectedTarget;
 
     let actor = initiative.getActorData(req.session.turnOrder, target);
+    if(actor.hp === undefined) return " ";
     actor.hp = data.Result.RemainingHP;
 
     var resultText;
@@ -309,7 +320,8 @@ router.post("/victory", async (req, res) => {
     res.render("combatVictory", {
         summary: outro,
         players: getAllPlayers(req),
-        isPlayer: true
+        isPlayer: true,
+        destination: req.session.combatSequence
     })
 });
 
