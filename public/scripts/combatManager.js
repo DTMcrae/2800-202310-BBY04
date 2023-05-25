@@ -6,6 +6,8 @@ const CombatPrompts = require('./combatPrompts.js');
 const Dice = require('./Dice.js');
 const Crypto = require('crypto');
 const ObjectId = require('mongodb').ObjectId;
+const Data = require('./Data.js');
+const data = new Data();
 
 const openAI = new CombatAI(process.env.OPENAI_KEY);
 
@@ -34,7 +36,7 @@ router.post("/load/:id", async (req, res) => {
     id = req.params.id;
 
     if (id === undefined) {
-        console.log("Bad ID");
+        console.error("Bad Story ID");
         req.redirect("/LandingPage");
         return;
     }
@@ -63,15 +65,12 @@ router.post("/load/:id", async (req, res) => {
 })
 
 router.get('*', async (req, res) => {
-    if(!req.session.authenticated)
-    {
+    if (!req.session.authenticated) {
         res.redirect("/userLoginScreen");
         return;
     }
 
-    console.log(req.session);
-
-    if(!req.session.combatInit) startCombat(req);
+    if (!req.session.combatInit) await startCombat(req);
     req.session.lastURL = req.url;
 
     var currentActor = initiative.currentTurn(req.session.turnOrder);
@@ -84,14 +83,27 @@ router.post('/', (req, res) => {
 });
 
 //Placeholder function for assigning actors to combat.
-function startCombat(req) {
+async function startCombat(req) {
 
     req.session.history = [];
     let actors = [];
 
     //Assign the preset players/enemies
     let players = (req.session.characters !== undefined) ? req.session.characters : presetPlayers();
-    let enemies = presetEnemies();
+    let enemies = (req.session.enemies !== undefined) ? req.session.enemies : presetEnemies();
+
+    console.log("Enemies:", enemies);
+
+    if (enemies[0].name === undefined) {
+        for (var x = 0; x < enemies.length; x++) {
+            enemies[x] = await data.getMonsterInfo((enemies[x]).toLowerCase());
+        }
+    }
+
+    replaceNull(enemies);
+
+
+    console.log("Enemies:", enemies);
 
     //Roll initiative for each player
     players.forEach(player => {
@@ -110,27 +122,52 @@ function startCombat(req) {
     })
 
     req.session.turnOrder = initiative.assignNew(actors);
+    console.log("Starting Combat:", actors);
     req.session.combatInit = true;
     this.combatEnded = false;
+}
+
+function replaceNull(enemies) {
+    var copy = null;
+    var breakout = 0;
+    var result = enemies;
+
+    while (result.includes(null)) {
+        breakout++;
+        for (var x = 0; x < result.length; x++) {
+            if (result[x] != null) {
+                copy = result[x];
+            } else {
+                result[x] = copy;
+            }
+        }
+        if (breakout >= 3) break;
+    }
+
+    if (result.includes(null)) {
+        console.error("Unable to find a replacement enemy.", result);
+    }
+    else return result;
 }
 
 //Process and save the damage the player deals to an enemy.
 //If the enemy dies and no enemies remain, combat ends in victory.
 //Returns a text string describing the result. (Damage taken or death)
 function parseDamage(req, data) {
-    if(data === 'undefiend' || data === null || data.Result.DamageDealt === undefined) return undefined;
+    if (data === 'undefiend' || data === null || data.Result.DamageDealt === undefined) return undefined;
     let target = (data.Target !== undefined) ? data.Target.Name : data.Result.SelectedTarget;
 
-    let actor = initiative.getActorData(req.session.turnOrder,target);
+    let actor = initiative.getActorData(req.session.turnOrder, target);
     actor.hp = data.Result.RemainingHP;
 
     var resultText;
-    if(actor.hp > 0) { 
+    if (actor.hp > 0) {
         resultText = `${actor.name} took ${data.Result.DamageDealt} damage.`;
     } else {
         resultText = `${actor.name} falls to the ground, defeated.`;
         actor.isActive = false;
 
+        console.log("Active Players:", getActivePlayers(req));
         if (getActiveEnemies(req).length < 1 || getActivePlayers(req).length < 1) {
             this.combatEnded = true;
             this.playerVictory = (getActiveEnemies(req).length < 1);
@@ -142,8 +179,7 @@ function parseDamage(req, data) {
 }
 
 //Returns if an actor is friendly, meaning they are in the player's party.
-function isActorFriendly(actor)
-{
+function isActorFriendly(actor) {
     return actor.isPlayer;
 }
 
@@ -158,14 +194,12 @@ function getAllPlayers(req) {
 }
 
 //Returns all currently alive players.
-function getActivePlayers(req)
-{
+function getActivePlayers(req) {
     var result = [];
 
     req.session.turnOrder.order.forEach(actor => {
         if (actor.isPlayer && actor.isActive) result.push(actor);
     })
-
     return result;
 }
 
@@ -193,50 +227,50 @@ function getActiveEnemies(req) {
 //Checks the current status of combat.
 //status is false if combat is ongoing, true if it has ended.
 function combatStatus(req) {
-    if(req.session.combatEnded) {
-        return {status: true, playerVictory: (getActiveEnemies(req).length < 1)};
+    if (req.session.combatEnded) {
+        return { status: true, playerVictory: (getActiveEnemies(req).length < 1) };
     }
-    return  {status: false};
+    return { status: false };
 }
 
 //Checks if the response from chatGPT is null, and redirects to an error page.
 function verifyResponse(req, res, response, url) {
-    if(response === null) {
+    if (response === null) {
         //The below function works similar to a standard redirect, but treats it as a post request.
-        res.redirect(307,url);
+        res.redirect(307, url);
         return false;
     }
     return true;
 }
 
-router.post("/save", async (req,res) => {
-   var turnOrder = req.session.turnOrder;
-   var history = req.session.history;
+router.post("/save", async (req, res) => {
+    var turnOrder = req.session.turnOrder;
+    var history = req.session.history;
 
-   if(req.session.storyID !== undefined) {
+    if (req.session.storyID !== undefined) {
 
-    try {
-        var result = await userSavedCollection.collection.find({
-            storyID: req.session.storyID
+        try {
+            var result = await userSavedCollection.collection.find({
+                storyID: req.session.storyID
             }).project({
-            initiative: 1,
-            history: 1
-        }).toArray();
+                initiative: 1,
+                history: 1
+            }).toArray();
 
-        if(result.length > 0) {
-            var updated = await userSavedCollection.collection.updateOne(
-                {storyID: req.session.storyID},
-                { $set: { gameState: "combat", initiative: turnOrder, history: history, date: new Date().toLocaleString() }}
-            );
-            console.log("Save Attempt:",updated);
+            if (result.length > 0) {
+                var updated = await userSavedCollection.collection.updateOne(
+                    { storyID: req.session.storyID },
+                    { $set: { gameState: "combat", initiative: turnOrder, history: history, date: new Date().toLocaleString() } }
+                );
+                console.log("Save Attempt:", updated);
+            }
+        } catch (e) {
+            console.log(e);
         }
-    } catch (e) {
-        console.log(e);
-    }
 
-   }
-   else {
-       var id = Crypto.randomBytes(20).toString('hex');
+    }
+    else {
+        var id = Crypto.randomBytes(20).toString('hex');
         req.session.storyID = id;
         var result = await userSavedCollection.collection.insertOne({
             gameState: "combat",
@@ -250,19 +284,19 @@ router.post("/save", async (req,res) => {
 
         var userUpdate = await userCollection.collection.updateOne(
             { _id: new ObjectId(req.session.userID) },
-            {$addToSet: {userStories: id}}
+            { $addToSet: { userStories: id } }
         );
-       console.log("User Update Result:", userUpdate);
-}
+        console.log("User Update Result:", userUpdate);
+    }
     res.redirect("/combat");
-   /*
-   In case turnOrder cant be used as a string and must be broken down:
-   */
-   //Something something save to database
+    /*
+    In case turnOrder cant be used as a string and must be broken down:
+    */
+    //Something something save to database
 });
 
 //Sends the user to the victory page, and generates a combat outro.
-router.post("/victory", async (req,res) => {
+router.post("/victory", async (req, res) => {
     let response = await openAI.generateResponse(prompts.storySystemPrompt(), prompts.combatVictoryPrompt(getAllPlayers(req), getAllEnemies(req), req.session.history), 600, 0.95);
     let data = JSON.parse(response);
 
@@ -286,13 +320,13 @@ router.post("/defeat", async (req, res) => {
 
     var outro;
 
-    if(data.Result !== undefined) outro = data.Result.CombatOutro;
+    if (data.Result !== undefined) outro = data.Result.CombatOutro;
     else outro = data.CombatOutro;
 
     req.session.combatInit = false;
     res.render("combatDefeat", {
         summary: outro,
-        players: getAllPlayers(req), 
+        players: getAllPlayers(req),
         isPlayer: true
     })
 });
@@ -322,12 +356,12 @@ router.post("/selectTarget/:target", async (req, res) => {
 
     var roll;
 
-    if(actor.actions[req.session.combatAction].DamageDice === undefined) {
+    if (actor.actions[req.session.combatAction].DamageDice === undefined) {
 
         response = await openAI.generateRollRequest(prompts.generateBasicActionPrompt(actor.name, actor.actions[req.session.combatAction], req.params.target));
 
-        if(!verifyResponse(req,res,response,"/combat/selectAction/" + req.session.combatActor + "=" + req.session.combatAction));
-    
+        if (!verifyResponse(req, res, response, "/combat/selectAction/" + req.session.combatActor + "=" + req.session.combatAction));
+
         response = formatResponse(response);
 
         let data = JSON.parse(response);
@@ -339,7 +373,7 @@ router.post("/selectTarget/:target", async (req, res) => {
         roll = actor.actions[req.session.combatAction].DamageDice;
     }
 
-    console.log("Roll:",req.session.combatRoll);
+    console.log("Roll:", req.session.combatRoll);
 
     res.render('diceRoll', {
         Dice: roll[1],
@@ -352,13 +386,13 @@ router.post("/selectTarget/:target", async (req, res) => {
 });
 
 function updateHistory(req, data) {
-        req.session.history.push(data.Result.ActionDescription);
-        req.session.history.push(parseDamage(req, data));
-        req.session.lastURL = req.url;
+    req.session.history.push(data.Result.ActionDescription);
+    req.session.history.push(parseDamage(req, data));
+    req.session.lastURL = req.url;
 }
 
 //Gets the values rolled by the player, and generates a response.
-router.post('/generatePlayerAction/:roll', async(req,res) => {
+router.post('/generatePlayerAction/:roll', async (req, res) => {
     let result = req.params.roll;
     result = result.toString().split('_');
 
@@ -371,7 +405,7 @@ router.post('/generatePlayerAction/:roll', async(req,res) => {
         //const text = await openAI.generateText(prompts.generatePlayerTurnPrompt(prompts.generateActionPrompt(actor, current.actions[req.session.combatAction], initiative.getActorData(req.session.combatTarget), result[0], result[1])), model, 200);
 
         let systemPrompt = prompts.playerSystemPrompt();
-        let playerPrompt = prompts.playerTurnPrompt(current, prompts.assignAction(current.actions[req.session.combatAction], result[0], result[1]), initiative.getActorData(req.session.turnOrder,req.session.combatTarget), 300, 0.75);
+        let playerPrompt = prompts.playerTurnPrompt(current, prompts.assignAction(current.actions[req.session.combatAction], result[0], result[1]), initiative.getActorData(req.session.turnOrder, req.session.combatTarget), 300, 0.75);
 
         let text = await openAI.generateResponse(systemPrompt, playerPrompt);
         if (!verifyResponse(req, res, text, '/combat/selectTarget/' + req.session.combatTarget)) {
@@ -411,8 +445,8 @@ router.post('/generateAction/:actor', async (req, res) => {
         let systemPrompt = prompts.enemySystemPrompt();
         let enemyPrompt = prompts.enemyTurnPrompt(current, getActivePlayers(req));
 
-        let text = await openAI.generateResponse(systemPrompt,enemyPrompt, 300, 0.75);
-        if(!verifyResponse(req, res, text, '/combat')) {
+        let text = await openAI.generateResponse(systemPrompt, enemyPrompt, 300, 0.75);
+        if (!verifyResponse(req, res, text, '/combat')) {
             return;
         };
         text = formatResponse(text);
@@ -445,8 +479,7 @@ router.post('/generateAction/:actor', async (req, res) => {
 function formatResponse(text) {
     var data = text;
 
-    while(data.substring(data.length - 1) != "}" && data.length > 1)
-    {
+    while (data.substring(data.length - 1) != "}" && data.length > 1) {
         data = data.substring(0, data.length - 1);
     }
 
