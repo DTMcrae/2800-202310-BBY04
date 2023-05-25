@@ -33,7 +33,7 @@
                 <button class="btn btn-secondary p-2 mb-2" style="width:25rem" id="displayActions" type="button">More</button>
             <% } %>
         <% } else { %>
-            <form action='/combat/generateAction/<%- actor.name %>' method="post">
+            <form action='/combat/generateAction/<%- actor.combatID %>' method="post">
                 <button class="btn btn-secondary p-2 mb-2 loader" style="width:25rem" type="submit">Continue</button>
             </form>
             <% } %>

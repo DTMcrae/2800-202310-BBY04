@@ -53,8 +53,6 @@ router.post("/load/:id", async (req, res) => {
         req.session.turnOrder = response[0].initiative;
         req.session.history = response[0].history;
 
-        console.log("TurnOrder:", response[0].initiative);
-
     } catch (e) {
         console.log(e);
     }
@@ -92,8 +90,6 @@ async function startCombat(req) {
     let players = (req.session.characters !== undefined) ? req.session.characters : presetPlayers();
     let enemies = (req.session.enemies !== undefined) ? req.session.enemies : presetEnemies();
 
-    console.log("Enemies:", enemies);
-
     if (req.session.combatSequence === 0)
     {
         if (enemies[0].name === undefined) {
@@ -112,27 +108,30 @@ async function startCombat(req) {
 
     replaceNull(enemies);
 
-
-    console.log("Enemies:", enemies);
+    var count = 0;
 
     //Roll initiative for each player
     players.forEach(player => {
         player.roll = Dice.Roll(20, 1);
         player.isActive = (player.hp > 0);
         player.isPlayer = true;
+        player.combatID = count;
         actors.push(player);
-    })
+        count++;
+    });
 
     //Roll initiative for each enemy
     enemies.forEach(enemy => {
         enemy.roll = Dice.Roll(20, 1);
         enemy.isActive = (enemy.hp > 0);
         enemy.isPlayer = false;
+        enemy.combatID = count;
+        count++;
+
         actors.push(enemy);
     })
 
     req.session.turnOrder = initiative.assignNew(actors);
-    console.log("Starting Combat:", actors);
     req.session.combatInit = true;
     this.combatEnded = false;
 }
@@ -165,9 +164,14 @@ function replaceNull(enemies) {
 //Returns a text string describing the result. (Damage taken or death)
 function parseDamage(req, data) {
     if (data === undefined || data === null || data.Result.DamageDealt === undefined) return undefined;
-    let target = (data.Target !== undefined) ? data.Target.Name : data.Result.SelectedTarget;
+    let target = (data.Target !== undefined) ? req.session.combatTarget : data.Result.SelectedTarget;
 
     let actor = initiative.getActorData(req.session.turnOrder, target);
+    if(actor === null) actor = initiative.getActorDataID(req.session.turnOrder, target);
+
+    console.log("Target:", target);
+    console.log("Found:", actor);
+
     if(actor.hp === undefined) return " ";
     actor.hp = data.Result.RemainingHP;
 
@@ -178,14 +182,12 @@ function parseDamage(req, data) {
         resultText = `${actor.name} falls to the ground, defeated.`;
         actor.isActive = false;
 
-        console.log("Active Players:", getActivePlayers(req));
         if (getActiveEnemies(req).length < 1 || getActivePlayers(req).length < 1) {
             this.combatEnded = true;
             this.playerVictory = (getActiveEnemies(req).length < 1);
         }
     }
 
-    console.log(resultText);
     return resultText;
 }
 
@@ -229,7 +231,10 @@ function getActiveEnemies(req) {
     var result = [];
 
     req.session.turnOrder.order.forEach(actor => {
-        if (!actor.isPlayer && actor.isActive) result.push(actor);
+        if (!actor.isPlayer && actor.isActive) {
+            console.log("Found Active:", actor);
+            result.push(actor);
+        }
     })
 
     return result;
@@ -417,7 +422,7 @@ router.post('/generatePlayerAction/:roll', async (req, res) => {
         //const text = await openAI.generateText(prompts.generatePlayerTurnPrompt(prompts.generateActionPrompt(actor, current.actions[req.session.combatAction], initiative.getActorData(req.session.combatTarget), result[0], result[1])), model, 200);
 
         let systemPrompt = prompts.playerSystemPrompt();
-        let playerPrompt = prompts.playerTurnPrompt(current, prompts.assignAction(current.actions[req.session.combatAction], result[0], result[1]), initiative.getActorData(req.session.turnOrder, req.session.combatTarget), 300, 0.75);
+        let playerPrompt = prompts.playerTurnPrompt(current, prompts.assignAction(current.actions[req.session.combatAction], result[0], result[1]), initiative.getActorDataID(req.session.turnOrder, req.session.combatTarget), 300, 0.75);
 
         let text = await openAI.generateResponse(systemPrompt, playerPrompt);
         if (!verifyResponse(req, res, text, '/combat/selectTarget/' + req.session.combatTarget)) {

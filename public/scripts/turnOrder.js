@@ -53,9 +53,19 @@ class TurnOrder {
      * @returns Actor:{name,id,roll,start}
      */
     getActorData(turnOrder, name) {
-        var result;
+        var result = null;
         turnOrder.order.forEach(actor => {
-            if (actor.name === name) {
+            if (actor.name == name) {
+                result = actor;
+            }
+        });
+        return result;
+    }
+
+    getActorDataID(turnOrder, id) {
+        var result = null;
+        turnOrder.order.forEach(actor => {
+            if (actor.combatID == id) {
                 result = actor;
             }
         });

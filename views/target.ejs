@@ -20,7 +20,7 @@
             </div>
             <div class="modal-body overflow-auto" style="max-height: 20rem;">
                 <% for(var x=0; x < targets.length; x++) { %>
-                    <form action='/combat/selectTarget/<%- targets[x].name %>' method="post">
+                    <form action='/combat/selectTarget/<%- targets[x].combatID %>' method="post">
                         <button class="btn btn-secondary p-2 mb-2 loader selection" style="width:100%;" type="submit"><%- targets[x].name
                                 %></button>
                     </form>
