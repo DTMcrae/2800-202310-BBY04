@@ -53,7 +53,7 @@ const generateStoryPrompt = (NPC, monster, characters, randomType, bcit) => {
     - "s_travel": The name of a location they need to travel through to reach the central conflict or goal. Only provide the name.
     - "s_boss": The location where the central conflict or goal can be resolved. Only provide the name.
     - "npc_role": The role of the NPC who tells you about the adventure. Only provide their title.
-    - "npc_name": Look at this list of potential characters: ${NPC}. Choose one that fits the story best and provide their name from the list.
+    - "npcselected": Look at this list of potential characters: ${NPC}. Choose one that fits the story best and provide their name from the list.
     - "monster_1": Consider this list of monsters: ${monster}. Select a monster appropriate for the adventure and provide their name from the list. Do not invent a new monster.
     - "monster_2": Consider this list of monsters: ${monster}. Select a monster appropriate for the adventure and provide their name from the list. Do not invent a new monster.
     
@@ -67,7 +67,7 @@ const generateStoryPrompt = (NPC, monster, characters, randomType, bcit) => {
       "s_travel: "<setting>"
       "s_boss": "<setting>"
       "npc_role": "<role>"
-      "npc_name" : "<name>"
+      "npcselected" : "<name>"
       "monster_1" : "<monster name>"
       "monster_2" : "<monster name>"
     
@@ -140,12 +140,12 @@ const generateNPCSC3 = (npcPrompt, npcReaction, characters, NPC, enemies, goal, 
 
 };
 
-const generateJourney = (characters, selectedClass, NPC, s_travel, enemies) => {
+const generateJourney = (characters, NPC, s_travel, enemies) => {
     return `In this adventure, ${characters[0].name} and ${NPC} are navigating through ${s_travel}.
 
     There are two scenes:
     1. Describe the setting and how the characters feel during their travels in four sentences.
-    2. ${enemies[1]} appears and creates an obstacle that prevents ${characters[0].name} and ${NPC} from travelling further. The problem must be something that can be resolved by a skill check for a ${selectedClass} by ${characters[0].name}. Set up the problem but do not resolve it. The problem must not be about fighting an enemy. Write this scene in two sentences.
+    2. ${enemies[1]} appears and creates an obstacle that prevents ${characters[0].name} and ${NPC} from travelling further. Set up the problem but do not resolve it. The problem must not be about fighting an enemy. Write this scene in two sentences.
 
     Format your response as follows:
     
@@ -270,14 +270,14 @@ router.post('/generateStory', async (req, res) => {
         req.session.s_travel = responseObject.s_travel;
         req.session.s_boss = responseObject.s_boss;
         req.session.npc_role = responseObject.npc_role;
-        req.session.npc_name = responseObject.npc_name;
+        req.session.npcSelected = responseObject.npcselected;
 
         req.session.enemies = [responseObject.monster_1, responseObject.monster_2];
 
         req.session.currentEvent = 1;
         req.session.events = {
             "1": {
-                "type": "story-journey"
+                "type": "story-intro"
             },
             "2": {
                 "type": "story-npc"
@@ -328,7 +328,7 @@ router.post('/generateStory', async (req, res) => {
         console.log('Travel location:', req.session.s_travel);
         console.log('Boss location:', req.session.s_boss);
         console.log('NPC role:', req.session.npc_role);
-        console.log('NPC name:', req.session.npc_name);
+        console.log('NPC name:', req.session.npcSelected);
         console.log('Enemies:', req.session.enemies);
 
         // Sends title and summary to the story generation screen
@@ -379,7 +379,7 @@ router.get('/story-event', async (req, res) => {
                 text: npcText,
                 emotion: randomEmotion,
                 goal: req.session.goal,
-                NPC: req.session.npc_name,
+                NPC: req.session.npcSelected,
                 s_start: req.session.s_start,
                 questions: req.session.questions,
                 npc_role: req.session.npc_role
@@ -415,7 +415,7 @@ router.get('/story-event', async (req, res) => {
 
         case 'story-journey':
 
-            const journeyText = await openAI.generateText(generateJourney(characters, req.session.selectedClass, req.session.npc_name, req.session.s_travel, req.session.enemies), model, 3000);
+            const journeyText = await openAI.generateText(generateJourney(characters, req.session.npcSelected, req.session.s_travel, req.session.enemies), model, 3000);
             const journeyObject = JSON.parse(journeyText);
 
             req.session.journey_text = journeyObject.journey_text;
@@ -487,7 +487,7 @@ router.get('/story-npcCHAT', async (req, res) => {
         Q2: req.session.Q2,
         A2: req.session.A2,
         goal: req.session.goal,
-        NPC: req.session.npc_name,
+        NPC: req.session.npcSelected,
         s_start: req.session.s_start,
         questions: req.session.questions
     });
@@ -539,7 +539,7 @@ router.get('/story-npcSC2', async (req, res) => {
         SCA = req.session.SCA2;
     }
 
-    const npcsc2Text = await openAI.generateText(generateNPCSC2(SC, SCA, req.session.rollResult, npcPrompt, scPrompt, characters, req.session.selectedClass, req.session.npc_name, req.session.enemies), model, 1600);
+    const npcsc2Text = await openAI.generateText(generateNPCSC2(SC, SCA, req.session.rollResult, npcPrompt, scPrompt, characters, req.session.selectedClass, req.session.npcSelected, req.session.enemies), model, 1600);
     console.log(npcsc2Text);
 
     res.render('story-npcSC2', {
@@ -577,7 +577,7 @@ router.get('/story-npcSC3', async (req, res) => {
             break;
     }
 
-    const npcsc3Text = await openAI.generateText(generateNPCSC3(npcPrompt, npcReaction, characters, req.session.npc_name, req.session.enemies, req.session.goal, req.session.s_travel), model, 1600);
+    const npcsc3Text = await openAI.generateText(generateNPCSC3(npcPrompt, npcReaction, characters, req.session.npcSelected, req.session.enemies, req.session.goal, req.session.s_travel), model, 1600);
     console.log(npcsc3Text);
 
     res.render('story-npcSC3', {
@@ -587,10 +587,9 @@ router.get('/story-npcSC3', async (req, res) => {
 
 router.get('/story-journey2', async (req, res) => {
 
-    const NPC = req.session.npc_name;
     const characters = req.session.characters;
 
-    const journey2Text = await openAI.generateText(generateJourney2(req.session.journey_problem, characters, req.session.selectedClass, NPC, req.session.s_travel, req.session.enemies), model, 3000);
+    const journey2Text = await openAI.generateText(generateJourney2(req.session.journey_problem, characters, req.session.selectedClass, req.session.npcSelected, req.session.s_travel, req.session.enemies), model, 3000);
     const journey2Object = JSON.parse(journey2Text);
 
     console.log('journey 2 text:', journey2Text);
@@ -673,7 +672,7 @@ router.get('/story-journey3', async (req, res) => {
         SCA = req.session.SCA4;
     }
 
-    const journey3Text = await openAI.generateText(generateJourney3(req.session.journey_problem, SC, SCA, req.session.rollResult, npcPrompt, scPrompt, enemyPrompt, characters, req.session.selectedClass, req.session.npc_name, req.session.enemies), model, 1600);
+    const journey3Text = await openAI.generateText(generateJourney3(req.session.journey_problem, SC, SCA, req.session.rollResult, npcPrompt, scPrompt, enemyPrompt, characters, req.session.selectedClass, req.session.npcSelected, req.session.enemies), model, 1600);
     console.log(journey3Text);
 
     res.render('story-journey3', {
@@ -687,10 +686,9 @@ router.get('/story-journey3', async (req, res) => {
 router.post('/test', async (req, res) => {
 
     // *** ChatGPT line to test here **//
-    const NPC = req.session.npc_name;
     const characters = req.session.characters;
 
-    const journeyText = await openAI.generateText(generateJourney(characters, req.session.selectedClass, NPC, req.session.s_travel, req.session.enemies), model, 3000);
+    const journeyText = await openAI.generateText(generateJourney(characters, req.session.selectedClass, req.session.npcSelected, req.session.s_travel, req.session.enemies), model, 3000);
     const journeyObject = JSON.parse(journeyText);
 
     req.session.journey_text = journeyObject.journey_text;
