@@ -36,7 +36,11 @@
         
         <form class="form-class" action="/story/generateStory" method="post">
             <% if (typeof summary == 'undefined') { %>
+            <h2>Start New Game</h2>
+            <p>Click the button to generate a new adventure!</p>
             <button type="submit">Generate Story</button>
+            <br>
+            <p><i>myD&D</i> uses the power of A.I. to generate a new storyline that will be completely unique for each individual playthrough!</p>
             <% } else { %>
                 <br>
             <button type="submit">Reroll Story</button>
