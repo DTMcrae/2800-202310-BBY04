@@ -29,14 +29,41 @@ class Data {
         { $project: { _id: 0, name: 1 } }
     ]).toArray();
     return monstersList.map(monster => monster.name);
-}
+  }
 
 
     //fucntion for return an object containing spefic Monster information
     async getMonsterInfo(name) {
-      const monsterInfo = await monstersCollection.collection.findOne({ name: name });
-      return monsterInfo;
+      const normalized_name = name.toLowerCase().replace(/ /g, "-");
+      const monsterInfo = await monstersCollection.collection.findOne({ name: normalized_name });
+      const fallbackMonster = {
+        "_id" : "6451f263f429a21febb3d6ef",
+        "name" : "goblin",
+        "url" : "https://www.aidedd.org/dnd/monstres.php?vo=goblin",
+        "cr" : "1/4",
+        "type" : "humanoid (goblinoid)",
+        "size" : "Small",
+        "ac" : 15,
+        "hp" : 7,
+        "speed" : 0,
+        "align" : "neutral evil",
+        "legendary" : "0",
+        "source" : "Monster Manual (SRD)",
+        "str" : "8.0",
+        "dex" : "14.0",
+        "con" : "10.0",
+        "int" : "10.0",
+        "wis" : "8.0",
+        "cha" : "8.0"
+      }
+      if (monsterInfo) {
+        return monsterInfo;
+      } else {
+        console.log(`Monster with name: ${normalized_name} not found, using fallback data.`);
+        return fallbackMonster;
+      }
     }
+      
 
     async getBossMonsterNames() {
       const bossMonstersList = await monstersCollection.collection.find({ legendary: { $ne: null } }, { projection: { _id: 0, name: 1 } }).toArray();
