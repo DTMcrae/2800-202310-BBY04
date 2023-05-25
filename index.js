@@ -479,6 +479,46 @@ app.post('/saveCharacter', async (req, res) => {
     }
 });
 
+app.get('/userCharacters', async (req, res) => {
+
+    if (!req.session.authenticated) {
+        res.redirect("/userLoginScreen");
+        return;
+    }
+
+    try {
+        var result = await userCharCollection.collection.find({ userID: req.session.userID }).project({ _id: 1, Name: 1, Class: 1, Level: 1 }).toArray();
+
+        if (result.length < 1) {
+            res.redirect("/characterSelection");
+            return;
+        }
+
+        res.render("userCharacters", { characters: result });
+        return;
+    } catch (e) {
+        console.log("An error occured while trying to get the user's characters.");
+        res.redirect("/characterSelection");
+        return;
+    }
+});
+
+app.post("/charSelected/:charid", async (req, res) => {
+    var selection = req.params.charid;
+    var result = await userCharCollection.collection.find({ userID: req.session.userID, _id: new ObjectId(selection) }).project({ Name: 1 }).toArray();
+
+    if (result[0].Name !== undefined) {
+        req.session.charID = selection;
+        res.redirect("/story");
+        return;
+    }
+    else {
+        console.error("An error occured while attempting to select the user.");
+        res.redirect("/userCharacters");
+        return;
+    }
+});
+
 /*--------------------------------------------------------------------------------------------------end of user character-----------------------------------------------------------------------------------*/
 
 // Story Generation
