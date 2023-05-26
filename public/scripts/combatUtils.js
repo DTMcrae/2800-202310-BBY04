@@ -1,17 +1,3 @@
-const { userCollection,
-    classesCollection,
-    equipmentCollection,
-    levelCollection,
-    monstersCollection,
-    npcCollection,
-    partyMemCollection,
-    scenarioCollection,
-    sessionCollection,
-    spellsCollection,
-    userCharCollection,
-    userSavedCollection
-} = require('../../databaseConnection.js');
-
 class CombatUtils {
 
     calculatePlayerHP(character) {
