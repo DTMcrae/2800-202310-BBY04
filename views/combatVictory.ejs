@@ -58,6 +58,8 @@
 <div class="options d-flex fixed-bottom flex-column pb-5 mb-4 align-items-center">
     <%if(typeof destination === 'undefined' || destination == 0) { %>
     <a href="/story/story-npcSC3" class="btn btn-secondary p-2 mb-2" style="width:25rem">Continue</a>
+    <% } else if(destination == 2) {%>
+    <a href="/LandingScreen" class="btn btn-secondary p-2 mb-2" style="width:25rem">Main Menu</a>
     <%} else {%>
     <a href="/story/story-boss3" class="btn btn-secondary p-2 mb-2" style="width:25rem">Continue</a>
     <% } %>
