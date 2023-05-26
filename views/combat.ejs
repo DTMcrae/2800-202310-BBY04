@@ -6,12 +6,12 @@
                 <% if(combat.playerVictory) { %>
                     <p>You stand victorious.</p>
                     <form action='/combat/victory' method="post">
-                        <button class="btn btn-secondary p-2 mb-2" style="width:25rem" type="submit">Continue</button>
+                        <button class="btn btn-secondary p-2 mb-2 loader" style="width:25rem" type="submit">Continue</button>
                     </form>
                 <% } else { %>
                     <p>Your vision begins to fade...</p>
                     <form action='/combat/defeat' method="post">
-                        <button class="btn btn-secondary p-2 mb-2" style="width:25rem" type="submit">Continue</button>
+                        <button class="btn btn-secondary p-2 mb-2 loader" style="width:25rem" type="submit">Continue</button>
                     </form>
                 <% }%>
         <% } else if(typeof isPlayer !=='undefined' && typeof actor !=='undefined') {%>%>
@@ -20,21 +20,21 @@
             <% if(actor.actions.length <= 3) { %>
         <% for(var x = 0; x < actor.actions.length; x++) { %>
             <form action='/combat/selectAction/<%- actor.name %>=<%- x %>' method="post">
-                <button class="btn btn-secondary p-2 mb-2" style="width:25rem" type="submit"><%- actor.actions[x].name %></button>
+                <button class="btn btn-secondary p-2 mb-2 loader" style="width:25rem" type="submit"><%- actor.actions[x].name %></button>
             </form>
         <% } %>
 
         <% } else { %>
             <% for(var x=0; x < 2; x++) { %>
                 <form action='/combat/selectAction/<%- actor.name %>=<%- x %>' method="post">
-                    <button class="btn btn-secondary p-2 mb-2" style="width:25rem" type="submit"><%- actor.actions[x].name%></button>
+                    <button class="btn btn-secondary p-2 mb-2 loader" style="width:25rem" type="submit"><%- actor.actions[x].name%></button>
                 </form>
                 <% } %>
                 <button class="btn btn-secondary p-2 mb-2" style="width:25rem" id="displayActions" type="button">More</button>
             <% } %>
         <% } else { %>
-            <form action='/combat/generateAction/<%- actor.name %>' method="post">
-                <button class="btn btn-secondary p-2 mb-2" style="width:25rem" type="submit">Continue</button>
+            <form action='/combat/generateAction/<%- actor.combatID %>' method="post">
+                <button class="btn btn-secondary p-2 mb-2 loader" style="width:25rem" type="submit">Continue</button>
             </form>
             <% } %>
         <% } %>
@@ -56,7 +56,7 @@
                 <div class="modal-body overflow-auto" style="max-height: 20rem;">
                     <% for(var x=0; x < actor.actions.length; x++) { %>
                         <form action='/combat/selectAction/<%- actor.name %>=<%- x %>' method="post">
-                            <button class="btn btn-secondary p-2 mb-2" style="width:100%;" type="submit"><%-
+                            <button class="btn btn-secondary p-2 mb-2 loader" style="width:100%;" type="submit"><%-
                                     actor.actions[x].name %></button>
                         </form>
                         <% } %>
@@ -68,6 +68,32 @@
         </div>
     </div>
     <% } %>
+    <% } %>
+
+    <% if(typeof saved !== 'undefined' && saved === true) { %>
+        <%- include("templates/saveModal") %>
+    <% } %>
+
+    <%- include("templates/confirmationModal") %>
+    
+        <script>
+            function setUpHome() {
+                document.getElementById("home-button").addEventListener('click', () => {
+                    $("#confirmationModal").modal("show");
+                });
+            }
+            setUpHome();
+        </script>
+
+    <%- include("templates/combatLoadModal") %>
+    <% if(typeof error !== 'undefined') { %>
+        <%- include("templates/combatErrorModal") %>
+            <script>
+                function error() {
+                    $('#errorModal').modal("show");
+                }
+                error();
+            </script>
     <% } %>
 
     <script>

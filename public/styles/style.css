@@ -3,6 +3,16 @@ body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+    padding-bottom: 80px; 
+  }
+
+  h1, h2, h3, h4, h5, h6, a, p, li, ul, span, div, input, textarea, button {
+    /* font-family: "Old English Text MT"; */
+    /* font-family: "Trajan Pro"; */
+    /* font-family: "Lombardic"; */
+    /* font-family: "Goudy Medieval"; */
+    /* font-family: "Celtic Garamond"; */
+    font-family: "Averia Serif Libre";  
   }
   
   .footer-container {
@@ -11,9 +21,9 @@ body {
   }
   
   .content {
-    padding-bottom: 160px; /* Adjust this value to leave space for the footer */
+    padding-bottom: 50px; 
     overflow-y: auto;
-    height: calc(100% - 60px); /* Adjust this value to leave space for the footer */
+    height: calc(100% - 60px); 
   }
   
   footer {
@@ -21,8 +31,46 @@ body {
     bottom: 0;
     left: 0;
     width: 100%;
-    background-color: rgba(61, 57, 57, 0.973);
+    background-color: rgba(34, 32, 32, 0.973);
     color: white;
     bottom: -25px;
   }
+  .frame {
+    background-image: url('../images/Equipimg.gif');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .frame2 {
+    background-image: url('../images/Partyimg.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
 
+
+  
+
+  @media (max-width: 6000px) {
+    #DnD_Banner {
+      max-height: 60px !important;
+    }
+}
+
+  @media (max-width: 600px) {
+    h1 {
+      padding-top: 60px;
+  }
+
+    footer {
+        height: 110px;
+    }
+}

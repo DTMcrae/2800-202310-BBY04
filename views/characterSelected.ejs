@@ -4,44 +4,65 @@
 
 <%- include("templates/headerEnd") %>
 
-<div class="characterCard" id="DruidCard">
+<div class="characterCard overflow-auto" id="DruidCard" style="max-height: 40rem">
+
     <div>
-        <h2>Selected Character: </h2>
-
-        <img src="" alt="Selected Character" id="characterImage">
+        <div id="char_image">
+            <br>
+            <img src="" alt="Selected Character" id="characterImage">
+            <br>
+        </div>
     </div>
+
+    <div id="char_name">
+        <input type="text" id="characterName" placeholder="Enter character name" style="max-width: 18rem;">
+        <div id="name_Container">
+            <h5 id="name" class="d-flex justify-content-end pr-2">Give a Name to Your: </h5>
+            <h5 id="characterClass" class="d-flex justify-content-start"><%= characterData.Class %></h5>
+        </div>
+        <br>
+        <h3 id="levelHeading" class="d-flex justify-content-center">Level: <%= characterData.Level %> </h3>
+    </div>
+
     <% if (characterData) { %>
-    <h2 id="characterClass">Class: <%= characterData.Class %></h2>
-    <h3 id="levelHeading">Level: <%= characterData.Level %></h3>
-    <h3>Ability Scores:</h3>
-    <ul id="abilityScoresList">
-        <% Object.entries(characterData.AbilityScores).forEach(([ability, score]) => { %>
-        <li><%= ability %>: <%= score %></li>
-        <% }); %>
-    </ul>
-    <h3>Equipment:</h3>
-    <ul id="equipmentList">
-        <% Object.entries(characterData.Equipment).forEach(([equipment, item]) => { %>
-        <li><%= equipment %>: <%= item %></li>
-        <% }); %>
-    </ul>
+    <div id="char_Container" class="d-flex flex-column align-items-center">
+        <div id="ability_scores">
+            <h3>Ability Scores</h3>
+            <ul id="abilityScoresList">
+                <% Object.entries(characterData.AbilityScores).forEach(([ability, score]) => { %>
+                <li><%= ability %>: <%= score %></li>
+                <% }); %>
+            </ul>
+        </div>
+        <div id="Equipment" class="d-flex flex-column align-items-center">
+            <h3>Equipment</h3>
+            <ul id="equipmentList">
+                <% Object.entries(characterData.Equipment).forEach(([equipment, item]) => { %>
+                <li><%= equipment %>: <%= item %></li>
+                <% }); %>
+            </ul>
+        </div>
+        <div id="Skills">
+            <h3>Skills</h3>
+            <ul id="skillsList">
+                <% characterData.Skills.forEach(skill => { %>
+                <li><%= skill %></li>
+                <% }); %>
+            </ul>
+        </div>
+        <div id="Abilities">
+            <h3>Abilities</h3>
+            <ul id="abilitiesList">
+                <% characterData.Abilities.forEach(ability => { %>
+                <li><%= ability %></li>
+                <% }); %>
+            </ul>
+        </div>
+        <% } else { %>
+        <p>Character not found.</p>
+        <% } %>
+    </div>
 
-    <h3>Skills:</h3>
-    <ul id="skillsList">
-        <% characterData.Skills.forEach(skill => { %>
-        <li><%= skill %></li>
-        <% }); %>
-    </ul>
-
-    <h3>Abilities:</h3>
-    <ul id="abilitiesList">
-        <% characterData.Abilities.forEach(ability => { %>
-        <li><%= ability %></li>
-        <% }); %>
-    </ul>
-    <% } else { %>
-    <p>Character not found.</p>
-    <% } %>
     <div class="buttonContainer">
         <div>
             <a href="/characterSelection" id="goBack" class="buttonLink">
@@ -49,15 +70,12 @@
             </a>
         </div>
         <div class="confirmButton">
-            <a href="/Quickstart" id="Quickstart" class="buttonLink">
-                <button class="confirmButton">Confirm Character</button>
-            </a>
+            <button id="confirmButton" class="confirmButton" data-userid="<%= userID %>">Confirm Character</button>
         </div>
         <br>
     </div>
 
 </div>
-<br><br><br><br><br>
 
 <script src="/scripts/characterSelected.js"></script>
 

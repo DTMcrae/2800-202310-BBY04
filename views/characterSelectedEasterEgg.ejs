@@ -6,14 +6,18 @@
 
 <div class="characterCard" id="DruidCard">
     <div>
-        
-        <h2>Selected Character: </h2>
-
+        <br>
         <img src="" alt="Selected Character" id="characterImage">
+        <br>
     </div>
     <% if (characterData) { %>
-    <h2 id="characterClass">Class: <%= characterData.Class %></h2>
-    <h3 id="levelHeading">Level: <%= characterData.Level %></h3>
+    <input type="text"  placeholder="Enter character name">
+    <div id="name_Container">
+        <h5 id="characterClass">Give a Name to Your: </h5>
+        <h5 id="characterName"><%= characterData.Class %></h5>
+    </div>
+    <br>
+    <h3 id="levelHeading">Level: <%= characterData.Level %> </h3>
     <h3>Ability Scores:</h3>
     <ul id="abilityScoresList">
         <% Object.entries(characterData.AbilityScores).forEach(([ability, score]) => { %>
@@ -50,8 +54,8 @@
             </a>
         </div>
         <div class="confirmButton">
-            <a href="/Quickstart" id="Quickstart" class="buttonLink">
-                <button class="confirmButton">Confirm Character</button>
+            <a href="/story" id="story" class="buttonLink">
+                <button id="confirmButton" class="confirmButton" data-userid="<%= userID %>">Confirm Character</button>
             </a>
         </div>
         <br>

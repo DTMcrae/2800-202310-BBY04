@@ -1,0 +1,32 @@
+<%- include("templates/storyHeaderStart") %>
+
+<link rel="stylesheet" href="/styles/story-npc.css">
+
+<%- include("templates/storyBodyStart") %>
+
+
+        <!-- Story text -->
+        <p class="form-class"><%- Q1 %></p>
+        <p class="form-class"><%- A1 %></p>
+        <p class="form-class"><%- Q2 %></p>
+        <p class="form-class"><%- A2 %></p>
+
+        <!-- Interactive button(s) for the player -->         
+        <% for (let i = 0; i < questions.length; i++) { %>
+            <form class="form-class" action="/story/story-npcCHAT/?question=<%= questions[i] %>" method="get">
+              <input type="hidden" name="question" value="<%= questions[i] %>">
+              <% if (questions[i] === 'mission') { %>
+                <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Ask About the Mission</button>
+              <% } else if (questions[i] === 'npc') { %>
+                <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Ask about <%- NPC %></button>
+              <% } else if (questions[i] === 'setting') { %>
+                <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Ask about <%- s_start %></button>
+              <% } %>
+            </form>
+          <% } %>          
+
+        <form class="form-class" action="/story/story-event" method="get">
+          <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Let's move on</button>
+        </form>
+
+<%- include("templates/storyFooter") %>

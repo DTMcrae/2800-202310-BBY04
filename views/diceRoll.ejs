@@ -4,12 +4,22 @@
 <% if(typeof Dice !=='undefined') {%>
 <div class="options d-flex fixed-bottom flex-column pb-5 mb-4 ml-auto mr-auto" style="max-width: 25rem;">
 <p class="text-center">Roll!</p>
+<% if (typeof roll !== 'undefined' && roll !== 0) {%>
+    <form id="roller" action="/combat/generatePlayerAction/<%- roll[0] %>_<%- roll[1] %>" method="post">
+        <button id="atkRoll" class="btn btn-secondary p-2 mb-2 disabled" style="width:25rem" type="button">Roll 1d20</button>
+        <button id="dmgRoll" class="btn btn-secondary p-2 mb-2 disabled" style="width:25rem" dice="<%-Amount%>d<%-Dice%>"
+            type="button">Roll <%- Amount %>d<%- Dice %></button>
+        <button id="continue" class="btn btn-secondary p-2 mb-2 loader" style="width:25rem"
+            type="submit">Next</button>
+    </form>
+<% } else {%>
 <form id="roller" method="post">
     <button id="atkRoll" class="btn btn-secondary p-2 mb-2" style="width:25rem" type="button">Roll 1d20</button>
     <button id="dmgRoll" class="btn btn-secondary p-2 mb-2" style="width:25rem" dice="<%-Amount%>d<%-Dice%>" type="button">Roll <%- Amount %>d<%- Dice %></button>
-    <button id="continue" class="btn btn-secondary p-2 mb-2 disabled" style="width:25rem" type="button">Next</button>
+    <button id="continue" class="btn btn-secondary p-2 mb-2 loader disabled" style="width:25rem" type="button">Next</button>
 </form>
 </div>
+<% } %>
 <% } %>
 
 <div class="modal fade" id="diceModal" tabindex="-1" role="dialog" aria-labelledby="diceModalCenterTitle"
@@ -32,12 +42,27 @@
     </div>
 </div>
 
+<%- include("templates/confirmationModal") %>
+
+    <script>
+        function setUpHome() {
+            document.getElementById("home-button").addEventListener('click', () => {
+                $("#confirmationModal").modal("show");
+            });
+        }
+        setUpHome();
+    </script>
+
+<% if (typeof roll ==='undefined' || roll === 0) {%>
 <script src="/scripts/DiceClient.js"></script>
 <script>
     this.atkRoll = undefined;
     this.dmgRoll = undefined;
 
-    const atkRoll = document.getElementById('atkRoll').addEventListener('click', () => {
+
+    //Assigns each dice roll to the associated button.
+    function assignRolls() {
+    document.getElementById('atkRoll').addEventListener('click', () => {
         if(this.atkRoll != undefined) return;
         this.atkRoll = VisualizeRoll(20,1);
         if (this.atkRoll < 0) {
@@ -48,11 +73,10 @@
         updateForm();
     });
 
-    const dmgRoll = document.getElementById('dmgRoll').addEventListener('click', () => {
+    document.getElementById('dmgRoll').addEventListener('click', () => {
         if (this.dmgRoll != undefined) return;
         let roll = document.getElementById('dmgRoll').getAttribute("dice").split('d');
         this.dmgRoll = VisualizeRoll(roll[1], roll[0]);
-        console.log("Damage Roll: " + this.dmgRoll);
         if(this.dmgRoll < 0) {
             this.dmgRoll = undefined;
             return;
@@ -60,6 +84,7 @@
         document.getElementById("dmgRoll").classList.add("disabled");
         updateForm();
     });
+    }
 
     function updateForm() {
         if (typeof this.dmgRoll == 'undefined' || typeof this.atkRoll == 'undefined') return;
@@ -67,6 +92,11 @@
         document.getElementById("continue").setAttribute("type","submit");
         document.getElementById("continue").classList.remove("disabled");
     }
-</script>
 
+    assignRolls();
+</script>
+<% } %>
+
+<%- include("templates/combatLoadModal") %>
+<%- include("templates/combatErrorModal") %>
 <%- include("templates/combatBodyEnd") %>

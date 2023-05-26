@@ -1,0 +1,106 @@
+.material-symbols-outlined {
+    font-size: 45px;
+}
+
+h4 {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    color: #EEE;
+}
+
+h5 {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    color: #FFF;   
+}
+
+p {
+    color: #FFF;
+    text-align: center;
+}
+
+button {
+    display: block;
+    margin: 0 auto;
+    margin-top: 10px;
+    width: 75%;
+}
+
+.storycontainer {
+    width: 100%;
+    height: 100vh;
+    overflow-y: auto;
+    margin-left: auto;
+    margin-right: auto;
+    background-image: url(../images/story-npc-lrg.jpg);
+    background-color: black;
+    background-size: cover;
+    background-position: center;
+}
+
+.navbar {
+    padding: 0;
+    width: 100%;
+}
+
+.container {
+    background-color: #181818;
+    padding: 0;
+    max-width: 100%;
+}
+
+.storygen {
+    max-width: 100rem;
+    background-color: rgba(0, 0, 0, 0.75);
+    height: 80vh;
+    margin-top: 5vh;
+    padding-top: 5vh;
+    overflow-y: auto;
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.form-class {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.loading-container {
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+.loading {
+    max-width: 100px;
+    margin: auto;
+    display: block;
+}
+
+.white-line {
+    border: none;
+    height: 1px;
+    background-color: white;
+}
+
+@media only screen and (max-width: 800px) {
+    .storycontainer {
+        width: 100%;
+        height: 100vh;
+        overflow-y: auto;
+        margin-left: auto;
+        margin-right: auto;
+        background-image: url(../images/story-npc.png);
+        background-size: cover;
+        background-position: center;
+    }
+}

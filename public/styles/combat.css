@@ -15,12 +15,31 @@ body {
     background-color: rgba(43, 43, 43, .5);
 }
 
+.playerImage {
+    width: 75px;
+    height: 75px;
+}
+
 h5 {
     color: white;
 }
 
 p {
     color: white;
+}
+
+.partyTitle {
+    position:absolute;
+    top: 10px;
+    left: 13px;
+}
+
+.partyMembers {
+    flex-direction: row;
+}
+
+.playerDetails {
+    flex-direction: column;
 }
 
 #combatHistory {
@@ -31,14 +50,52 @@ p {
     background-color: rgba(43, 43, 43, .5);
 }
 
-#playerCard {
+.playerCard {
     width: 250px;
+    margin-top: 15px;
+}
+
+.playerHealth {
+    margin-left: 0;
+}
+
+.secondaryCard {
+    margin-top: 1rem;
+    margin-left: 0;
 }
 
 @media only screen and (min-height: 1101px) {
     #combat-text {
         height: 70vh;
         overflow: auto;
+    }
+}
+
+@media only screen and (max-width: 700px) {
+    .playerImage {
+            width: 0;
+            height: 0;
+        }
+    
+    .playerCard {
+        font-size: 1rem;
+    }
+    
+    .partyMembers {
+        flex-direction: column;
+    }
+    
+    .playerDetails {
+        flex-direction: row;
+    }
+
+    .playerHealth {
+        margin-left: 0.5rem;
+    }
+
+    .secondaryCard {
+        margin-top: 0;
+        margin-left: 0;
     }
 }
 
@@ -60,6 +117,11 @@ p {
 {
     body {
         background-image: url("../images/combat_bg.jpg");
+    }
+
+    .playerImage {
+        width: 0;
+        height: 0;
     }
 
     #combat-text {

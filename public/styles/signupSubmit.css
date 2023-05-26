@@ -1,0 +1,19 @@
+@media (max-width: 6000px) {
+    body {
+        background-image: url(../images/New_User_Background_HiRes.jpg);
+        background-size: 100% auto;
+        background-repeat: repeat-y;
+    }
+}
+
+@media (max-width: 600px) {
+    body {
+        background-image: url(../images/Create\ New\ User\ Background\ 1.png);
+    }
+}
+
+.login-container {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+}

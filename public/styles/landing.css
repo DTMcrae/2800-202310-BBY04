@@ -1,10 +1,52 @@
-@media (max-width: 600px){
-    body{
-        background-image: url(../images/landing\ page\ background\ 3.png);
-    }
+@media (max-width: 6000px) {
+  body {
+    background-image: url(../images/Landing_Page_backgroun_HiRes2.jpg);
+    background-size: 100% auto;
+    background-repeat: repeat-y;
+  }
+
+  #button_Container {
+    display: flex;
+    flex-direction: column;
+    /* grid-template-areas: 
+      "b1 b2"
+      "b3 b4"
+      "b5 b6"; */
+    grid-gap: 20px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #BannerBG {
+    background: rgb(7, 7, 7);
+      background: linear-gradient(105deg, rgb(12, 12, 12) 0%, rgba(0, 0, 0, 1)40%, rgb(48, 48, 48) 77%);
+  }
+
+  .menu-button {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    text-align: center;
+    width: 200px;
+    margin: 0 auto;
+  }
+  
 }
 
-.menu-button {
+@media (max-width: 600px) {
+  body {
+    background-image: url(../images/landing\ page\ background\ 3.png);
+    background-size: 100% 100%;
+    background-position: 50% 0%;
+  }
+
+  h1 {
+    color: black;
+  }
+
+  .menu-button {
     background-color: #f8f9fa;
     padding: 20px;
     border-radius: 10px;
@@ -15,10 +57,19 @@
     margin: 0 auto;
   }
 
-  .user-welcome {
-    text-align: center;
+  #button_Container {
+    display: grid;
+    grid-template-columns: auto;
+    grid-gap: 20px;
+    justify-content: center;
+    align-items: center;
   }
+}
 
-  a {
-    color: black;
-  }
+.user-welcome {
+  text-align: center;
+}
+
+a {
+  color: black;
+}

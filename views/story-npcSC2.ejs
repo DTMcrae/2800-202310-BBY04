@@ -1,0 +1,17 @@
+<%- include("templates/storyHeaderStart") %>
+
+<link rel="stylesheet" href="/styles/story-npc.css">
+
+<%- include("templates/storyBodyStart") %>
+
+        <!-- Story text -->
+        <p class="form-class">You rolled a <b><%- rollResult %></b>!</p>
+        <p class="form-class"><%- text %></p>
+
+        <!-- Interactive button(s) for the player -->         
+        <!-- ***NEEDS TO BE LINKED TO BATTLE SCREEN*** -->
+        <form class="form-class" action="/combat" method="get">
+            <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Begin Battle</button>
+        </form>
+
+<%- include("templates/storyFooter") %>

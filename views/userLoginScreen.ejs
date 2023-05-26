@@ -6,17 +6,16 @@
 
 <div class="login-container">
   <h1 class="fw-bold text-white">Login</h1>
-  <br>
   <form class="login-form" action="/loggingin" method="post">
-    <input name="email" type="text" placeholder="email">
-    <br><br>
-    <input name="password" type="password" placeholder="password">
+    <input name="email" type="text" placeholder="email *">
     <br>
+    <input name="password" type="password" placeholder="password *">
+    <p class="text-white">* = Required Field</p>
     <button>Submit</button>
   </form>
   <a class="fw-bold text-white" href="/passwordReset">Forgot Password</a>
-  <br><br>
-  <p class="fw-bold text-white">Don't have an account?</p>
+  <br>
+  <p class="fw-bold text-white" id="signup">Don't have an account?</p>
   <a class="fw-bold text-white" href="/userSignupScreen">Signup</a>
 </div>
 

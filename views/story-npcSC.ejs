@@ -1,0 +1,29 @@
+<%- include("templates/storyHeaderStart") %>
+
+<link rel="stylesheet" href="/styles/story-npc.css">
+
+<%- include("templates/storyBodyStart") %>
+
+
+        <!-- Story text -->
+        <p class="form-class"><%- text %></p>
+        <p class="form-class">In response, you can:</p>
+
+        <p class="form-class"><%- SCA1 %> (<%- SC1 %>)</p>
+        <p class="form-class"><%- SCA2 %> (<%- SC2 %>)</p>
+
+        <p class="form-class">What will you do?</p>
+
+        <!-- Interactive button(s) for the player -->         
+        <form class="form-class" action="/story/story-npcSC2" method="get">
+            <input type="hidden" name="skillcheck" value="<%- SC1 %>">
+            <button class="btn btn-secondary p-2 mb-2 loader" type="submit"><%- SC1 %></button>
+        </form>
+        
+        <form class="form-class" action="/story/story-npcSC2" method="get">
+            <input type="hidden" name="skillcheck" value="<%- SC2 %>">
+            <button class="btn btn-secondary p-2 mb-2 loader" type="submit"><%- SC2 %></button>
+        </form>
+
+
+<%- include("templates/storyFooter") %>

@@ -4,48 +4,41 @@
         <!-- Player Data -->
         <nav class="card partyDisplay">
             <div class="card-body d-flex" id="playerData">
-                <div class="d-flex flex-row overflow-hidden">
+                <p class="partyTitle">Party Members</p>
+                <div class="d-flex overflow-hidden partyMembers">
                     <div class="d-flex playerCard">
-                        <img id="playerImage" class="d-flex mt-auto mb-auto rounded-circle" src="/images/myD&D_Icon.png"
-                            width="75px" height="75px">
-                        <ul class="d-flex list-unstyled flex-column mb-0 pl-2">
+                        <img id="playerImage" class="d-flex mt-auto mb-auto rounded-circle playerImage"
+                            src="/images/myD&D_Icon.png" width="75px" height="75px">
+                        <ul class="d-flex list-unstyled mb-0 pl-2 playerDetails">
                             <li class="d-flex align-items-center">
-                                <h5 class="card-title mb-0" id="playerName"><%- players[0].name %></h5>
+                                <p class="card-title mb-0 playerName" id="playerName"><%- players[0].name %></p>
                             </li>
                             <li class="d-flex align-items-center">
-                                <p class="card-text mb-0">HP:</p>
-                                <p class="card-text pl-1" id="playerHealth"><%- players[0].hp %>/<%- players[0].maxHP %></p>
-                            </li>
-                            <li class="d-flex align-items-center">
-                                <p class="card-text mb-0">Gold:</p>
-                                <p class="card-text pl-1" id="playerGold"><%- players[0].gold %></p>
+                                <p class="card-text mb-0 playerHealth">HP:</p>
+                                <p class="card-text pl-1"><%- players[0].hp %>/<%- players[0].maxHP %></p>
                             </li>
                         </ul>
                     </div>
                     <% for(var x=1; x < players.length; x++) { %>
-                        <div class="d-flex ml-5 playerCard">
-                            <img id="playerImage" class="d-flex mt-auto mb-auto rounded-circle" src="/images/myD&D_Icon.png"
+                        <div class="d-flex playerCard secondaryCard">
+                            <img class="d-flex mt-auto mb-auto rounded-circle playerImage" src="/images/myD&D_Icon.png"
                                 width="75px" height="75px">
-                            <ul class="d-flex list-unstyled flex-column mb-0 pl-2">
+                            <ul class="d-flex list-unstyled mb-0 pl-2 playerDetails">
                                 <li class="d-flex align-items-center">
-                                    <h5 class="card-title mb-0" id="playerName"><%- players[x].name %></h5>
+                                    <p class="card-title mb-0 playerName"><%- players[x].name %></p>
                                 </li>
                                 <li class="d-flex align-items-center">
-                                    <p class="card-text mb-0">HP:</p>
-                                    <p class="card-text pl-1" id="playerHealth"><%- players[x].hp %>/<%- players[x].maxHP %></p>
+                                    <p class="card-text mb-0 playerHealth">HP:</p>
+                                    <p class="card-text pl-1"><%- players[x].hp %>/<%- players[x].maxHP %></p>
                                 </li>
                             </ul>
                         </div>
                         <% } %>
                 </div>
                 <ul class="d-flex list-unstyled ml-auto">
-                    <li class="d-flex align-items-center ml-5 mt-auto">
-                        <a class="btn btn-outline-light" href="LandingScreen"><span
-                                class="material-symbols-outlined">save</span></a>
-                    </li>
                     <li class="d-flex align-items-center ml-2 mt-auto">
-                        <a class="btn btn-outline-light" href="LandingScreen"><span
-                                class="material-symbols-outlined">home</span></a>
+                        <button id="home-button" class="btn btn-outline-light"><span
+                                class="material-symbols-outlined">home</span></button>
                     </li>
                 </ul>
             </div>
@@ -63,7 +56,7 @@
         </div>
 
         <div class="options d-flex fixed-bottom flex-column pb-5 mb-4 align-items-center">
-                <a href="LandingScreen" class="btn btn-secondary p-2 mb-2" style="width:25rem">Main Menu</a>
+                <a href="/LandingScreen" class="btn btn-secondary p-2 mb-2" style="width:25rem">Main Menu</a>
         </div>
 
 

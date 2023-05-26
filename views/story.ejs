@@ -1,0 +1,65 @@
+<%- include("templates/storyHeaderStart") %>
+
+<link rel="stylesheet" href="../styles/story.css">
+
+<body>
+    <div class="storycontainer">
+      <nav class="navbar d-flex bg-body-tertiary">
+        <div class="container">
+          <a class="navbar-brand" href="#">
+            <img src="../../images/myD&D_Icon_HiResolution.png" alt="myD&D" width="54" height="54">
+          </a>
+          <a class="btn btn-outline-light" href="/LandingScreen"><span class="material-symbols-outlined">home</span></a>
+        </div>
+      </nav>
+  
+      <div class="storygen mr-auto ml-auto">
+  
+        <div class="center">
+  
+          <div class="storycreation">
+            <!-- Generates the loading animation -->
+            <div id="spinner" style="display: none;">
+              <div class="loading-container">
+                <hr class="white-line">
+                <h5>Generating...</h5>
+                <img src="/images/loading.gif" class="loading" alt="Loading...">
+                <h5>a new adventure</h5>
+                <hr class="white-line">
+              </div>
+            </div>
+
+            <!-- Story Gen: Title and Summary -->
+            <% if (typeof summary !== 'undefined') { %>
+            <h4 class="form-class"><%- title %></h4>
+            <p class="form-class"><%- summary %></p>
+            <% } %>
+
+            <!-- Story Gen: Buttons -->
+            <form class="form-class" action="/story/story-event" method="get">
+                <% if (typeof summary !== 'undefined') { %>
+                <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Start New Game</button>
+                <% } %>
+            </form>
+
+            <!-- ***For testing prompts*** -->
+            <!-- <form class="form-class" action="/story/test" method="post">
+            <% if (typeof summary !== 'undefined') { %>
+            <button type="submit">(Test Prompt)</button>
+            <% } %>
+        </form> -->
+
+            <form class="form-class" action="/story/generateStory" method="post">
+                <% if (typeof summary == 'undefined') { %>
+                <h4>Start New Game</h4>
+                <p><i>myD&D</i> uses the power of A.I. to generate a new storyline that will be completely unique for
+                    each individual playthrough!</p>
+                <p>Click the button to generate a new adventure!</p>
+                <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Generate Story</button>
+                <% } else { %>
+                <br>
+                <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Reroll Story</button>
+                <% } %>
+            </form>
+
+<%- include("templates/storyFooter") %>
