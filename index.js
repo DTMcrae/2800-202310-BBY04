@@ -142,7 +142,7 @@ app.get('/', (req, res) => {
         res.redirect('/LandingScreen');
         return;
     }
-    res.render("userLoginScreen");
+    res.render("welcome");
 });
 
 app.get('/LandingScreen', async (req, res) => {

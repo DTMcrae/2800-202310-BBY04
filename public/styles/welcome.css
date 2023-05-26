@@ -1,0 +1,36 @@
+body {
+    background-image: url("../images/welcome.jpg");
+    background-position: 50% 0;
+    color: white;
+}
+
+#hero {
+    display: flex;
+    flex-direction: column;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: rgba(43, 43, 43, 0.705);
+    max-width: 60rem;
+    border-radius: 25px;
+}
+
+#BannerBG {
+    background: rgb(7, 7, 7);
+    background: linear-gradient(105deg, rgb(12, 12, 12) 0%, rgba(0, 0, 0, 1)40%, rgb(48, 48, 48) 77%);
+}
+
+.btn-primary {
+    background-color: rgb(165, 126, 35);
+    border-color:rgb(190, 142, 30)
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active,
+.open>.dropdown-toggle.btn-primary {
+    color: #fff;
+    background-color: rgb(109, 83, 24);
+    border-color: rgb(190, 142, 30)
+    /*set the color you want here*/
+}
