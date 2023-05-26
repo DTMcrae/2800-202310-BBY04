@@ -746,8 +746,7 @@ app.get('/equipped', fetchPlayerEquippedItemsMiddleware, (req, res) => {
 });
 
 app.get("*", (req, res) => {
-    res.status(404);
-    res.send("Page not found - 404");
+    res.render('pageNotFound');
 })
 
 app.listen(port, () => {
