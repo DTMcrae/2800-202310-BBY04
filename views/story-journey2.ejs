@@ -1,0 +1,29 @@
+<%- include("templates/storyHeaderStart") %>
+
+<link rel="stylesheet" href="../styles/story-journey.css">
+
+<%- include("templates/storyBodyStart") %>
+
+
+        <!-- Story text -->
+        <p class="form-class"><%- text %></p>
+        <p class="form-class">In response, you can:</p>
+
+        <p class="form-class"><%- SCA3 %> (<%- SC3 %>)</p>
+        <p class="form-class"><%- SCA4 %> (<%- SC4 %>)</p>
+
+        <p class="form-class">What will you do?</p>
+
+        <!-- Interactive button(s) for the player -->         
+        <form class="form-class" action="/story/story-journey3" method="get">
+            <input type="hidden" name="skillcheck" value="<%- SC3 %>">
+            <button class="btn btn-secondary p-2 mb-2 loader" type="submit"><%- SC3 %></button>
+        </form>
+        
+        <form class="form-class" action="/story/story-journey3" method="get">
+            <input type="hidden" name="skillcheck" value="<%- SC4 %>">
+            <button class="btn btn-secondary p-2 mb-2 loader" type="submit"><%- SC4 %></button>
+        </form>
+
+
+<%- include("templates/storyFooter") %>

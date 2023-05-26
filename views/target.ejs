@@ -4,12 +4,65 @@
 <% if(typeof targets !=='undefined') {%>
 <div class="options d-flex fixed-bottom flex-column pb-5 mb-4 ml-auto mr-auto" style="max-width: 25rem;">
 <p class="text-center">Select a Target</p>
-<% for(var x = 0; x < targets.length; x++) { %>
-    <form action='/combat/selectTarget/<%- targets[x].name %>' method="post">
-        <button class="btn btn-secondary p-2 mb-2" style="width:25rem" type="submit"><%- targets[x].name %></button>
-    </form>
-<% } %>
+<button class="btn btn-secondary p-2 mb-2" style="width:25rem" type="button" id="displayTargets">Target List</button>
+<a href="/combat" class="btn btn-secondary p-2 mb-2 loader" style="width:25rem">Back</a>
 </div>
+
+<div class="modal fade" id="targetModal" tabindex="-1" role="dialog" aria-labelledby="tergetModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tergetModalLongTitle">Available Targets</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" style="color:white">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body overflow-auto" style="max-height: 20rem;">
+                <% for(var x=0; x < targets.length; x++) { %>
+                    <form action='/combat/selectTarget/<%- targets[x].combatID %>' method="post">
+                        <button class="btn btn-secondary p-2 mb-2 loader selection" style="width:100%;" type="submit"><%- targets[x].name
+                                %></button>
+                    </form>
+                    <% } %>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include("templates/confirmationModal") %>
+
+    <script>
+        function setUpHome() {
+            document.getElementById("home-button").addEventListener('click', () => {
+                $("#confirmationModal").modal("show");
+            });
+        }
+        setUpHome();
+    </script>
+
+<script>
+    function init() {
+        const displayModal = document.getElementById('displayTargets');
+        if (typeof displayModal !== undefined && displayModal != null) {
+            displayModal.addEventListener('click', () => {
+                $('#targetModal').modal("show");
+            });
+        }
+
+        document.querySelectorAll('.selection').forEach(element => {
+            element.addEventListener('click', () => {
+                $('#targetModal').modal("hide");
+            });
+        })
+    }
+    init();
+</script>
 <% } %>                             
 
+<%- include("templates/combatLoadModal") %>
+<%- include("templates/combatErrorModal") %>
 <%- include("templates/combatBodyEnd") %>

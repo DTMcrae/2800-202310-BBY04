@@ -1,29 +1,17 @@
-<%- include("templates/headerStart") %>
+<%- include("templates/storyHeaderStart") %>
 
-<link rel="stylesheet" href="../styles/story.css">
+<link rel="stylesheet" href="/styles/story-npc.css">
 
-<%- include("templates/headerEnd") %>
-
-<div class="storygen">
-
-    <div class="center">
-
-        <div class = "storycreation">
-        <!-- Generates the loading animation -->
-        <div id="spinner" style="display: none;">
-            <img src="/images/loading.gif" class="loading" alt="Loading...">
-        </div>
+<%- include("templates/storyBodyStart") %>
 
         <!-- Story text -->
+        <p class="form-class">You rolled a <b><%- rollResult %></b>!</p>
         <p class="form-class"><%- text %></p>
 
         <!-- Interactive button(s) for the player -->         
-        <form class="form-class" action="/story/story-event" method="get">
-            <button type="submit">Begin Battle</button>
+        <!-- ***NEEDS TO BE LINKED TO BATTLE SCREEN*** -->
+        <form class="form-class" action="/combat" method="get">
+            <button class="btn btn-secondary p-2 mb-2 loader" type="submit">Begin Battle</button>
         </form>
-        </div>
 
-    </div>
-</div>
-
-<script src="/scripts/story.js"></script>
+<%- include("templates/storyFooter") %>

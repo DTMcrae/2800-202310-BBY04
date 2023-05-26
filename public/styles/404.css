@@ -1,0 +1,23 @@
+body {
+    background: url('../images/404.png') no-repeat center center fixed; 
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+.container {
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #F5ECD1; /* Light cream color for better contrast against brown/orange background */
+}
+.btn-primary {
+    background-color: #8B4513; /* Dark brown color for button */
+    border-color: #8B4513; /* Dark brown color for button border */
+}
+.btn-primary:hover {
+    background-color: #A0522D; /* Slightly lighter brown for hover effect */
+    border-color: #A0522D; /* Slightly lighter brown for hover effect */
+}

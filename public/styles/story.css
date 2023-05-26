@@ -1,84 +1,92 @@
-@media (max-width: 600px) {
-    body {
-        background-image: url(../images/passwordResetConfirmationScreen.png);
-        overflow-y: auto;
-    }
+.material-symbols-outlined {
+    font-size: 45px;
 }
 
-h1 {
+h4 {
     display: flex;
     justify-content: center;
     align-content: center;
     width: 100%;
-    color: white;
+    color: #EEE;
+    margin-bottom: 20px;
+
 }
 
-h2 {
+h5 {
     display: flex;
     justify-content: center;
     align-content: center;
     width: 100%;
-    color: #CCC;
+    color: #FFF;   
 }
 
 p {
     color: #FFF;
-    font-size: 0.8em;
+    text-align: center;
+}
+
+button {
+    display: block;
+    margin: 0 auto;
+    margin-top: 10px;
+    width: 75%;
+}
+
+.storycontainer {
+    width: 100%;
+    max-width: 600px;
+    height: 100vh;
+    overflow-y: auto;
+    margin-left: auto;
+    margin-right: auto;
+    background-image: url(../images/story.png);
+    background-size: cover;
+    background-position: center;
+}
+
+.navbar {
+    padding: 0;
+}
+
+.container {
+    background-color: #181818;
+    padding: 0;
 }
 
 .storygen {
     background-color: rgba(0, 0, 0, 0.75);
-    height: 350px;
-    position: relative;
+    height: 80vh;
+    margin-top: 5vh;
+    padding-top: 5vh;
+    overflow-y: auto;
 }
 
 .center {
-	position: absolute;
-	top: 50%;
-	left: 10vw;
-	right: 10vw;
-	height: 50vh;
-	margin-top: -25vh;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.form-class {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.loading-container {
+    background-color: rgba(0, 0, 0, 0.75);
 }
 
 .loading {
-    width: 100%;
-    height: 100%;
+    max-width: 100px;
     margin: auto;
     display: block;
 }
 
-button {
-    display: flex;
-    justify-content: center;
-    align-content: center;
-    width: 60%;
-    height: 60%;
-    margin: 0 auto;
-}
-
-.buttonContainer {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-    "backButton confirmButton";
-    justify-content: center;
-    align-content: center;
-    width: 100%;
-    height: 100%;
-    gap: 30px;
-}
-
-.backButton, .confirmButton {
-    overflow: hidden;
-    white-space: wrap;
-    text-overflow: ellipsis;
-    width: 100%;
-    height: 100%;
-    font-weight: bold;
-    color: black;
-  }
-  
-  .buttonLink {
-    text-decoration: none;
+.white-line {
+    border: none;
+    height: 1px;
+    background-color: white;
 }

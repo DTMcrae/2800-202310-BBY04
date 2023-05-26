@@ -1,0 +1,91 @@
+.material-symbols-outlined {
+    font-size: 45px;
+}
+
+h4 {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    color: #EEE;
+}
+
+h5 {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    color: #FFF;   
+}
+
+p {
+    color: #FFF;
+    text-align: center;
+}
+
+button {
+    display: block;
+    margin: 0 auto;
+    margin-top: 10px;
+    width: 75%;
+}
+
+.storycontainer {
+    width: 100%;
+    max-width: 600px;
+    height: 100vh;
+    overflow-y: auto;
+    margin-left: auto;
+    margin-right: auto;
+    background-image: url(../images/story-boss.png);
+    background-color: black;
+    background-size: cover;
+    background-position: center;
+}
+
+.navbar {
+    padding: 0;
+}
+
+.container {
+    background-color: #181818;
+    padding: 0;
+}
+
+.storygen {
+    background-color: rgba(0, 0, 0, 0.75);
+    height: 80vh;
+    margin-top: 5vh;
+    padding-top: 5vh;
+    overflow-y: auto;
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.form-class {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.loading-container {
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+.loading {
+    max-width: 100px;
+    margin: auto;
+    display: block;
+}
+
+.white-line {
+    border: none;
+    height: 1px;
+    background-color: white;
+}
