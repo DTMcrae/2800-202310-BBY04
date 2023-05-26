@@ -807,7 +807,7 @@ app.get('/equipped', fetchPlayerEquippedItemsMiddleware, (req, res) => {
 
 
 app.get("*", (req, res) => {
-    res.render('pageNotFound');
+    res.render('404');
 })
 
 app.listen(port, () => {
