@@ -235,7 +235,6 @@ app.post('/submitUser', async (req, res) => {
         password: hashedPassword,
         type: 'user'
     });
-    console.log("Inserted user");
 
     const result = await userCollection.collection.find({
         email: email
@@ -299,7 +298,6 @@ app.post('/loggingin', async (req, res) => {
     }
 
     if (await bcrypt.compare(password, result[0].password)) {
-        console.log("correct password");
         req.session.authenticated = true;
         req.session.name = result[0].name;
         req.session.cookie.maxAge = expireTime;
@@ -323,7 +321,6 @@ app.post('/logout', (req, res) => {
         if (err) {
             console.log(err);
         }
-        console.log("check");
         res.redirect('/userLoginScreen');
     });
 });
@@ -353,8 +350,6 @@ app.post('/forgot', async (req, res) => {
             message: 'Email address not found',
         });
     }
-
-    console.log("user" + user._id);
 
     const token = generateToken();
     try {
@@ -484,8 +479,6 @@ app.post('/saveCharacter', async (req, res) => {
     characterStats.AC = ac;
     characterStats.Actions = actions;
 
-    console.log('Saving character:', characterStats);
-
     try {
         var result = await userCharCollection.collection.insertOne(characterStats);
         req.session.charID = result.insertedId;
@@ -560,7 +553,6 @@ app.get('/story', async (req, res) => {
         const players = await userCharCollection.collection.find({
             _id: new ObjectId(req.session.charID)
         }).toArray();
-        console.log("Player:", players);
 
         const mainChar = players.map(async (myPlayer) => {
             const ac = await data.calculateAC(myPlayer);
@@ -622,8 +614,6 @@ app.get('/story', async (req, res) => {
         // const monsterInfo = await data.getMonsterInfo(name);
         const npcList = await data.getNpc();
         // const npcDetails = await data.getNpcDetails(name, background);
-
-        console.log("Characters:", characters);
 
         req.session.characters = characters;
         req.session.monsterNames = monsterNames;
@@ -734,7 +724,6 @@ app.post('/levelup', (req, res) => {
             }
         })
         .then(result => {
-            console.log(result);
             res.send("Skills updated successfully");
         })
         .catch(err => {
@@ -749,7 +738,6 @@ app.use("/loadGame", loadGame);
 
 app.get('/equipped', async (req, res) => {
     let equippedDetails = await data.getPlayerEquipment(req);
-    console.log(equippedDetails);
     res.render('equipped', { items: equippedDetails });
 });
 

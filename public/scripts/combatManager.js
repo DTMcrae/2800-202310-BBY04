@@ -111,11 +111,9 @@ async function startCombat(req) {
         }
     }
 
-    console.log(req.session.enemies);
     replaceNull(enemies);
 
     var count = 0;
-    console.log("Initializing");
 
     //Roll initiative for each player
     players.forEach(player => {
@@ -133,7 +131,6 @@ async function startCombat(req) {
         enemy.isActive = (enemy.hp > 0);
         enemy.isPlayer = false;
         enemy.combatID = count;
-        enemy.hp = 1;
         count++;
 
         actors.push(enemy);
@@ -145,6 +142,7 @@ async function startCombat(req) {
     this.combatEnded = false;
 }
 
+//In case one of the enemies cannot be found in the database, attempt to copy an already existing enemy's data.
 function replaceNull(enemies) {
     var copy = null;
     var breakout = 0;
@@ -172,27 +170,27 @@ function replaceNull(enemies) {
 //If the enemy dies and no enemies remain, combat ends in victory.
 //Returns a text string describing the result. (Damage taken or death)
 function parseDamage(req, data) {
+    //Ensure all required paramaters are present.
     if (data === undefined || data === null || data.Result.DamageDealt === undefined) return undefined;
     let target = (data.Target !== undefined) ? req.session.combatTarget : data.Result.SelectedTarget;
 
+    //Get the information of the actor that is taking damage.
     let actor = initiative.getActorData(req.session.turnOrder, target);
     if(actor === null) actor = initiative.getActorDataID(req.session.turnOrder, target);
 
-    console.log("Target:", target);
-    console.log("Found:", actor);
-
+    //Update that actors health (hp)
     if(actor.hp === undefined) return " ";
     actor.hp = data.Result.RemainingHP;
 
-    console.log("Post-Damage:", actor);
-
     var resultText;
+
+    //If the actor's hp is greater than 0, say they take damage.
+    //Otherwise, set isActive to false for the actor, meaning they are "dead"
     if (Number(actor.hp) > 0) {
         resultText = `${actor.name} took ${data.Result.DamageDealt} damage.`;
     } else {
         resultText = `${actor.name} falls to the ground, defeated.`;
         actor.isActive = false;
-        console.log("Post-Death:", actor);
 
         if (getActiveEnemies(req).length < 1 || getActivePlayers(req).length < 1) {
             req.session.combatEnded = true;
@@ -208,6 +206,7 @@ function isActorFriendly(actor) {
     return actor.isPlayer;
 }
 
+//Returns all players present in combat.
 function getAllPlayers(req) {
     var result = [];
 
@@ -228,6 +227,7 @@ function getActivePlayers(req) {
     return result;
 }
 
+//Returns all enemies present in combat.
 function getAllEnemies(req) {
     var result = [];
 
@@ -238,13 +238,12 @@ function getAllEnemies(req) {
     return result;
 }
 
-//Returns all currently alive players.
+//Returns all currently alive enemies.
 function getActiveEnemies(req) {
     var result = [];
 
     req.session.turnOrder.order.forEach(actor => {
         if (actor.isPlayer === false && actor.isActive === true) {
-            console.log("Alive:", actor);
             result.push(actor);
         }
     })
@@ -271,12 +270,14 @@ function verifyResponse(req, res, response, url) {
     return true;
 }
 
+//Post route for saving progress to the database.
 router.post("/save", async (req, res) => {
     var turnOrder = req.session.turnOrder;
     var history = req.session.history;
 
     if (req.session.storyID !== undefined) {
 
+        //Attempt to find an update an existing save
         try {
             var result = await userSavedCollection.collection.find({
                 storyID: req.session.storyID
@@ -298,6 +299,7 @@ router.post("/save", async (req, res) => {
 
     }
     else {
+        //Attempt to create a new save
         try {
         var id = Crypto.randomBytes(20).toString('hex');
         req.session.storyID = id;
@@ -321,10 +323,6 @@ router.post("/save", async (req, res) => {
     }
     req.session.saved = true;
     res.redirect("/combat");
-    /*
-    In case turnOrder cant be used as a string and must be broken down:
-    */
-    //Something something save to database
 });
 
 //Sends the user to the victory page, and generates a combat outro.
@@ -389,6 +387,8 @@ router.post("/selectTarget/:target", async (req, res) => {
 
     var roll;
 
+    //Checks if the action has a dice roll assigned to it.
+    //If not, ask chatGPT for one, and save it to the action.
     if (actor.actions[req.session.combatAction].DamageDice === undefined) {
 
         response = await openAI.generateRollRequest(prompts.generateBasicActionPrompt(actor.name, actor.actions[req.session.combatAction], req.params.target));
@@ -416,6 +416,7 @@ router.post("/selectTarget/:target", async (req, res) => {
     });
 });
 
+//Updates the session history, and processes the damage of the previous event.
 function updateHistory(req, data) {
     req.session.history.push(data.Result.ActionDescription);
     req.session.history.push(parseDamage(req, data));

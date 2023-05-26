@@ -19,16 +19,13 @@ const confirmButton = document.getElementById('confirmButton');
 
 // Retrieve the userID from the data attribute of the confirm button
 const userID = confirmButton.getAttribute('data-userid');
-console.log("userID " + userID);
 
 // Event listener to the "Confirm Character" button
 confirmButton.addEventListener('click', function (event) {
     event.preventDefault();
-    console.log('Confirm button clicked');
 
     // Retrieve the character name from the input field
     const characterName = characterNameInput.value;
-    console.log("characterName " + characterName);
 
     // Object to store the character data
     const characterData = {
@@ -41,8 +38,6 @@ confirmButton.addEventListener('click', function (event) {
         Skills: getListItemTexts('skillsList'),
         Abilities: getListItemTexts('abilitiesList')
     };
-
-    console.log('Saving character data:', characterData);
 
     // HTTP request to save the character data
     fetch('/saveCharacter', {

@@ -59,7 +59,6 @@ async function getGPTResponse(prompt) {
             content: prompt
         }]
       });
-      console.log(`request cost: ${response.data.usage.total_tokens} tokens`);
       return response.data.choices[0].message;
     } catch (error) {
         console.error('Error while making a request to the ChatGPT API:', error);
@@ -233,7 +232,6 @@ const chatGPTMiddleware = async (req, res, next) => {
   const equipmentOptions = await fetchEquipmentOptions();
 
   // Log the equipmentOptions to the console
-  console.log('Equipment Options:', equipmentOptions);
 const generatedPrompt = `Pick 5 random items from the following items: ${equipmentOptions}.`; //prompt that can be changed
 
 try {
