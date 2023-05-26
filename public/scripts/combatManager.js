@@ -100,6 +100,8 @@ function startCombatTrial(req) {
     const players = presetPlayers();
     const enemies = presetEnemies();
 
+    req.session.characters = players;
+
     var count = 0;
 
     //Roll initiative for each player
