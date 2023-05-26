@@ -19,10 +19,10 @@ const prompts = new CombatPrompts();
 const initiative = new TurnOrder();
 
 const { userCollection,
-    monstersCollection,
-    npcCollection,
-    partyMemCollection,
-    userCharCollection,
+    // monstersCollection,
+    // npcCollection,
+    // partyMemCollection,
+    // userCharCollection,
     userSavedCollection
 } = require('../.././databaseConnection.js');
 

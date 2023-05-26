@@ -1,15 +1,16 @@
-const { userCollection, 
-  classesCollection, 
+const { 
+  // userCollection, 
+  // classesCollection, 
   equipmentCollection,
   levelCollection,
   monstersCollection,
   npcCollection,
-  partyMemCollection,
-  scenarioCollection,
-  sessionCollection,
+  // partyMemCollection,
+  // scenarioCollection,
+  // sessionCollection,
   spellsCollection,
-  userCharCollection,
-  userSavedCollection  
+  // userCharCollection,
+  // userSavedCollection  
 } = require('../../databaseConnection.js');
 const { ObjectId, Code } = require('mongodb');
 

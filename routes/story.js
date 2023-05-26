@@ -7,20 +7,20 @@ const model = 'gpt-3.5-turbo';
 
 /*----------------------------------------------------------------------------Database connections loading variables------------------------------------------------------------------------------------------------------------------*/
 //Dasebase connection
-const {
-    userCollection,
-    classesCollection,
-    equipmentCollection,
-    levelCollection,
-    monstersCollection,
-    npcCollection,
-    partyMemCollection,
-    scenarioCollection,
-    sessionCollection,
-    spellsCollection,
-    userCharCollection,
-    userSavedCollection
-} = require('../databaseConnection.js');
+// const {
+//     userCollection,
+//     classesCollection,
+//     equipmentCollection,
+//     levelCollection,
+//     monstersCollection,
+//     npcCollection,
+//     partyMemCollection,
+//     scenarioCollection,
+//     sessionCollection,
+//     spellsCollection,
+//     userCharCollection,
+//     userSavedCollection
+// } = require('../databaseConnection.js');
 /*----------------------------------------------------------------------------end of Database connections loading variables------------------------------------------------------------------------------------------------------------------*/
 
 // Arrays for story generation. (note: N is for "Normal" games, B is for BCIT "Easter egg games")

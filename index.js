@@ -45,16 +45,16 @@ const mailgun_api_secret = process.env.MAILGUN_API_SECRET;
 const {
     userCollection,
     classesCollection,
-    equipmentCollection,
-    levelCollection,
-    monstersCollection,
-    npcCollection,
+    // equipmentCollection,
+    // levelCollection,
+    // monstersCollection,
+    // npcCollection,
     partyMemCollection,
-    scenarioCollection,
-    sessionCollection,
-    spellsCollection,
+    // scenarioCollection,
+    // sessionCollection,
+    // spellsCollection,
     userCharCollection,
-    userSavedCollection
+    // userSavedCollection
 } = require('./databaseConnection.js');
 
 //password variables
