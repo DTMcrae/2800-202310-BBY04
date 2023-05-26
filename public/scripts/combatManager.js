@@ -68,11 +68,13 @@ router.get('*', async (req, res) => {
         return;
     }
 
+    //req.session.combatInit = false;
     if (!req.session.combatInit) await startCombat(req);
     req.session.lastURL = req.url;
 
     var currentActor = initiative.currentTurn(req.session.turnOrder);
-    res.render('combat', { players: getAllPlayers(req), history: req.session.history, isPlayer: isActorFriendly(currentActor), actor: currentActor, combat: combatStatus(req) });
+    res.render('combat', { players: getAllPlayers(req), history: req.session.history, isPlayer: isActorFriendly(currentActor), actor: currentActor, combat: combatStatus(req), saved:req.session.saved });
+    req.session.saved = false;
 });
 
 router.post('/', (req, res) => {
@@ -83,6 +85,7 @@ router.post('/', (req, res) => {
 //Placeholder function for assigning actors to combat.
 async function startCombat(req) {
 
+    req.session.combatEnded = false;
     req.session.history = [];
     let actors = [];
 
@@ -109,6 +112,7 @@ async function startCombat(req) {
     replaceNull(enemies);
 
     var count = 0;
+    console.log("Initializing");
 
     //Roll initiative for each player
     players.forEach(player => {
@@ -126,6 +130,7 @@ async function startCombat(req) {
         enemy.isActive = (enemy.hp > 0);
         enemy.isPlayer = false;
         enemy.combatID = count;
+        enemy.hp = 1;
         count++;
 
         actors.push(enemy);
@@ -133,6 +138,7 @@ async function startCombat(req) {
 
     req.session.turnOrder = initiative.assignNew(actors);
     req.session.combatInit = true;
+    req.session.saved = false;
     this.combatEnded = false;
 }
 
@@ -175,16 +181,19 @@ function parseDamage(req, data) {
     if(actor.hp === undefined) return " ";
     actor.hp = data.Result.RemainingHP;
 
+    console.log("Post-Damage:", actor);
+
     var resultText;
-    if (actor.hp > 0) {
+    if (Number(actor.hp) > 0) {
         resultText = `${actor.name} took ${data.Result.DamageDealt} damage.`;
     } else {
         resultText = `${actor.name} falls to the ground, defeated.`;
-        actor.isActive = false;
+        actor.isActive = true;
+        console.log("Post-Death:", actor);
 
         if (getActiveEnemies(req).length < 1 || getActivePlayers(req).length < 1) {
-            this.combatEnded = true;
-            this.playerVictory = (getActiveEnemies(req).length < 1);
+            req.session.combatEnded = true;
+            req.session.playerVictory = (getActiveEnemies(req).length < 1);
         }
     }
 
@@ -211,7 +220,7 @@ function getActivePlayers(req) {
     var result = [];
 
     req.session.turnOrder.order.forEach(actor => {
-        if (actor.isPlayer && actor.isActive) result.push(actor);
+        if (actor.isPlayer === true && actor.isActive === true) result.push(actor);
     })
     return result;
 }
@@ -231,8 +240,8 @@ function getActiveEnemies(req) {
     var result = [];
 
     req.session.turnOrder.order.forEach(actor => {
-        if (!actor.isPlayer && actor.isActive) {
-            console.log("Found Active:", actor);
+        if (actor.isPlayer === false && actor.isActive === true) {
+            console.log("Alive:", actor);
             result.push(actor);
         }
     })
@@ -243,8 +252,8 @@ function getActiveEnemies(req) {
 //Checks the current status of combat.
 //status is false if combat is ongoing, true if it has ended.
 function combatStatus(req) {
-    if (req.session.combatEnded) {
-        return { status: true, playerVictory: (getActiveEnemies(req).length < 1) };
+    if (req.session.combatEnded || getActiveEnemies(req).length < 1 || getActivePlayers(req).length < 1) {
+        return { status: true, playerVictory: req.session.playerVictory };
     }
     return { status: false };
 }
@@ -278,14 +287,15 @@ router.post("/save", async (req, res) => {
                     { storyID: req.session.storyID },
                     { $set: { gameState: "combat", initiative: turnOrder, history: history, date: new Date().toLocaleString() } }
                 );
-                console.log("Save Attempt:", updated);
             }
         } catch (e) {
             console.log(e);
+            res.redirect(307, "/combat");
         }
 
     }
     else {
+        try {
         var id = Crypto.randomBytes(20).toString('hex');
         req.session.storyID = id;
         var result = await userSavedCollection.collection.insertOne({
@@ -296,14 +306,17 @@ router.post("/save", async (req, res) => {
             history: history,
             date: new Date().toLocaleString(),
         });
-        console.log("Story Save Result:", result);
 
         var userUpdate = await userCollection.collection.updateOne(
             { _id: new ObjectId(req.session.userID) },
             { $addToSet: { userStories: id } }
         );
-        console.log("User Update Result:", userUpdate);
+        } catch (e) {
+            console.log(e);
+            res.redirect(307, "/combat");
+        }
     }
+    req.session.saved = true;
     res.redirect("/combat");
     /*
     In case turnOrder cant be used as a string and must be broken down:
@@ -390,8 +403,6 @@ router.post("/selectTarget/:target", async (req, res) => {
         roll = actor.actions[req.session.combatAction].DamageDice;
     }
 
-    console.log("Roll:", req.session.combatRoll);
-
     res.render('diceRoll', {
         Dice: roll[1],
         Amount: roll[0],
@@ -402,7 +413,7 @@ router.post("/selectTarget/:target", async (req, res) => {
     });
 });
 
-function updateHistory(req, data) {
+async function updateHistory(req, data) {
     req.session.history.push(data.Result.ActionDescription);
     req.session.history.push(parseDamage(req, data));
     req.session.lastURL = req.url;
@@ -422,7 +433,7 @@ router.post('/generatePlayerAction/:roll', async (req, res) => {
         //const text = await openAI.generateText(prompts.generatePlayerTurnPrompt(prompts.generateActionPrompt(actor, current.actions[req.session.combatAction], initiative.getActorData(req.session.combatTarget), result[0], result[1])), model, 200);
 
         let systemPrompt = prompts.playerSystemPrompt();
-        let playerPrompt = prompts.playerTurnPrompt(current, prompts.assignAction(current.actions[req.session.combatAction], result[0], result[1]), initiative.getActorDataID(req.session.turnOrder, req.session.combatTarget), 300, 0.75);
+        let playerPrompt = prompts.playerTurnPrompt(current, prompts.assignAction(current.actions[req.session.combatAction], 20, 20), initiative.getActorDataID(req.session.turnOrder, req.session.combatTarget), 300, 0.75);
 
         let text = await openAI.generateResponse(systemPrompt, playerPrompt);
         if (!verifyResponse(req, res, text, '/combat/selectTarget/' + req.session.combatTarget)) {
@@ -475,7 +486,6 @@ router.post('/generateAction/:actor', async (req, res) => {
         //This repeats for every consecutive enemy action.
         await initiative.endTurn(req.session.turnOrder);
 
-        console.log(req.session.history);
         //Render the page, using the received information from chatGPT.
         res.render('combat', {
             history: req.session.history,

@@ -29,13 +29,16 @@ class CombatAI {
                 temperature: temp,
             });
             // Return the text of the response
+            var parseAttempt = JSON.parse(response.data.choices[0].message.content);
             return response.data.choices[0].message.content;
         } catch (error) {
             const response = await this.#retryResponse(systemPrompt, userPrompt, tokens, temp);
-            return response.data.choices[0].message.content;
+            console.log(response);
+            return response;
         }
     }
 
+    //A private function that repeats the prompt request from chatGPT in case an error occurs.
     async #retryResponse(systemPrompt, userPrompt, tokens, temp) {
         this.breakout++;
 
@@ -61,7 +64,8 @@ class CombatAI {
                 temperature: temp,
             });
             // Return the text of the response
-            return response;
+            var parseAttempt = JSON.parse(response.data.choices[0].message.content);
+            return response.data.choices[0].message.content;
         } catch (error) {
             const response = await this.#retryResponse(systemPrompt, userPrompt, tokens, temp);
             return response;
@@ -91,13 +95,15 @@ class CombatAI {
                 temperature: 0.5,
             });
             // Return the text of the response
+            var parseAttempt = JSON.parse(response.data.choices[0].message.content);
             return response.data.choices[0].message.content;
         } catch (error) {
             const response = await this.#retryRollRequest(action);
-            return response.data.choices[0].message.content;
+            return response;
         }
     }
 
+    //A private function that repeats the prompt request from chatGPT in case an error occurs.
     async #retryRollRequest(action) {
         this.breakout++;
 
@@ -128,7 +134,8 @@ class CombatAI {
                 temperature: 0.5,
             });
             // Return the text of the response
-            return response;
+            var parseAttempt = JSON.parse(response.data.choices[0].message.content);
+            return response.data.choices[0].message.content;
         } catch (error) {
             const response = await this.#retryRollRequest(action);
             return response;
