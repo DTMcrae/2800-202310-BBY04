@@ -82,9 +82,8 @@ function requireLogin(req, res, next) {
 // Send the password reset email
 function sendPasswordResetEmail(user, token) {
 
-    // ******************* WILL NEED TO UPDATE DOMAIN WITH OUR CYCLISH.SH DOMAIN
+    //OUR CYCLISH.SH DOMAIN
     const resetLink = `https://mydnd.cyclic.app/reset/${token}`;
-    // ******************* WILL NEED TO UPDATE DOMAIN WITH OUR CYCLISH.SH DOMAIN
 
     mg.messages
         .create('sandbox5227049b12c7448491caa1aa0c761516.mailgun.org', {
@@ -93,14 +92,13 @@ function sendPasswordResetEmail(user, token) {
             subject: 'Password Reset Request',
             text: `Hi ${user.name},\n\nYou are receiving this email because you (or someone else) has requested a password reset for your account.
             \n\nPlease click on the following link, or paste this into your browser to complete the process:
-            \n\nhttp://localhost:3000/reset/${token}
+            \n\nLocalhost address: http://localhost:3000/reset/${token}
+            \n\nWebsite address: ${resetLink}
             \n\nIf you did not request this, please ignore this email and your password will remain unchanged.
             \n\n****Privacy Policy****
             \nmyDnD is not responsible for any loss of accounts or account information as a result of password resets. myDnD implements hashing in password reset links so the liklihood of this happening is rare.
             \n\nBest regards,
-            \nThe D&D Dudes
-            \n`,
-            html: '<html> <img alt="myDnD_Icon" id="1" src="public\images\myD&D_Icon_HiResolution.png"/></html>',
+            \nThe D&D Dudes`
         })
         .then((msg) => console.log(msg))
         .catch((err) => console.log(err));
@@ -359,16 +357,21 @@ app.post('/forgot', async (req, res) => {
     console.log("user" + user._id);
 
     const token = generateToken();
+    try {
+        // Save the token to the user's document in MongoDB
+        await userCollection.collection.updateOne({
+            _id: user._id,
+        }, {
+            $set: {
+                resetPasswordToken: token,
+                resetPasswordExpires: Date.now() + 3600000, // 1 hour
+            },
+        });
+    } catch (error) {
+        console.error('Database connection error:', error);
+    }
 
-    // Save the token to the user's document in MongoDB
-    await userCollection.updateOne({
-        _id: user._id,
-    }, {
-        $set: {
-            resetPasswordToken: token,
-            resetPasswordExpires: Date.now() + 3600000, // 1 hour
-        },
-    });
+
 
     // Send the password reset email to the user
     sendPasswordResetEmail(user, token);
