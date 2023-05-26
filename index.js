@@ -87,7 +87,7 @@ function sendPasswordResetEmail(user, token) {
 
     mg.messages
         .create('sandbox5227049b12c7448491caa1aa0c761516.mailgun.org', {
-            from: 'Mailgun Sandbox <postmaster@sandbox5227049b12c7448491caa1aa0c761516.mailgun.org>',
+            from: 'myDnD <mydnd.bby04@gmail.com>',
             to: user.email,
             subject: 'Password Reset Request',
             text: `Hi ${user.name},\n\nYou are receiving this email because you (or someone else) has requested a password reset for your account.
@@ -762,50 +762,9 @@ app.get('/party', async (req, res) => {
     }
 });
 
-const fetchPlayerInventoryMiddleware = async (req, res, next) => {
-    try {
-        // need a charid here
-        const characterId = 'ExampleCharacterId';
-        req.inventoryItems = await data.getPlayerInventory(characterId);
-        next();
-    } catch (error) {
-        console.error('Error while fetching player inventory:', error);
-        res.status(500).json({
-            error: 'Error while fetching player inventory'
-        });
-    }
-};
-
-const fetchPlayerEquippedItemsMiddleware = async (req, res, next) => {
-    try {
-        // need a charid here
-        const characterId = 'ExampleCharacterId';
-        req.equippedItems = await data.getPlayerEquippedItems(characterId);
-        next();
-    } catch (error) {
-        console.error('Error while fetching player equipped items:', error);
-        res.status(500).json({
-            error: 'Error while fetching player equipped items'
-        });
-    }
-};
-
-//This page will display a players inventory
-app.get('/inventory', fetchPlayerInventoryMiddleware, (req, res) => {
-    res.render('inventory', {
-        items: req.inventoryItems
-    });
-});
-
-app.get('/equipped', fetchPlayerEquippedItemsMiddleware, (req, res) => {
-    res.render('equipped', {
-        items: req.equippedItems
-    });
-});
-
 
 app.get("*", (req, res) => {
-    res.render('pageNotFound');
+    res.render('404');
 })
 
 app.listen(port, () => {
