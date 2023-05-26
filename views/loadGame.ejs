@@ -40,7 +40,7 @@
         <%for(var x = 0; x < stories.length; x++) {%>
             <div class="card transparent save-card mt-1">
                 <div class="card-body">
-                    <h5 class="card-title">Story Title</h5>
+                    <h5 class="card-title"><%- stories[x].title %></h5>
                     <h6 class="card-text mb-2">Game State: <%- stories[x].gameState %></h6>
                     <h6 class="card-text mb-2">Save Date: <%- stories[x].date %></h6>
                     <form action="/<%- stories[x].gameState %>/load/<%- stories[x].storyID %>" method="post">
