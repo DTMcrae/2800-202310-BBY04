@@ -42,6 +42,17 @@
     </div>
 </div>
 
+<%- include("templates/confirmationModal") %>
+
+    <script>
+        function setUpHome() {
+            document.getElementById("home-button").addEventListener('click', () => {
+                $("#confirmationModal").modal("show");
+            });
+        }
+        setUpHome();
+    </script>
+
 <% if (typeof roll ==='undefined' || roll === 0) {%>
 <script src="/scripts/DiceClient.js"></script>
 <script>

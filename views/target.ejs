@@ -33,6 +33,17 @@
     </div>
 </div>
 
+<%- include("templates/confirmationModal") %>
+
+    <script>
+        function setUpHome() {
+            document.getElementById("home-button").addEventListener('click', () => {
+                $("#confirmationModal").modal("show");
+            });
+        }
+        setUpHome();
+    </script>
+
 <script>
     function init() {
         const displayModal = document.getElementById('displayTargets');
