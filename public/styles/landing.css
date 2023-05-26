@@ -6,8 +6,8 @@
   }
 
   #button_Container {
-    display: grid;
-    grid-template-columns: auto auto auto;
+    display: flex;
+    flex-direction: column;
     /* grid-template-areas: 
       "b1 b2"
       "b3 b4"
@@ -15,6 +15,11 @@
     grid-gap: 20px;
     justify-content: center;
     align-items: center;
+  }
+
+  #BannerBG {
+    background: rgb(7, 7, 7);
+      background: linear-gradient(105deg, rgb(12, 12, 12) 0%, rgba(0, 0, 0, 1)40%, rgb(48, 48, 48) 77%);
   }
 
   .menu-button {

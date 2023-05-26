@@ -33,7 +33,6 @@ class CombatAI {
             return response.data.choices[0].message.content;
         } catch (error) {
             const response = await this.#retryResponse(systemPrompt, userPrompt, tokens, temp);
-            console.log(response);
             return response;
         }
     }

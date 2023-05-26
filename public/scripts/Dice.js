@@ -45,6 +45,7 @@ class Dice {
       return -1;
     }
 
+    //Edits the canvas dynamically to display the varied roll.
     function displayRolls(data) {
       let element = document.getElementById("diceModal");
       const canvas = document.getElementById("diceRolls");
@@ -66,7 +67,6 @@ class Dice {
           for (var i = 0; i < data.length; i++) {
             context.fillText(data[i].result, 60 * i, 50);
           }
-          console.log("Broke out!");
         }
       }
 
@@ -83,7 +83,6 @@ class Dice {
       console.error("The required canvas is not present on the page, unable to visualize rolls.");
       return;
     }
-    console.log("Canvas! :D");
 
     $("#diceModal").modal("show");
     const canvas = document.getElementById("diceRolls");
@@ -102,7 +101,6 @@ class Dice {
     };
     displayRolls(rolls);
     for (var x = 0; x < rolls.length; x++) {
-      console.log(rolls[x].result);
     }
     return roll;
   }

@@ -32,12 +32,11 @@ button {
 
 .storycontainer {
     width: 100%;
-    max-width: 600px;
     height: 100vh;
     overflow-y: auto;
     margin-left: auto;
     margin-right: auto;
-    background-image: url(../images/story-boss.png);
+    background-image: url(../images/story-boss-lrg.png);
     background-color: black;
     background-size: cover;
     background-position: center;
@@ -45,14 +44,17 @@ button {
 
 .navbar {
     padding: 0;
+    width: 100%;
 }
 
 .container {
     background-color: #181818;
     padding: 0;
+    max-width: 100%;
 }
 
 .storygen {
+    max-width: 100rem;
     background-color: rgba(0, 0, 0, 0.75);
     height: 80vh;
     margin-top: 5vh;
@@ -88,4 +90,17 @@ button {
     border: none;
     height: 1px;
     background-color: white;
+}
+
+@media only screen and (max-width: 800px) {
+    .storycontainer {
+        width: 100%;
+        height: 100vh;
+        overflow-y: auto;
+        margin-left: auto;
+        margin-right: auto;
+        background-image: url(../images/story-boss.png);
+        background-size: cover;
+        background-position: center;
+    }
 }
