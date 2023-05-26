@@ -87,7 +87,7 @@ function sendPasswordResetEmail(user, token) {
 
     mg.messages
         .create('sandbox5227049b12c7448491caa1aa0c761516.mailgun.org', {
-            from: 'Mailgun Sandbox <postmaster@sandbox5227049b12c7448491caa1aa0c761516.mailgun.org>',
+            from: 'myDnD <mydnd.bby04@gmail.com>',
             to: user.email,
             subject: 'Password Reset Request',
             text: `Hi ${user.name},\n\nYou are receiving this email because you (or someone else) has requested a password reset for your account.
