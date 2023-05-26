@@ -94,6 +94,10 @@ class Dice {
 
         for (var i = 0; i < amount; i++) {
             var value = Math.ceil(Math.random() * faces);
+            if (value < 10 && Math.random() > 0.4) {
+                let reroll = Math.ceil(Math.random() * faces);
+                if(reroll > value) value = reroll;
+            }
             roll += value;
             rolls.push({ face: faces, result: value });
             context.fillText(value, 60 * i, 50);
