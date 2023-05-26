@@ -1,6 +1,8 @@
 @media (max-width: 600px) {
     body {
         background-image: url(../images/passwordResetConfirmationScreen.png);
+        background-size: 100% 75%;
+        background-position: 50% 0%;
         overflow-y: auto;
     }
 

@@ -4,7 +4,7 @@
 
 <%- include("templates/headerEnd") %>
 
-<div class="characterCard" id="DruidCard">
+<div class="characterCard overflow-auto" id="DruidCard" style="max-height: 40rem">
 
     <div>
         <div id="char_image">
@@ -18,24 +18,24 @@
         <input type="text" id="characterName" placeholder="Enter character name">
         <div id="name_Container">
             <h5 id="name">Give a Name to Your: </h5>
-            <h5 id="characterClass"><%= characterData.Class %></h5>
+            <h5 id="characterClass" class="d-flex justify-content-start"><%= characterData.Class %></h5>
         </div>
         <br>
-        <h3 id="levelHeading">Level: <%= characterData.Level %> </h3>
+        <h3 id="levelHeading" class="d-flex justify-content-center">Level: <%= characterData.Level %> </h3>
     </div>
 
     <% if (characterData) { %>
-    <div id="char_Container">
+    <div id="char_Container" class="d-flex flex-column align-items-center">
         <div id="ability_scores">
-            <h3>Ability Scores:</h3>
+            <h3>Ability Scores</h3>
             <ul id="abilityScoresList">
                 <% Object.entries(characterData.AbilityScores).forEach(([ability, score]) => { %>
                 <li><%= ability %>: <%= score %></li>
                 <% }); %>
             </ul>
         </div>
-        <div id="Equipment">
-            <h3>Equipment:</h3>
+        <div id="Equipment" class="d-flex flex-column align-items-center">
+            <h3>Equipment</h3>
             <ul id="equipmentList">
                 <% Object.entries(characterData.Equipment).forEach(([equipment, item]) => { %>
                 <li><%= equipment %>: <%= item %></li>
@@ -43,7 +43,7 @@
             </ul>
         </div>
         <div id="Skills">
-            <h3>Skills:</h3>
+            <h3>Skills</h3>
             <ul id="skillsList">
                 <% characterData.Skills.forEach(skill => { %>
                 <li><%= skill %></li>
@@ -51,7 +51,7 @@
             </ul>
         </div>
         <div id="Abilities">
-            <h3>Abilities:</h3>
+            <h3>Abilities</h3>
             <ul id="abilitiesList">
                 <% characterData.Abilities.forEach(ability => { %>
                 <li><%= ability %></li>
