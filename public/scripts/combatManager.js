@@ -91,24 +91,27 @@ async function startCombat(req) {
 
     //Assign the preset players/enemies
     let players = (req.session.characters !== undefined) ? req.session.characters : presetPlayers();
-    let enemies = (req.session.enemies !== undefined) ? req.session.enemies : presetEnemies();
+    const enemyNames = (req.session.enemies !== undefined) ? req.session.enemies : presetEnemies();
+    let enemies = ["",""];
 
     if (req.session.combatSequence === 0)
     {
-        if (enemies[0].name === undefined) {
-            enemies[0] = await data.getMonsterInfo((enemies[0]).toLowerCase());
-            enemies[1] = enemies[0];
+        if (enemyNames[0].name === undefined) {
+            enemies[0] = await data.getMonsterInfo((enemyNames[0]).toLowerCase());
+            const copy = JSON.stringify(enemies[0]);
+            enemies[1] = JSON.parse(copy);
         }
     } 
     else 
     {
-        if (enemies[0].name === undefined) {
+        if (enemyNames[0].name === undefined) {
             for (var x = 0; x < enemies.length; x++) {
-                enemies[x] = await data.getMonsterInfo((enemies[x]).toLowerCase());
+                enemies[x] = await data.getMonsterInfo((enemyNames[x]).toLowerCase());
             }
         }
     }
 
+    console.log(req.session.enemies);
     replaceNull(enemies);
 
     var count = 0;
@@ -188,7 +191,7 @@ function parseDamage(req, data) {
         resultText = `${actor.name} took ${data.Result.DamageDealt} damage.`;
     } else {
         resultText = `${actor.name} falls to the ground, defeated.`;
-        actor.isActive = true;
+        actor.isActive = false;
         console.log("Post-Death:", actor);
 
         if (getActiveEnemies(req).length < 1 || getActivePlayers(req).length < 1) {
@@ -252,7 +255,7 @@ function getActiveEnemies(req) {
 //Checks the current status of combat.
 //status is false if combat is ongoing, true if it has ended.
 function combatStatus(req) {
-    if (req.session.combatEnded || getActiveEnemies(req).length < 1 || getActivePlayers(req).length < 1) {
+    if (req.session.combatEnded === true || getActiveEnemies(req).length < 1 || getActivePlayers(req).length < 1) {
         return { status: true, playerVictory: req.session.playerVictory };
     }
     return { status: false };
@@ -413,7 +416,7 @@ router.post("/selectTarget/:target", async (req, res) => {
     });
 });
 
-async function updateHistory(req, data) {
+function updateHistory(req, data) {
     req.session.history.push(data.Result.ActionDescription);
     req.session.history.push(parseDamage(req, data));
     req.session.lastURL = req.url;
