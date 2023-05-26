@@ -59,6 +59,8 @@
     this.atkRoll = undefined;
     this.dmgRoll = undefined;
 
+
+    //Assigns each dice roll to the associated button.
     function assignRolls() {
     document.getElementById('atkRoll').addEventListener('click', () => {
         if(this.atkRoll != undefined) return;
@@ -75,7 +77,6 @@
         if (this.dmgRoll != undefined) return;
         let roll = document.getElementById('dmgRoll').getAttribute("dice").split('d');
         this.dmgRoll = VisualizeRoll(roll[1], roll[0]);
-        console.log("Damage Roll: " + this.dmgRoll);
         if(this.dmgRoll < 0) {
             this.dmgRoll = undefined;
             return;

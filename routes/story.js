@@ -40,9 +40,6 @@ const verb_location = ['living in', 'arriving at', 'visiting', 'exploring', 'inv
 
 // The general story prompt asks for an adventure summary and event types
 const generateStoryPrompt = (NPC, monster, characters, randomType, bcit) => {
-    //console.log(NPC);
-    //console.log(monster);
-    //console.log(characters);
 
     return `Imagine you are creating a detailed DnD adventure ${randomType} ${bcit}. Please provide the following details:
 
@@ -271,7 +268,6 @@ router.post('/generateStory', async (req, res) => {
 
         // Adds a random story type to the generated story
         const randomType = getRandomElement(types);
-        //console.log('Story type: ', randomType);
 
         //pulling monster and npc names from session
         const monsterNames = req.session.monsterNames;
@@ -322,19 +318,7 @@ router.post('/generateStory', async (req, res) => {
         if (!req.session.selectedClass) {
             const randomClass = getRandomElement(random_class);
             req.session.selectedClass = randomClass;
-            //console.log('Random class: ', randomClass);
         }
-
-        //console.log('Character Class:', req.session.selectedClass);
-        //console.log('Summary:', req.session.summary);
-        //console.log('Title:', req.session.title);
-        //console.log('Goal:', req.session.goal);
-        //console.log('Start location:', req.session.s_start);
-        //console.log('Travel location:', req.session.s_travel);
-        //console.log('Boss location:', req.session.s_boss);
-        //console.log('NPC role:', req.session.npc_role);
-        //console.log('NPC name:', req.session.npcSelected);
-        //console.log('Enemies:', req.session.enemies);
 
         // Sends title and summary to the story generation screen
         res.render('story', {
@@ -375,7 +359,6 @@ router.get('/story-event', async (req, res) => {
             const randomEmotion = getRandomElement(emotion_NPC);
 
             const npcText = await openAI.generateText(generateNPC(req.session.npcSelected, randomEmotion, req.session.characters, req.session.goal), model, 800);
-            //console.log(npcText);
 
             // Generates an array of questions to ask the NPC
             req.session.questions = ['mission', 'npc', 'setting'];
@@ -411,12 +394,6 @@ router.get('/story-event', async (req, res) => {
             req.session.SC2 = npcscObject.SC2;
             req.session.SCA2 = npcscObject.SCA2;
 
-            //console.log('npc_atk:', req.session.npc_atk);
-            //console.log('SC1:', req.session.SC1);
-            //console.log('SCA1:', req.session.SCA1);
-            //console.log('SC2:', req.session.SC2);
-            //console.log('SCA2:', req.session.SCA2);
-
             res.render('story-npcSC', {
                 text: req.session.npc_atk,
                 SC1: req.session.SC1,
@@ -442,9 +419,6 @@ router.get('/story-event', async (req, res) => {
 
             req.session.journey_text = journeyObject.journey_text;
             req.session.journey_problem = journeyObject.journey_problem;
-
-            //console.log('journey_text:', req.session.journey_text);
-            //console.log('journey_problem:', req.session.journey_problem);
 
             res.render('story-journey', {
                 text: req.session.journey_text,
@@ -480,7 +454,6 @@ router.get('/story-event', async (req, res) => {
             }
 
             const bossText = await openAI.generateText(generateBoss(arrival, npcMood, req.session.characters, req.session.npcSelected, req.session.s_boss, req.session.enemies, req.session.goal), model, 3000);
-            //console.log('Boss Scene 1: ', bossText);
 
             res.render('story-boss', {
                 text: bossText
@@ -523,11 +496,6 @@ router.get('/story-npcCHAT', async (req, res) => {
             break;
     }
 
-    //console.log('Question Key:', questionKey);
-    //console.log('Session Questions:', req.session.questions);
-    //console.log('Question Index:', questionIndex);
-    //console.log('QTopic:', qtopic);
-
     let dialogueText = await openAI.generateText(generateDialogue(qtopic, req.session.npcSelected, req.session.characters), model, 800);
     while(!verifyResponse(dialogueText)) {
         if (breakout > 3) {
@@ -559,8 +527,6 @@ router.get('/story-npcCHAT', async (req, res) => {
 router.get('/story-npcSC2', async (req, res) => {
 
     let rollResult = rollD20();
-    //console.log('Skill Check Dice roll:' + rollResult.roll);
-    //console.log('Skill Check Result:' + rollResult.result);
 
     let scPrompt;
     let npcPrompt;
@@ -601,7 +567,6 @@ router.get('/story-npcSC2', async (req, res) => {
     }
 
     const npcsc2Text = await openAI.generateText(generateNPCSC2(SC, SCA, req.session.rollResult, npcPrompt, scPrompt, req.session.characters, req.session.selectedClass, req.session.npcSelected, req.session.enemies), model, 1600);
-    //console.log(npcsc2Text);
 
     req.session.combatInit = false;
     req.session.combatSequence = 0;
@@ -641,7 +606,6 @@ router.get('/story-npcSC3', async (req, res) => {
     }
 
     const npcsc3Text = await openAI.generateText(generateNPCSC3(npcPrompt, npcReaction, req.session.characters, req.session.npcSelected, req.session.enemies, req.session.goal, req.session.s_travel), model, 1600);
-    //console.log(npcsc3Text);
 
     res.render('story-npcSC3', {
         text: npcsc3Text,
@@ -661,17 +625,10 @@ router.get('/story-journey2', async (req, res) => {
     }
     const journey2Object = JSON.parse(journey2Text);
 
-    //console.log('journey 2 text:', journey2Text);
-
     req.session.SC3 = journey2Object.SC3;
     req.session.SCA3 = journey2Object.SCA3;
     req.session.SC4 = journey2Object.SC4;
     req.session.SCA4 = journey2Object.SCA4;
-
-    //console.log('SC3:', req.session.SC3);
-    //console.log('SCA3:', req.session.SCA3);
-    //console.log('SC4:', req.session.SC4);
-    //console.log('SCA4:', req.session.SCA4);
 
     res.render('story-journey2', {
         text: req.session.journey_problem,
@@ -685,8 +642,6 @@ router.get('/story-journey2', async (req, res) => {
 router.get('/story-journey3', async (req, res) => {
 
     let rollResult = rollD20();
-    //console.log('Skill Check Dice roll:' + rollResult.roll);
-    //console.log('Skill Check Result:' + rollResult.result);
 
     let scPrompt;
     let enemyPrompt;
@@ -736,7 +691,6 @@ router.get('/story-journey3', async (req, res) => {
     }
 
     const journey3Text = await openAI.generateText(generateJourney3(req.session.journey_problem, SC, SCA, req.session.rollResult, npcPrompt, scPrompt, enemyPrompt, req.session.characters, req.session.selectedClass, req.session.npcSelected, req.session.enemies), model, 1600);
-    //console.log(journey3Text);
 
     res.render('story-journey3', {
         text: journey3Text,
@@ -747,7 +701,6 @@ router.get('/story-journey3', async (req, res) => {
 router.get('/story-boss2', async (req, res) => {
 
     const boss2Text = await openAI.generateText(generateBoss2(req.session.characters, req.session.npcSelected, req.session.s_boss, req.session.enemies, req.session.goal), model, 1600);
-    //console.log(boss2Text);
 
     req.session.combatInit = false;
     req.session.combatSequence = 1;
@@ -760,7 +713,6 @@ router.get('/story-boss2', async (req, res) => {
 router.get('/story-boss3', async (req, res) => {
 
     const boss3Text = await openAI.generateText(generateBoss3(req.session.characters, req.session.npcSelected, req.session.enemies, req.session.goal), model, 1600);
-    //console.log(boss3Text);
 
     res.render('story-boss3', {
         text: boss3Text,

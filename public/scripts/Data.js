@@ -158,7 +158,6 @@ class Data {
       var hitDie = this.getHitDie(character.Class);
 
       var result = (hitDie + (((hitDie / 2) + 1) * (level - 1)) + (Math.floor((constitution - 10) / 2) * level));
-      console.log("MaxHP:", result);
       return result;
     }
 

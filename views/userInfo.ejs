@@ -1,10 +1,11 @@
 <%- include("templates/headerStart") %>
 
-<!-- <link rel="stylesheet" href="../styles/passwordReset.css"> -->
+<link rel="stylesheet" href="../styles/landing.css">
 
 <%- include("templates/headerEnd") %>
 
 
+  <div class="card d-flex align-items-center mr-auto ml-auto pb-2" style="background-color: rgba(43, 43, 43, 0.692); color: rgb(236, 236, 236); max-width: 50rem;">
     <h1>User Information</h1>
 
     <ul>
@@ -14,7 +15,8 @@
         <li><strong>Type:</strong> <%= user.type %></li>
       </ul>
 
-      <h2 class="menu-button"><a href="/landingScreen">Back</a></h2>
+      <a href="/landingScreen"><button class="btn btn-secondary">Back</button></a>
+    </div>
 
 
 <%- include("templates/footer") %>

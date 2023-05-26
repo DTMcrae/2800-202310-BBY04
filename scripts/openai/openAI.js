@@ -27,7 +27,6 @@ class OpenAI {
                 ],
                 temperature: temp,
             });
-            console.log(`request cost: ${response.data.usage.total_tokens} tokens`);
             // Return the text of the response
             return response.data.choices[0].message.content;
         } catch (error) {
@@ -49,8 +48,6 @@ class OpenAI {
                 max_tokens: tokens,
                 temperature: temp,
             });
-            console.log(`request cost: ${response.data.usage.total_tokens} tokens`);
-            console.log("Result:",response.data.choices[0].message.content);
             // Return the text of the response
             return response.data.choices[0].message.content;
         } catch (error) {
