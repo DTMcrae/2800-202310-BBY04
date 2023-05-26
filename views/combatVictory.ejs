@@ -39,10 +39,6 @@
                     <% } %>
             </div>
             <ul class="d-flex list-unstyled ml-auto">
-                <li class="d-flex align-items-center ml-5 mt-auto">
-                    <a class="btn btn-outline-light" href="/LandingScreen"><span
-                            class="material-symbols-outlined">save</span></a>
-                </li>
                 <li class="d-flex align-items-center ml-2 mt-auto">
                     <a class="btn btn-outline-light" href="/LandingScreen"><span
                             class="material-symbols-outlined">home</span></a>
@@ -69,6 +65,17 @@
     <a href="/story/story-boss3" class="btn btn-secondary p-2 mb-2" style="width:25rem">Continue</a>
     <% } %>
 </div>
+
+<%- include("templates/confirmationModal") %>
+
+    <script>
+        function setUpHome() {
+            document.getElementById("home-button").addEventListener('click', () => {
+                $("#confirmationModal").modal("show");
+            });
+        }
+        setUpHome();
+    </script>
                                         
 
 <%- include("templates/combatBodyEnd") %>
