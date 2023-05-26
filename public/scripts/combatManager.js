@@ -437,7 +437,7 @@ router.post('/generatePlayerAction/:roll', async (req, res) => {
         //const text = await openAI.generateText(prompts.generatePlayerTurnPrompt(prompts.generateActionPrompt(actor, current.actions[req.session.combatAction], initiative.getActorData(req.session.combatTarget), result[0], result[1])), model, 200);
 
         let systemPrompt = prompts.playerSystemPrompt();
-        let playerPrompt = prompts.playerTurnPrompt(current, prompts.assignAction(current.actions[req.session.combatAction], 20, 20), initiative.getActorDataID(req.session.turnOrder, req.session.combatTarget), 300, 0.75);
+        let playerPrompt = prompts.playerTurnPrompt(current, prompts.assignAction(current.actions[req.session.combatAction], result[0], result[1]), initiative.getActorDataID(req.session.turnOrder, req.session.combatTarget), 300, 0.75);
 
         let text = await openAI.generateResponse(systemPrompt, playerPrompt);
         if (!verifyResponse(req, res, text, '/combat/selectTarget/' + req.session.combatTarget)) {
