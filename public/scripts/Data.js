@@ -239,49 +239,43 @@ class Data {
          In this case, the field is named inventoryDetails.
     */
     
-    async getPlayerInventory(characterId) {
-        const result = userCharCollection.collection.aggregate([
-            { $match: { _id: ObjectId(characterId) } },
-            {
-            $lookup: {
-                from: 'EQUIPMENT',
-                localField: 'items',
-                foreignField: '_id',
-                as: 'inventoryDetails',
-            },
-            },
-            {
-            $project: {
-                _id: 0,
-                inventoryDetails: 1,
-            },
-            },
-        ]).toArray();
-    
-        return result[0]?.inventoryDetails || [];
-    }
-    
-    async getPlayerEquippedItems(characterId) {
-        const result = await userCharCollection.collection.aggregate([
-          { $match: { _id: ObjectId(characterId) } },
-          {
-            $lookup: {
-              from: 'EQUIPMENT',
-              localField: 'equippedItems',
-              foreignField: '_id',
-              as: 'equippedDetails',
-            },
-          },
-          {
-            $project: {
-              _id: 0,
-              equippedDetails: 1,
-            },
-          },
-        ]).toArray();
+        async getPartyDetails(req, res, next) {
+        if (!req.session || !req.session.characters) {
+          throw new Error('No characters found in session');
+        }
+  
+        const playerDetails = req.session.characters.map(character => {
+            const { Equipment, ...details } = character;
+            return details;
+        });
+  
+        return playerDetails;
+      }
       
-        return result[0]?.equippedDetails || [];
-    }
+    
+    async getPlayerEquipment(req) {
+      // Ensure the session data is parsed to an object
+      if (typeof req.session.characters === 'string') {
+          req.session.characters = JSON.parse(req.session.characters);
+      }
+  
+      // Array to store details of all characters
+      let characterDetails = [];
+  
+      // Loop over all characters in the session
+      for (let character of req.session.characters) {
+          // Get the character's Name, Class and Equipment
+          let details = {
+              'Name': character.Name,
+              'Class': character.Class,
+              'Equipment': character.Equipment
+          };
+          characterDetails.push(details);
+      }
+  
+      return characterDetails;
+  }
+  
 }
 
 module.exports = Data;

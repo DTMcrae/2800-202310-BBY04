@@ -666,38 +666,21 @@ app.post('/levelup', (req, res) => {
 app.use("/loadGame", loadGame);
 /*----------------------------------------------------------------------------------------------------end of loading-----------------------------------------------------------------------------------*/
 
-const fetchPlayerInventoryMiddleware = async (req, res, next) => {
-    try {
-      // need a charid here
-      const characterId = 'ExampleCharacterId';
-      req.inventoryItems = await data.getPlayerInventory(characterId);
-      next();
-    } catch (error) {
-      console.error('Error while fetching player inventory:', error);
-      res.status(500).json({ error: 'Error while fetching player inventory' });
-    }
-};
-
-const fetchPlayerEquippedItemsMiddleware = async (req, res, next) => {
-    try {
-      // need a charid here
-      const characterId = 'ExampleCharacterId';
-      req.equippedItems = await data.getPlayerEquippedItems(characterId);
-      next();
-    } catch (error) {
-      console.error('Error while fetching player equipped items:', error);
-      res.status(500).json({ error: 'Error while fetching player equipped items' });
-    }
-};
-
-//This page will display a players inventory
-app.get('/inventory', fetchPlayerInventoryMiddleware, (req, res) => {
-    res.render('inventory', { items: req.inventoryItems });
+app.get('/equipped', async (req, res) => {
+    let equippedDetails = await data.getPlayerEquipment(req);
+    console.log(equippedDetails);
+    res.render('equipped', { items: equippedDetails });
 });
 
-app.get('/equipped', fetchPlayerEquippedItemsMiddleware, (req, res) => {
-    res.render('equipped', { items: req.equippedItems });
+app.get('/party', async (req, res) => {
+    try {
+        const playerDetails = await data.getPartyDetails(req);
+        res.render('party', { items: playerDetails });
+    } catch (error) {
+        res.status(400).send(error.message);
+    }
 });
+
 
 app.get("*", (req, res) => {
     res.status(404);
