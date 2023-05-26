@@ -12,17 +12,13 @@ const data = new Data();
 const openAI = new CombatAI(process.env.OPENAI_KEY);
 
 //Preset enemy and player information for testing.
-function presetPlayers() { return [{ name: "Draeven", class: "Ranger", maxHP: 10, hp: 99, ac: 12, gold: 0, actions: [{ name: "Greatbow" }, { name: "Dagger" }, { name: "Axe" }, { name: "Quarterstaff" }] }, { name: "Asha", class: "Rogue", maxHP: 10, hp: 99, ac: 12, gold: 0, actions: [{ name: "Greatbow" }, { name: "Dagger" }, { name: "Axe" }, { name: "Quarterstaff" }] }] }
+function presetPlayers() { return [{ name: "Draeven", class: "Ranger", maxHP: 14, hp: 14, ac: 12, gold: 0, actions: [{ name: "Greatbow" }, { name: "Dagger" }, { name: "Axe" }, { name: "Quarterstaff" }] }, { name: "Asha", class: "Rogue", maxHP: 10, hp: 10, ac: 12, gold: 0, actions: [{ name: "Greatbow" }, { name: "Dagger" }, { name: "Axe" }, { name: "Quarterstaff" }] }] }
 function presetEnemies() { return [{ name: "Goblin 1", hp: 7, ac: 9, desc: "A goblin wielding a dagger." }, { name: "Goblin 2", hp: 7, ac: 9, desc: "A goblin wielding a bow." }] }
 
 const prompts = new CombatPrompts();
 const initiative = new TurnOrder();
 
 const { userCollection,
-    monstersCollection,
-    npcCollection,
-    partyMemCollection,
-    userCharCollection,
     userSavedCollection
 } = require('../.././databaseConnection.js');
 
@@ -62,6 +58,15 @@ router.post("/load/:id", async (req, res) => {
     res.redirect('/combat');
 })
 
+//A page for testing combat
+router.get('/trial', (req, res) => {
+    startCombatTrial(req);
+    req.session.combatSequence = 2;
+
+    res.redirect('/combat');
+})
+
+//The main combat page
 router.get('*', async (req, res) => {
     if (!req.session.authenticated) {
         res.redirect("/userLoginScreen");
@@ -81,6 +86,44 @@ router.post('/', (req, res) => {
     var currentActor = initiative.currentTurn(req.session.turnOrder);
     res.render('combat', { players: getAllPlayers(req), history: req.session.history, isPlayer: isActorFriendly(currentActor), actor: currentActor, combat: combatStatus(req), error: true });
 });
+
+function startCombatTrial(req) {
+    req.session.combatEnded = false;
+    req.session.history = [];
+    let actors = [];
+
+    //Assign the preset players/enemies
+    const players = presetPlayers();
+    const enemies = presetEnemies();
+
+    var count = 0;
+
+    //Roll initiative for each player
+    players.forEach(player => {
+        player.roll = Dice.Roll(20, 1);
+        player.isActive = (player.hp > 0);
+        player.isPlayer = true;
+        player.combatID = count;
+        actors.push(player);
+        count++;
+    });
+
+    //Roll initiative for each enemy
+    enemies.forEach(enemy => {
+        enemy.roll = Dice.Roll(20, 1);
+        enemy.isActive = (enemy.hp > 0);
+        enemy.isPlayer = false;
+        enemy.combatID = count;
+        count++;
+
+        actors.push(enemy);
+    })
+
+    req.session.turnOrder = initiative.assignNew(actors);
+    req.session.combatInit = true;
+    req.session.saved = false;
+    this.combatEnded = false;
+}
 
 //Placeholder function for assigning actors to combat.
 async function startCombat(req) {
