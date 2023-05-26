@@ -35,6 +35,29 @@ body {
     color: white;
     bottom: -25px;
   }
+  .frame {
+    background-image: url('../images/Equipimg.gif');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .frame2 {
+    background-image: url('../images/Partyimg.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+
+  
 
   @media (max-width: 6000px) {
     #DnD_Banner {

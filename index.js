@@ -42,8 +42,9 @@ const mailgun_api_secret = process.env.MAILGUN_API_SECRET;
 /* END secret section */
 
 //Dasebase connection
-const { userCollection, 
-    classesCollection, 
+const {
+    userCollection,
+    classesCollection,
     equipmentCollection,
     levelCollection,
     monstersCollection,
@@ -53,7 +54,7 @@ const { userCollection,
     sessionCollection,
     spellsCollection,
     userCharCollection,
-    userSavedCollection  
+    userSavedCollection
 } = require('./databaseConnection.js');
 
 //password variables
@@ -81,16 +82,23 @@ function requireLogin(req, res, next) {
 // Send the password reset email
 function sendPasswordResetEmail(user, token) {
 
-    // ******************* WILL NEED TO UPDATE DOMAIN WITH OUR CYCLISH.SH DOMAIN
+    //OUR CYCLISH.SH DOMAIN
     const resetLink = `https://mydnd.cyclic.app/reset/${token}`;
-    // ******************* WILL NEED TO UPDATE DOMAIN WITH OUR CYCLISH.SH DOMAIN
 
     mg.messages
         .create('sandbox5227049b12c7448491caa1aa0c761516.mailgun.org', {
             from: 'Mailgun Sandbox <postmaster@sandbox5227049b12c7448491caa1aa0c761516.mailgun.org>',
             to: user.email,
             subject: 'Password Reset Request',
-            text: `Hi ${user.name},\n\nYou are receiving this email because you (or someone else) has requested a password reset for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\nhttp://localhost:3000/reset/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n\nBest regards,\nThe D&D Dudes`,
+            text: `Hi ${user.name},\n\nYou are receiving this email because you (or someone else) has requested a password reset for your account.
+            \n\nPlease click on the following link, or paste this into your browser to complete the process:
+            \n\nLocalhost address: http://localhost:3000/reset/${token}
+            \n\nWebsite address: ${resetLink}
+            \n\nIf you did not request this, please ignore this email and your password will remain unchanged.
+            \n\n****Privacy Policy****
+            \nmyDnD is not responsible for any loss of accounts or account information as a result of password resets. myDnD implements hashing in password reset links so the liklihood of this happening is rare.
+            \n\nBest regards,
+            \nThe D&D Dudes`
         })
         .then((msg) => console.log(msg))
         .catch((err) => console.log(err));
@@ -113,25 +121,24 @@ app.use(express.urlencoded({
 app.use(bodyParser.json());
 
 var mongoStore = MongoStore.create({
-	mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`,
-	collectionName: 'SESSION',
-	crypto: {
-		secret: mongodb_session_secret
-	}
+    mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`,
+    collectionName: 'SESSION',
+    crypto: {
+        secret: mongodb_session_secret
+    }
 })
 
-app.use(session({ 
+app.use(session({
     secret: node_session_secret,
-	store: mongoStore, //default is memory store 
-	saveUninitialized: false, 
-	resave: true
-}
-));
+    store: mongoStore, //default is memory store 
+    saveUninitialized: false,
+    resave: true
+}));
 
 /*--------------------------------------------------------------------------------------------------end of connections and imports-----------------------------------------------------------------------------------*/
 
 app.get('/', (req, res) => {
-    if(req.session.authenticated) {
+    if (req.session.authenticated) {
         res.redirect('/LandingScreen');
         return;
     }
@@ -267,7 +274,10 @@ app.post('/loggingin', async (req, res) => {
 
     if (validationResult.error != null) {
         console.log(validationResult.error);
-        res.redirect("/userLoginScreen");
+        const message = validationResult.error.details[0].message;
+        res.render("loginSubmit", {
+            message: message
+        });
         return;
     }
 
@@ -344,17 +354,24 @@ app.post('/forgot', async (req, res) => {
         });
     }
 
-    const token = generateToken();
+    console.log("user" + user._id);
 
-    // Save the token to the user's document in MongoDB
-    await userCollection.updateOne({
-        _id: user._id,
-    }, {
-        $set: {
-            resetPasswordToken: token,
-            resetPasswordExpires: Date.now() + 3600000, // 1 hour
-        },
-    });
+    const token = generateToken();
+    try {
+        // Save the token to the user's document in MongoDB
+        await userCollection.collection.updateOne({
+            _id: user._id,
+        }, {
+            $set: {
+                resetPasswordToken: token,
+                resetPasswordExpires: Date.now() + 3600000, // 1 hour
+            },
+        });
+    } catch (error) {
+        console.error('Database connection error:', error);
+    }
+
+
 
     // Send the password reset email to the user
     sendPasswordResetEmail(user, token);
@@ -367,7 +384,7 @@ app.post('/forgot', async (req, res) => {
 // Handle the password reset form submission
 app.post('/reset/:token', async (req, res) => {
     const token = req.params.token;
- 
+
     const user = await userCollection.collection.findOne({
         resetPasswordToken: token,
         resetPasswordExpires: {
@@ -423,35 +440,35 @@ app.get('/characterSelectionEasterEgg', (req, res) => {
 
 app.get('/characterSelected', async (req, res) => {
     try {
-      const selectedCharacter = req.query.class;
-  
-      const characterData = await classesCollection.collection.findOne({
-        Class: selectedCharacter,
-        Level: 1
-      });
-  
-      const userID = req.session.userID; 
-  
-      req.session.selectedClass = selectedCharacter;
-  
-      if (characterData) {
-        res.render('characterSelected', {
-          characterData,
-          userID 
+        const selectedCharacter = req.query.class;
+
+        const characterData = await classesCollection.collection.findOne({
+            Class: selectedCharacter,
+            Level: 1
         });
-      } else {
-        res.status(404).json({
-          error: 'Character not found'
-        });
-      }
+
+        const userID = req.session.userID;
+
+        req.session.selectedClass = selectedCharacter;
+
+        if (characterData) {
+            res.render('characterSelected', {
+                characterData,
+                userID
+            });
+        } else {
+            res.status(404).json({
+                error: 'Character not found'
+            });
+        }
     } catch (error) {
-      console.error('Error fetching character data:', error);
-      res.status(500).json({
-        error: 'Internal Server Error'
-      });
+        console.error('Error fetching character data:', error);
+        res.status(500).json({
+            error: 'Internal Server Error'
+        });
     }
-  });
-  
+});
+
 
 app.post('/saveCharacter', async (req, res) => {
 
@@ -472,10 +489,15 @@ app.post('/saveCharacter', async (req, res) => {
     try {
         var result = await userCharCollection.collection.insertOne(characterStats);
         req.session.charID = result.insertedId;
-        res.json({success: true});
+        res.json({
+            success: true
+        });
     } catch (err) {
         console.error('Error saving character:', err);
-        res.json({ success: false, error: err })
+        res.json({
+            success: false,
+            error: err
+        })
     }
 });
 
@@ -524,16 +546,20 @@ app.post("/charSelected/:charid", async (req, res) => {
 // Story Generation
 app.get('/story', async (req, res) => {
     const userID = req.session.userID;
-    
+
     // Check if userId exists
     if (!userID) {
         // Handle case when user is not logged in
-        return res.status(401).json({ message: "Not authenticated" });
+        return res.status(401).json({
+            message: "Not authenticated"
+        });
     }
-    
+
     try {
 
-        const players = await userCharCollection.collection.find({ _id: new ObjectId(req.session.charID) }).toArray();
+        const players = await userCharCollection.collection.find({
+            _id: new ObjectId(req.session.charID)
+        }).toArray();
         console.log("Player:", players);
 
         const mainChar = players.map(async (myPlayer) => {
@@ -541,7 +567,7 @@ app.get('/story', async (req, res) => {
             const maxhp = await data.calculateMaxHP(myPlayer);
             const hp = (myPlayer.HP !== undefined) ? myPlayer.HP : maxhp;
             const actions = (myPlayer.Actions !== undefined) ? myPlayer.Actions : await data.getActions(myPlayer);
-    
+
             const Player = {
                 name: myPlayer.Name, // replace 'name' with the correct field name for the character's name
                 class: myPlayer.Class,
@@ -553,15 +579,15 @@ app.get('/story', async (req, res) => {
             };
             return Player;
         });
-    
+
         const partyMembers = await partyMemCollection.collection.find({}).toArray(); // replace with the correct query if necessary
-    
+
         const presetPartyMembers = partyMembers.map(async (member) => {
             const ac = await data.calculateAC(member);
             const maxhp = await data.calculateMaxHP(member);
             const hp = (member.HP !== undefined) ? member.HP : maxhp;
             const actions = (member.Actions !== undefined) ? member.Actions : await data.getActions(member);
-    
+
             const partyMember = {
                 name: member.Name, // replace 'name' with the correct field name for the character's name
                 class: member.Class,
@@ -571,24 +597,24 @@ app.get('/story', async (req, res) => {
                 gold: member.gold, // replace 'gold' with the correct field name for gold
                 actions: actions // replace 'actions' with the correct field name for actions
             };
-    
+
             if (member.Domain) {
                 partyMember.domain = member.Domain;
             }
-    
+
             return partyMember;
         });
-    
+
         // Await all promises from map functions
         const [mainCharObjects, presetPartyMemObjects] = await Promise.all([Promise.all(mainChar), Promise.all(presetPartyMembers)]);
-    
+
         // Now we have arrays of objects, and we want to make sure we have exactly one main character and two party members
         // For main character, we'll just take the first one (assuming there is at least one)
         const mainCharObject = mainCharObjects[0];
-    
+
         // For party members, we'll take the first two (assuming there are at least two)
         const [partyMemObject1, partyMemObject2] = presetPartyMemObjects;
-    
+
         // Now construct the allCharacters array
         const characters = [mainCharObject, partyMemObject1, partyMemObject2];
 
@@ -598,11 +624,14 @@ app.get('/story', async (req, res) => {
         // const npcDetails = await data.getNpcDetails(name, background);
 
         console.log("Characters:", characters);
-    
+
         req.session.characters = characters;
         req.session.monsterNames = monsterNames;
         req.session.npcList = npcList;
-        res.render('story', { userID: req.session.userID, characters: req.session.characters });
+        res.render('story', {
+            userID: req.session.userID,
+            characters: req.session.characters
+        });
     } catch (error) {
         console.error('Error fetching character data:', error);
     }
@@ -643,105 +672,140 @@ app.use("/combat", combat);
 
 app.get('/levelup/:characterId', async (req, res) => {
     try {
-      // fetch character data from the database
-      const characterData = await userCharCollection.collection.findOne({ _id: ObjectId(req.params.characterId) });
-  
-      // parse class and level
-      const className = characterData.class.replace('Give Your Wizard a Name', '').trim();
-      let currentLevel = parseInt(characterData.level.replace('Level: ', '').trim());
-      let nextLevel = currentLevel + 1;      
-  
-      // fetch level up and spell data
-      const levelUpData = await data.getLevelUpData(className, nextLevel);
-      const spellData = await data.getSpellData(className, nextLevel);
-  
-      // update character data
-      const updatedCharacterData = {
-        ...characterData,
-        level: 'Level: ' + nextLevel.toString(),
-        ...levelUpData,
-        spells: spellData
-      };          
-  
-      // update character in the database
-      await userCharCollection.collection.updateOne({ _id: ObjectId(req.params.characterId) }, { $set: updatedCharacterData });
-  
-      // render the level up page
-      res.render('levelup', { updatedCharacterData, spells: updatedCharacterData.spells });
-  
+        // fetch character data from the database
+        const characterData = await userCharCollection.collection.findOne({
+            _id: ObjectId(req.params.characterId)
+        });
+
+        // parse class and level
+        const className = characterData.class.replace('Give Your Wizard a Name', '').trim();
+        let currentLevel = parseInt(characterData.level.replace('Level: ', '').trim());
+        let nextLevel = currentLevel + 1;
+
+        // fetch level up and spell data
+        const levelUpData = await data.getLevelUpData(className, nextLevel);
+        const spellData = await data.getSpellData(className, nextLevel);
+
+        // update character data
+        const updatedCharacterData = {
+            ...characterData,
+            level: 'Level: ' + nextLevel.toString(),
+            ...levelUpData,
+            spells: spellData
+        };
+
+        // update character in the database
+        await userCharCollection.collection.updateOne({
+            _id: ObjectId(req.params.characterId)
+        }, {
+            $set: updatedCharacterData
+        });
+
+        // render the level up page
+        res.render('levelup', {
+            updatedCharacterData,
+            spells: updatedCharacterData.spells
+        });
+
     } catch (error) {
-      console.error(error);
-      res.status(500).send('Error while leveling up');
+        console.error(error);
+        res.status(500).send('Error while leveling up');
     }
 });
-  
+
 app.post('/levelup', (req, res) => {
     let selectedSkills = req.body.skillSelection;
-  
+
     // If more than 3 skills are selected, return an error message
-    if(selectedSkills.length > 3) {
-      res.send("You can only select 3 skills");
-      return;
+    if (selectedSkills.length > 3) {
+        res.send("You can only select 3 skills");
+        return;
     }
-  
+
     // Assuming you have the user's id stored in a variable called userId
     let userId = req.session.userId;
-  
+
     // Update the spells field in the user's document in the collection
-    userCharCollection.collection.updateOne(
-        { _id: userId }, 
-        { $set: { spells: selectedSkills } }
-      )
-      .then(result => {
-        console.log(result);
-        res.send("Skills updated successfully");
-      })
-      .catch(err => {
-        console.log(err);
-        res.send("Error updating skills");
-      });      
+    userCharCollection.collection.updateOne({
+            _id: userId
+        }, {
+            $set: {
+                spells: selectedSkills
+            }
+        })
+        .then(result => {
+            console.log(result);
+            res.send("Skills updated successfully");
+        })
+        .catch(err => {
+            console.log(err);
+            res.send("Error updating skills");
+        });
 });
-  
-/*----------------------------------------------------------------------------------------------------end of leveling up-------------------------------------------------------------------------------*/  
+
+/*----------------------------------------------------------------------------------------------------end of leveling up-------------------------------------------------------------------------------*/
 app.use("/loadGame", loadGame);
 /*----------------------------------------------------------------------------------------------------end of loading-----------------------------------------------------------------------------------*/
 
+app.get('/equipped', async (req, res) => {
+    let equippedDetails = await data.getPlayerEquipment(req);
+    console.log(equippedDetails);
+    res.render('equipped', { items: equippedDetails });
+});
+
+app.get('/party', async (req, res) => {
+    try {
+        const playerDetails = await data.getPartyDetails(req);
+        res.render('party', { items: playerDetails });
+    } catch (error) {
+        res.status(400).send(error.message);
+    }
+});
+
 const fetchPlayerInventoryMiddleware = async (req, res, next) => {
     try {
-      // need a charid here
-      const characterId = 'ExampleCharacterId';
-      req.inventoryItems = await data.getPlayerInventory(characterId);
-      next();
+        // need a charid here
+        const characterId = 'ExampleCharacterId';
+        req.inventoryItems = await data.getPlayerInventory(characterId);
+        next();
     } catch (error) {
-      console.error('Error while fetching player inventory:', error);
-      res.status(500).json({ error: 'Error while fetching player inventory' });
+        console.error('Error while fetching player inventory:', error);
+        res.status(500).json({
+            error: 'Error while fetching player inventory'
+        });
     }
 };
 
 const fetchPlayerEquippedItemsMiddleware = async (req, res, next) => {
     try {
-      // need a charid here
-      const characterId = 'ExampleCharacterId';
-      req.equippedItems = await data.getPlayerEquippedItems(characterId);
-      next();
+        // need a charid here
+        const characterId = 'ExampleCharacterId';
+        req.equippedItems = await data.getPlayerEquippedItems(characterId);
+        next();
     } catch (error) {
-      console.error('Error while fetching player equipped items:', error);
-      res.status(500).json({ error: 'Error while fetching player equipped items' });
+        console.error('Error while fetching player equipped items:', error);
+        res.status(500).json({
+            error: 'Error while fetching player equipped items'
+        });
     }
 };
 
 //This page will display a players inventory
 app.get('/inventory', fetchPlayerInventoryMiddleware, (req, res) => {
-    res.render('inventory', { items: req.inventoryItems });
+    res.render('inventory', {
+        items: req.inventoryItems
+    });
 });
 
 app.get('/equipped', fetchPlayerEquippedItemsMiddleware, (req, res) => {
-    res.render('equipped', { items: req.equippedItems });
+    res.render('equipped', {
+        items: req.equippedItems
+    });
 });
 
+
 app.get("*", (req, res) => {
-    res.status(404);
-    res.send("Page not found - 404");
+    res.render('pageNotFound');
 })
 
 app.listen(port, () => {
