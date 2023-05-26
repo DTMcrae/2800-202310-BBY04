@@ -40,9 +40,9 @@ const verb_location = ['living in', 'arriving at', 'visiting', 'exploring', 'inv
 
 // The general story prompt asks for an adventure summary and event types
 const generateStoryPrompt = (NPC, monster, characters, randomType, bcit) => {
-    console.log(NPC);
-    console.log(monster);
-    console.log(characters);
+    //console.log(NPC);
+    //console.log(monster);
+    //console.log(characters);
 
     return `Imagine you are creating a detailed DnD adventure ${randomType} ${bcit}. Please provide the following details:
 
@@ -57,7 +57,7 @@ const generateStoryPrompt = (NPC, monster, characters, randomType, bcit) => {
     - "monster_1": Consider this list of monsters: ${monster}. Select a monster appropriate for the adventure and provide their name from the list. Do not invent a new monster.
     - "monster_2": Consider this list of monsters: ${monster}. Select a monster appropriate for the adventure and provide their name from the list. Do not invent a new monster.
     
-    Please structure your response in the following format:
+    Please structure your response in JSON using the format provided. Do not deviate from this format:
     
     {
       "title": "<title>",
@@ -90,7 +90,7 @@ const generateDialogue = (qtopic, NPC, characters) => {
     - "Q2": A follow-up question
     - "A2": Answer to the follow-up
          
-    Please structure your response in the following format:
+    Please structure your response in JSON using the format provided. Do not deviate from this format:
     
     {
       "Q1": "${characters[0].name}: <question>",
@@ -107,7 +107,7 @@ const generateNPCSC = (characters, selectedClass, NPC, enemies) => {
     1. In two sentences, depict the unfolding attack. Do not refer to the enemies with "the". Remember that the action is just starting.
     2. Choose two different skill checks. For each, provide a brief action phrase starting with "Try to" indicating how the skill check is used. Remember that the player is ${characters[0].name} and is a ${selectedClass}. Make your responses concise.
 
-    Format your response as follows:
+    Please structure your response in JSON using the format provided. Do not deviate from this format:
     
     {
       "npc_atk": "Description of the attack",
@@ -147,7 +147,7 @@ const generateJourney = (characters, NPC, s_travel, enemies) => {
     1. Describe the setting and how the characters feel during their travels in four sentences.
     2. ${enemies[1]} appears and creates an obstacle that prevents ${characters[0].name} and ${NPC} from travelling further. Set up the problem but do not resolve it. The problem must not be about fighting an enemy. Write this scene in two sentences.
 
-    Format your response as follows:
+    Please structure your response in JSON using the format provided. Do not deviate from this format:
     
     {
       "journey_text": "Description of the first scene",
@@ -161,7 +161,7 @@ const generateJourney2 = (problem, characters, selectedClass, NPC, s_travel) => 
 
     Choose two different skill checks. For each, provide a brief action phrase starting with "Try to" indicating how the skill check is used. Remember that the player is ${characters[0].name} and is a ${selectedClass}. Make your responses concise.
 
-    Format your response as follows:
+    Please structure your response in JSON using the format provided. Do not deviate from this format:
     
     {
       "SC3": "First Skill",
@@ -271,7 +271,7 @@ router.post('/generateStory', async (req, res) => {
 
         // Adds a random story type to the generated story
         const randomType = getRandomElement(types);
-        console.log('Story type: ', randomType);
+        //console.log('Story type: ', randomType);
 
         //pulling monster and npc names from session
         const monsterNames = req.session.monsterNames;
@@ -281,7 +281,10 @@ router.post('/generateStory', async (req, res) => {
         const characters = req.session.characters;
         // async() => await openAI.generateDM();
         // Creates the story and parses the text into a JSON object
-        const responseText = await openAI.generateText(generateStoryPrompt(nString, mString, characters, randomType, bcit), model);
+        let responseText = await openAI.generateText(generateStoryPrompt(nString, mString, characters, randomType, bcit), model);
+        if(!verifyResponse(responseText)) {
+            responseText = await openAI.generateText(generateStoryPrompt(nString, mString, characters, randomType, bcit), model);
+        }
         const responseObject = JSON.parse(responseText);
 
         // Store the generated story summary and events in the session
@@ -319,19 +322,19 @@ router.post('/generateStory', async (req, res) => {
         if (!req.session.selectedClass) {
             const randomClass = getRandomElement(random_class);
             req.session.selectedClass = randomClass;
-            console.log('Random class: ', randomClass);
+            //console.log('Random class: ', randomClass);
         }
 
-        console.log('Character Class:', req.session.selectedClass);
-        console.log('Summary:', req.session.summary);
-        console.log('Title:', req.session.title);
-        console.log('Goal:', req.session.goal);
-        console.log('Start location:', req.session.s_start);
-        console.log('Travel location:', req.session.s_travel);
-        console.log('Boss location:', req.session.s_boss);
-        console.log('NPC role:', req.session.npc_role);
-        console.log('NPC name:', req.session.npcSelected);
-        console.log('Enemies:', req.session.enemies);
+        //console.log('Character Class:', req.session.selectedClass);
+        //console.log('Summary:', req.session.summary);
+        //console.log('Title:', req.session.title);
+        //console.log('Goal:', req.session.goal);
+        //console.log('Start location:', req.session.s_start);
+        //console.log('Travel location:', req.session.s_travel);
+        //console.log('Boss location:', req.session.s_boss);
+        //console.log('NPC role:', req.session.npc_role);
+        //console.log('NPC name:', req.session.npcSelected);
+        //console.log('Enemies:', req.session.enemies);
 
         // Sends title and summary to the story generation screen
         res.render('story', {
@@ -351,6 +354,7 @@ router.post('/generateStory', async (req, res) => {
 router.get('/story-event', async (req, res) => {
 
     const event = getNextEvent(req);
+    var breakout = 0;
 
     // Generates a different event page depending on the next event type
     switch (event.type) {
@@ -371,7 +375,7 @@ router.get('/story-event', async (req, res) => {
             const randomEmotion = getRandomElement(emotion_NPC);
 
             const npcText = await openAI.generateText(generateNPC(req.session.npcSelected, randomEmotion, req.session.characters, req.session.goal), model, 800);
-            console.log(npcText);
+            //console.log(npcText);
 
             // Generates an array of questions to ask the NPC
             req.session.questions = ['mission', 'npc', 'setting'];
@@ -390,7 +394,15 @@ router.get('/story-event', async (req, res) => {
 
         case 'story-npcSC':
 
-            const npcscText = await openAI.generateText(generateNPCSC(req.session.characters, req.session.selectedClass, req.session.npcSelected, req.session.enemies), model, 3000);
+            let npcscText = await openAI.generateText(generateNPCSC(req.session.characters, req.session.selectedClass, req.session.npcSelected, req.session.enemies), model, 3000);
+            while(!verifyResponse(npcscText)) {
+                if(breakout > 3) {
+                    console.error("ChatGPT appears to be having a fit, try again later.");
+                    break;
+                }
+                breakout += 1;
+                npcscText = await openAI.generateText(generateNPCSC(req.session.characters, req.session.selectedClass, req.session.npcSelected, req.session.enemies), model, 3000);
+            }
             const npcscObject = JSON.parse(npcscText);
 
             req.session.npc_atk = npcscObject.npc_atk;
@@ -399,11 +411,11 @@ router.get('/story-event', async (req, res) => {
             req.session.SC2 = npcscObject.SC2;
             req.session.SCA2 = npcscObject.SCA2;
 
-            console.log('npc_atk:', req.session.npc_atk);
-            console.log('SC1:', req.session.SC1);
-            console.log('SCA1:', req.session.SCA1);
-            console.log('SC2:', req.session.SC2);
-            console.log('SCA2:', req.session.SCA2);
+            //console.log('npc_atk:', req.session.npc_atk);
+            //console.log('SC1:', req.session.SC1);
+            //console.log('SCA1:', req.session.SCA1);
+            //console.log('SC2:', req.session.SC2);
+            //console.log('SCA2:', req.session.SCA2);
 
             res.render('story-npcSC', {
                 text: req.session.npc_atk,
@@ -416,14 +428,23 @@ router.get('/story-event', async (req, res) => {
 
         case 'story-journey':
 
-            const journeyText = await openAI.generateText(generateJourney(req.session.characters, req.session.npcSelected, req.session.s_travel, req.session.enemies), model, 3000);
+            
+
+            let journeyText = await openAI.generateText(generateJourney(req.session.characters, req.session.npcSelected, req.session.s_travel, req.session.enemies), model, 3000);
+            while (!verifyResponse(journeyText)) {
+                if (breakout > 3) {
+                    console.error("ChatGPT appears to be having a fit, try again later.");
+                    break;
+                }
+                journeyText = await openAI.generateText(generateJourney(req.session.characters, req.session.npcSelected, req.session.s_travel, req.session.enemies), model, 3000);
+            }
             const journeyObject = JSON.parse(journeyText);
 
             req.session.journey_text = journeyObject.journey_text;
             req.session.journey_problem = journeyObject.journey_problem;
 
-            console.log('journey_text:', req.session.journey_text);
-            console.log('journey_problem:', req.session.journey_problem);
+            //console.log('journey_text:', req.session.journey_text);
+            //console.log('journey_problem:', req.session.journey_problem);
 
             res.render('story-journey', {
                 text: req.session.journey_text,
@@ -459,7 +480,7 @@ router.get('/story-event', async (req, res) => {
             }
 
             const bossText = await openAI.generateText(generateBoss(arrival, npcMood, req.session.characters, req.session.npcSelected, req.session.s_boss, req.session.enemies, req.session.goal), model, 3000);
-            console.log('Boss Scene 1: ', bossText);
+            //console.log('Boss Scene 1: ', bossText);
 
             res.render('story-boss', {
                 text: bossText
@@ -479,6 +500,7 @@ router.get('/story-npcCHAT', async (req, res) => {
 
     const questionKey = req.query.question;
     let qtopic;
+    let breakout = 0;
 
     // Removes a question if it was already asked
     const questionIndex = req.session.questions.indexOf(questionKey);
@@ -501,13 +523,19 @@ router.get('/story-npcCHAT', async (req, res) => {
             break;
     }
 
-    console.log('Question Key:', questionKey);
-    console.log('Session Questions:', req.session.questions);
-    console.log('Question Index:', questionIndex);
-    console.log('QTopic:', qtopic);
+    //console.log('Question Key:', questionKey);
+    //console.log('Session Questions:', req.session.questions);
+    //console.log('Question Index:', questionIndex);
+    //console.log('QTopic:', qtopic);
 
-    const dialogueText = await openAI.generateText(generateDialogue(qtopic, req.session.npcSelected, req.session.characters), model, 800);
-    console.log('Response from OpenAI: ', dialogueText);
+    let dialogueText = await openAI.generateText(generateDialogue(qtopic, req.session.npcSelected, req.session.characters), model, 800);
+    while(!verifyResponse(dialogueText)) {
+        if (breakout > 3) {
+            console.error("ChatGPT appears to be having a fit, try again later.");
+            break;
+        }
+        dialogueText = await openAI.generateText(generateDialogue(qtopic, req.session.npcSelected, req.session.characters), model, 800);
+    }
     const dialogueObject = JSON.parse(dialogueText);
 
     req.session.Q1 = dialogueObject.Q1;
@@ -531,8 +559,8 @@ router.get('/story-npcCHAT', async (req, res) => {
 router.get('/story-npcSC2', async (req, res) => {
 
     let rollResult = rollD20();
-    console.log('Skill Check Dice roll:' + rollResult.roll);
-    console.log('Skill Check Result:' + rollResult.result);
+    //console.log('Skill Check Dice roll:' + rollResult.roll);
+    //console.log('Skill Check Result:' + rollResult.result);
 
     let scPrompt;
     let npcPrompt;
@@ -573,7 +601,7 @@ router.get('/story-npcSC2', async (req, res) => {
     }
 
     const npcsc2Text = await openAI.generateText(generateNPCSC2(SC, SCA, req.session.rollResult, npcPrompt, scPrompt, req.session.characters, req.session.selectedClass, req.session.npcSelected, req.session.enemies), model, 1600);
-    console.log(npcsc2Text);
+    //console.log(npcsc2Text);
 
     req.session.combatInit = false;
     req.session.combatSequence = 0;
@@ -613,7 +641,7 @@ router.get('/story-npcSC3', async (req, res) => {
     }
 
     const npcsc3Text = await openAI.generateText(generateNPCSC3(npcPrompt, npcReaction, req.session.characters, req.session.npcSelected, req.session.enemies, req.session.goal, req.session.s_travel), model, 1600);
-    console.log(npcsc3Text);
+    //console.log(npcsc3Text);
 
     res.render('story-npcSC3', {
         text: npcsc3Text,
@@ -622,20 +650,28 @@ router.get('/story-npcSC3', async (req, res) => {
 
 router.get('/story-journey2', async (req, res) => {
 
-    const journey2Text = await openAI.generateText(generateJourney2(req.session.journey_problem, req.session.characters, req.session.selectedClass, req.session.npcSelected, req.session.s_travel, req.session.enemies), model, 3000);
+    let breakout = 0;
+    let journey2Text = await openAI.generateText(generateJourney2(req.session.journey_problem, req.session.characters, req.session.selectedClass, req.session.npcSelected, req.session.s_travel, req.session.enemies), model, 3000);
+    while (!verifyResponse(journey2Text)) {
+        if (breakout > 3) {
+            console.error("ChatGPT appears to be having a fit, try again later.");
+            break;
+        }
+        journey2Text = await openAI.generateText(generateJourney2(req.session.journey_problem, req.session.characters, req.session.selectedClass, req.session.npcSelected, req.session.s_travel, req.session.enemies), model, 3000);
+    }
     const journey2Object = JSON.parse(journey2Text);
 
-    console.log('journey 2 text:', journey2Text);
+    //console.log('journey 2 text:', journey2Text);
 
     req.session.SC3 = journey2Object.SC3;
     req.session.SCA3 = journey2Object.SCA3;
     req.session.SC4 = journey2Object.SC4;
     req.session.SCA4 = journey2Object.SCA4;
 
-    console.log('SC3:', req.session.SC3);
-    console.log('SCA3:', req.session.SCA3);
-    console.log('SC4:', req.session.SC4);
-    console.log('SCA4:', req.session.SCA4);
+    //console.log('SC3:', req.session.SC3);
+    //console.log('SCA3:', req.session.SCA3);
+    //console.log('SC4:', req.session.SC4);
+    //console.log('SCA4:', req.session.SCA4);
 
     res.render('story-journey2', {
         text: req.session.journey_problem,
@@ -649,8 +685,8 @@ router.get('/story-journey2', async (req, res) => {
 router.get('/story-journey3', async (req, res) => {
 
     let rollResult = rollD20();
-    console.log('Skill Check Dice roll:' + rollResult.roll);
-    console.log('Skill Check Result:' + rollResult.result);
+    //console.log('Skill Check Dice roll:' + rollResult.roll);
+    //console.log('Skill Check Result:' + rollResult.result);
 
     let scPrompt;
     let enemyPrompt;
@@ -685,7 +721,8 @@ router.get('/story-journey3', async (req, res) => {
             break;
     }
 
-    req.session.captured = captured;
+    //This isnt used anywhere???
+    //req.session.captured = captured;
 
     let SC;
     let SCA;
@@ -699,7 +736,7 @@ router.get('/story-journey3', async (req, res) => {
     }
 
     const journey3Text = await openAI.generateText(generateJourney3(req.session.journey_problem, SC, SCA, req.session.rollResult, npcPrompt, scPrompt, enemyPrompt, req.session.characters, req.session.selectedClass, req.session.npcSelected, req.session.enemies), model, 1600);
-    console.log(journey3Text);
+    //console.log(journey3Text);
 
     res.render('story-journey3', {
         text: journey3Text,
@@ -710,10 +747,10 @@ router.get('/story-journey3', async (req, res) => {
 router.get('/story-boss2', async (req, res) => {
 
     const boss2Text = await openAI.generateText(generateBoss2(req.session.characters, req.session.npcSelected, req.session.s_boss, req.session.enemies, req.session.goal), model, 1600);
-    console.log(boss2Text);
+    //console.log(boss2Text);
 
     req.session.combatInit = false;
-    req.session.combatSequence = 0;
+    req.session.combatSequence = 1;
 
     res.render('story-boss2', {
         text: boss2Text,
@@ -723,7 +760,7 @@ router.get('/story-boss2', async (req, res) => {
 router.get('/story-boss3', async (req, res) => {
 
     const boss3Text = await openAI.generateText(generateBoss3(req.session.characters, req.session.npcSelected, req.session.enemies, req.session.goal), model, 1600);
-    console.log(boss3Text);
+    //console.log(boss3Text);
 
     res.render('story-boss3', {
         text: boss3Text,
@@ -744,5 +781,14 @@ router.post('/test', async (req, res) => {
     });
 
 });
+
+function verifyResponse(response) {
+    try {
+        var attempt = JSON.parse(response);
+        return true;
+    } catch(e) {
+        return false;
+    }
+}
 
 module.exports = router;
